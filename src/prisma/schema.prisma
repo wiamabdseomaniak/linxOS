@@ -1,0 +1,234 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  manager
+  client
+}
+
+enum DeliveryStatus {
+  preparation
+  ready_to_deliver
+  on_route
+  delivered
+  received
+  delayed
+  cancelled
+  refused
+  problem
+  returned
+}
+
+enum Priority {
+  low
+  medium
+  high
+  urgent
+}
+
+enum ProblemType {
+  broken_product
+  client_absent
+  wrong_address
+  client_refused
+  delivery_damaged
+}
+
+enum ProblemStatus {
+  pending
+  resolved
+  escalated
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  phone         String?
+  role          UserRole  @default(client)
+  avatar        String?
+  address       String?
+  emailVerified DateTime?
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  deliveries     Delivery[]
+  sessions       Session[]
+  devices        Device[]
+  activityLogs   ActivityLog[]
+  notifications  Notification[]
+
+  @@map("users")
+}
+
+model Delivery {
+  id            String         @id @default(cuid())
+  trackingId    String         @unique
+  clientName    String
+  clientPhone   String
+  clientEmail   String?
+  address       String
+  city          String
+  status        DeliveryStatus @default(preparation)
+  priority      Priority       @default(medium)
+  driverId      String?
+  scheduledDate DateTime
+  deliveredDate DateTime?
+  notes         String?
+  proofOfDelivery String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  driver       User?           @relation(fields: [driverId], references: [id])
+  items        DeliveryItem[]
+  proofs       DeliveryProof[]
+  problemReport ProblemReport?
+
+  @@index([trackingId])
+  @@index([status])
+  @@index([driverId])
+  @@map("deliveries")
+}
+
+model DeliveryItem {
+  id          String   @id @default(cuid())
+  deliveryId  String
+  name        String
+  quantity    Int
+  weight      Float?
+  description String?
+  createdAt   DateTime @default(now())
+
+  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  @@map("delivery_items")
+}
+
+model DeliveryProof {
+  id          String   @id @default(cuid())
+  deliveryId  String
+  type        String
+  url         String
+  signature   String?
+  latitude    Float?
+  longitude   Float?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  @@map("delivery_proofs")
+}
+
+model ProblemReport {
+  id          String        @id @default(cuid())
+  deliveryId  String        @unique
+  type        ProblemType
+  description String
+  latitude    Float?
+  longitude   Float?
+  status      ProblemStatus @default(pending)
+  priority    Priority      @default(medium)
+  attachments String[]
+  createdAt   DateTime      @default(now())
+  resolvedAt  DateTime?
+
+  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  @@map("problem_reports")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String
+  read      Boolean  @default(false)
+  actionUrl String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  device       String
+  browser      String
+  ip           String
+  location     String?
+  lastActive   DateTime @default(now())
+  isCurrent    Boolean  @default(true)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("sessions")
+}
+
+model Device {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  type         String
+  browser      String
+  os           String
+  ip           String
+  location     String?
+  lastActive   DateTime @default(now())
+  isTrusted    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("devices")
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  description String
+  entityType  String
+  entityId    String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@map("activity_logs")
+}
+
+model File {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  url         String
+  size        Int
+  mimeType    String
+  uploadedBy  String
+  entityType  String?
+  entityId    String?
+  createdAt   DateTime @default(now())
+
+  @@map("files")
+}
