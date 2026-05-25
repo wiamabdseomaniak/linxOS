@@ -2,26 +2,32 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 let client: SupabaseClient | null = null;
 
-function getClient(): SupabaseClient {
-  if (!client) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Supabase environment variables NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set');
+function getClient(): SupabaseClient | null {
+  if (client) return client;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    if (typeof window === 'undefined') {
+      return null;
     }
-    client = createClient(supabaseUrl, supabaseAnonKey);
+    throw new Error('Supabase environment variables NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set');
   }
+
+  client = createClient(supabaseUrl, supabaseAnonKey);
   return client;
 }
 
-export function getSupabase(): SupabaseClient {
+export function getSupabase(): SupabaseClient | null {
   return getClient();
 }
 
-// Lazy proxy — only creates the client on first property access
 export const supabase = new Proxy({} as SupabaseClient, {
   get(_, prop) {
-    return (getClient() as any)[prop];
+    const c = getClient();
+    if (!c) return undefined;
+    return (c as any)[prop];
   },
 });
 
