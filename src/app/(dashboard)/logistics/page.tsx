@@ -5,7 +5,7 @@
 // Bibliothèques et composants nécessaires
 // ============================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Package,
@@ -44,7 +44,6 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import type { SportEvent } from '@/lib/mock-data';
-import { mockSportEvents } from '@/lib/mock-data';
 
 // ============================================
 // COMPOSANT PRINCIPAL: LogisticsPage
@@ -58,27 +57,27 @@ export default function LogisticsPage() {
   // Variables d'état pour gérer les données et l'UI
   // ============================================
 
-  // Ville sélectionnée pour le filtrage (par défaut: toutes les villes)
   const [selectedCity, setSelectedCity] = useState('all');
-  
-  // Liste des événements/livraisons (données mockées)
-  const [events, setEvents] = useState<SportEvent[]>(mockSportEvents);
-  
-  // États des dialogues et feuilles
+  const [events, setEvents] = useState<SportEvent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
-  
-  // Événement sélectionné pour affichage des détails
   const [selectedEvent, setSelectedEvent] = useState<SportEvent | null>(null);
-  
-  // Contenu de la note à ajouter
   const [noteText, setNoteText] = useState('');
+
+  useEffect(() => {
+    fetch('/api/deliveries/events')
+      .then((res) => res.json())
+      .then(setEvents)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
   
   // Fichiers joints à la note
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   
-  // Statut actif pour le filtrage des cartes (par défaut: SCHEDULED)
-  const [activeStatus, setActiveStatus] = useState<'SCHEDULED' | 'IN_TRANSIT' | 'DELIVERED' | 'FAILED'>('SCHEDULED');
+  // Statut actif pour le filtrage des cartes (par défaut: ALL pour montrer tous les statuts)
+  const [activeStatus, setActiveStatus] = useState<'SCHEDULED' | 'IN_TRANSIT' | 'DELIVERED' | 'FAILED' | 'ALL'>('ALL');
 
   // ============================================
   // DONNÉES CALCULÉES
@@ -94,8 +93,8 @@ export default function LogisticsPage() {
     failed: events.filter(e => e.status === 'FAILED').length,
   };
 
-  // Filtrage des événements selon le statut actif
-  const filteredEvents = events.filter(e => e.status === activeStatus);
+// Filtrage des événements selon le statut actif
+const filteredEvents = activeStatus === 'ALL' ? events : events.filter(e => e.status === activeStatus);
 
   // ============================================
   // FONCTIONS DE GESTION
@@ -281,50 +280,59 @@ export default function LogisticsPage() {
       </div>
 
       {/* ============================================ */}
-      {/* ONGLETS DE STATUT DE LIVRAISON */}
-      {/* Barre de navigation horizontale pour filtrer par statut */}
-      {/* ============================================ */}
-      <Card className="border-0 shadow-soft">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            {/* Bouton: Planifié (Scheduled) */}
-            <button
-              onClick={() => setActiveStatus('SCHEDULED')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'SCHEDULED' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
-            >
-              <Calendar className="h-4 w-4" />
-              Scheduled ({statusCounts.scheduled})
-            </button>
-            
-            {/* Bouton: En Transit (In Transit) */}
-            <button
-              onClick={() => setActiveStatus('IN_TRANSIT')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'IN_TRANSIT' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
-            >
-              <Truck className="h-4 w-4" />
-              In Transit ({statusCounts.in_transit})
-            </button>
-            
-            {/* Bouton: Livré (Delivered) */}
-            <button
-              onClick={() => setActiveStatus('DELIVERED')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'DELIVERED' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
-            >
-              <CheckCircle2 className="h-4 w-4" />
-              Delivered ({statusCounts.delivered})
-            </button>
-            
-            {/* Bouton: Échoué (Failed) */}
-            <button
-              onClick={() => setActiveStatus('FAILED')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'FAILED' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
-            >
-              <AlertTriangle className="h-4 w-4" />
-              Failed ({statusCounts.failed})
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+{/* ONGLETS DE STATUT DE LIVRAISON */}
+  {/* Barre de navigation horizontale pour filtrer par statut */}
+  {/* ============================================ */}
+  <Card className="border-0 shadow-soft">
+    <CardContent className="p-4">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2">
+        {/* Bouton: Tous (All) */}
+        <button
+          onClick={() => setActiveStatus('ALL')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'ALL' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
+        >
+          <Package className="h-4 w-4" />
+          All ({statusCounts.all})
+        </button>
+        
+        {/* Bouton: Planifié (Scheduled) */}
+        <button
+          onClick={() => setActiveStatus('SCHEDULED')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'SCHEDULED' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
+        >
+          <Calendar className="h-4 w-4" />
+          Scheduled ({statusCounts.scheduled})
+        </button>
+        
+        {/* Bouton: En Transit (In Transit) */}
+        <button
+          onClick={() => setActiveStatus('IN_TRANSIT')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'IN_TRANSIT' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
+        >
+          <Truck className="h-4 w-4" />
+          In Transit ({statusCounts.in_transit})
+        </button>
+        
+        {/* Bouton: Livré (Delivered) */}
+        <button
+          onClick={() => setActiveStatus('DELIVERED')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'DELIVERED' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
+        >
+          <CheckCircle2 className="h-4 w-4" />
+          Delivered ({statusCounts.delivered})
+        </button>
+        
+        {/* Bouton: Échoué (Failed) */}
+        <button
+          onClick={() => setActiveStatus('FAILED')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'FAILED' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
+        >
+          <AlertTriangle className="h-4 w-4" />
+          Failed ({statusCounts.failed})
+        </button>
+      </div>
+    </CardContent>
+  </Card>
 
       {/* ============================================ */}
       {/* LISTE DES LIVRAISONS */}

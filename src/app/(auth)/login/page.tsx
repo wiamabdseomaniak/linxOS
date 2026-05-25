@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [resetSent, setResetSent] = useState(false)
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
 
-  const validateForm = () => {
+  const validateForm = (requirePassword = true) => {
     const newErrors: { email?: string; password?: string } = {}
 
     if (!email.trim()) {
@@ -30,7 +30,7 @@ export default function LoginPage() {
       newErrors.email = "Veuillez entrer une adresse email valide"
     }
 
-    if (!password || password.length < 6) {
+    if (requirePassword && (!password || password.length < 6)) {
       newErrors.password = "Le mot de passe doit contenir au moins 6 caractères"
     }
 
@@ -41,25 +41,18 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (validateForm()) {
+    if (validateForm(true)) {
       setIsLoading(true)
       try {
-        // Request OTP via our custom API
-        const response = await fetch('/api/auth/request-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
-        
-        const result = await response.json();
-        
-        if (!result.success) {
-          setErrors({ email: result.error || 'Failed to send OTP' })
+
+        if (signInError) {
+          setErrors({ email: signInError.message })
         } else {
-          sessionStorage.setItem('pending_2fa_email', email);
-          sessionStorage.setItem('2fa_required', 'true');
-          sessionStorage.setItem('otp_sent', 'true');
-          router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+          router.push('/dashboard');
         }
       } catch (error) {
         console.error("Login error:", error)
@@ -74,22 +67,16 @@ export default function LoginPage() {
     try {
       setIsLoadingGoogle(true)
       
-      const { data: { user }, error: googleError } = await supabase.auth.signInWithOAuth({
+      const { error: googleError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/verify-otp?google=true`,
+          redirectTo: `${window.location.origin}/dashboard`,
         },
       })
       
       if (googleError) {
         console.error("Google login error:", googleError)
         setErrors({ email: "Failed to sign in with Google" })
-        return
-      }
-
-      if (user?.email) {
-        sessionStorage.setItem('pending_2fa_email', user.email)
-        router.push(`/verify-otp?email=${encodeURIComponent(user.email)}&google=true`)
       }
     } catch (error) {
       console.error("Google login error:", error)
@@ -209,6 +196,7 @@ export default function LoginPage() {
                     Mot de passe oublié ?
                   </button>
                 </div>
+
               </form>
 
               <div className="relative my-6">
