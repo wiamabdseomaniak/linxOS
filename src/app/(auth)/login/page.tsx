@@ -86,11 +86,6 @@ export default function LoginPage() {
         setErrors({ email: "Failed to sign in with Google" })
         return
       }
-
-      if (user?.email) {
-        sessionStorage.setItem('pending_2fa_email', user.email)
-        router.push(`/verify-otp?email=${encodeURIComponent(user.email)}&google=true`)
-      }
     } catch (error) {
       console.error("Google login error:", error)
     } finally {
