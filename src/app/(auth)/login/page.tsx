@@ -74,10 +74,10 @@ export default function LoginPage() {
     try {
       setIsLoadingGoogle(true)
       
-      const { data: { user }, error: googleError } = await supabase.auth.signInWithOAuth({
+      const { error: googleError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/verify-otp?google=true`,
+          redirectTo: `${window.location.origin}/dashboard`,
         },
       })
       
