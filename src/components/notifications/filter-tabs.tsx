@@ -12,8 +12,8 @@ interface FilterTabsProps {
 
 export function FilterTabs({ activeTab, onTabChange, unreadCount, totalCount }: FilterTabsProps) {
   const tabs: { id: FilterTab; label: string; badge?: number }[] = [
-    { id: 'all', label: 'All', badge: totalCount },
-    { id: 'unread', label: 'Unread', badge: unreadCount },
+    { id: 'all', label: 'Toutes', badge: totalCount },
+    { id: 'unread', label: 'Non lues', badge: unreadCount },
   ];
 
   return (

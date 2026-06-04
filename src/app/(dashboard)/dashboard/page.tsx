@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -9,16 +9,10 @@ import {
   AlertTriangle,
   ArrowUpRight,
   ArrowDownRight,
-  Truck,
-  MapPin,
-  Calendar,
-  BarChart3,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
 import {
   BarChart,
   Bar,
@@ -27,23 +21,11 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
   Area,
   AreaChart,
-  LineChart,
-  Line,
 } from 'recharts';
-import {
-  mockDashboardStats,
-  mockWeeklyPerformance,
-  mockDeliveriesByCity,
-  mockStatusDistribution,
-  mockDeliveries,
-  mockActivityTimeline,
-  mockCurrentUser,
-} from '@/lib/mock-data';
+import { useDashboard } from '@/features/dashboard/hooks/use-dashboard';
+import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
 import { PRIORITIES } from '@/lib/constants';
 
 const containerVariants = {
@@ -59,43 +41,6 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const statCards = [
-  {
-    title: 'Total Deliveries',
-    value: mockDashboardStats.totalDeliveries.toLocaleString(),
-    change: '+12.5%',
-    changeType: 'positive',
-    icon: Package,
-    color: 'violet',
-  },
-  {
-    title: 'Pending',
-    value: mockDashboardStats.activeDeliveries.toString(),
-    change: '+5.2%',
-    changeType: 'negative',
-    icon: Clock,
-    color: 'amber',
-  },
-  {
-    title: 'Successful',
-    value: mockDashboardStats.completedDeliveries.toLocaleString(),
-    change: '+8.1%',
-    changeType: 'positive',
-    icon: CheckCircle2,
-    color: 'green',
-  },
-  {
-    title: 'Problematic',
-    value: mockDashboardStats.failedDeliveries.toString(),
-    change: '-3.4%',
-    changeType: 'positive',
-    icon: AlertTriangle,
-    color: 'red',
-  },
-  
-  
-];
-
 const colorMap: Record<string, string> = {
   violet: 'from-violet-600 to-purple-600',
   amber: 'from-yellow-500 to-amber-500',
@@ -105,12 +50,52 @@ const colorMap: Record<string, string> = {
   emerald: 'from-emerald-500 to-teal-500',
 };
 
-const pieColors = ['#22c55e', '#8b5cf6', '#f59e0b', '#3b82f6', '#ef4444'];
-
 export default function DashboardPage() {
   const router = useRouter();
-  const urgentDeliveries = mockDeliveries.filter((d) => d.priority === 'urgent').slice(0, 3);
-  const recentActivity = mockActivityTimeline.slice(0, 4);
+  const { stats, weekly, byCity, activity, problems, urgent, loading, error } = useDashboard();
+  const { user } = useCurrentUser();
+
+  const displayName = user?.name?.split(' ')[0] ?? 'Utilisateur';
+
+  const statCards = [
+    {
+      title: 'Total des livraisons',
+      value: stats.totalDeliveries.toLocaleString(),
+      change: '+12.5%',
+      changeType: 'positive' as const,
+      icon: Package,
+      color: 'violet',
+    },
+    {
+      title: 'En attente',
+      value: stats.activeDeliveries.toString(),
+      change: '+5.2%',
+      changeType: 'negative' as const,
+      icon: Clock,
+      color: 'amber',
+    },
+    {
+      title: 'Réussies',
+      value: stats.completedDeliveries.toLocaleString(),
+      change: '+8.1%',
+      changeType: 'positive' as const,
+      icon: CheckCircle2,
+      color: 'green',
+    },
+    {
+      title: 'Problématiques',
+      value: stats.failedDeliveries.toString(),
+      change: '-3.4%',
+      changeType: 'positive' as const,
+      icon: AlertTriangle,
+      color: 'red',
+    },
+  ];
+
+  const urgentDeliveries = urgent;
+  const recentActivity = activity.slice(0, 4);
+  const issuesThisWeek = problems;
+  const totalIssuesThisWeek = issuesThisWeek.reduce((sum, p) => sum + p.count, 0);
 
   return (
     <motion.div
@@ -119,25 +104,22 @@ export default function DashboardPage() {
       animate="visible"
       className="space-y-6"
     >
-      {/* Header */}
       <motion.div variants={itemVariants} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Welcome back, {mockCurrentUser.name.split(' ')[0]} 👋
+            Bonjour, {displayName} 👋
           </h1>
           <p className="text-muted-foreground">
-            Here&apos;s what&apos;s happening with your logistics today.
+            Voici ce qui se passe avec votre logistique aujourd&apos;hui.
           </p>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="rounded-xl" onClick={() => router.push('/tracking')}>
-            <BarChart3 className="mr-2 h-4 w-4" />
-            View Reports
-          </Button>
         </div>
       </motion.div>
 
-      {/* Stats Grid */}
+      {error && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-red-800 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300 text-sm">
+          Erreur : {error}
+        </div>
+      )}
       <motion.div variants={itemVariants} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => (
           <Card key={stat.title} className="relative overflow-hidden border-0 shadow-soft hover:shadow-lg transition-shadow">
@@ -151,62 +133,61 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
+              <div className="text-2xl font-bold">{loading ? '…' : stat.value}</div>
               <div className="flex items-center gap-1 text-xs">
                 {stat.changeType === 'positive' ? (
-                  <ArrowUpRight className="h-3 w-3 text-green-600" />
+                  <ArrowUpRight className="h-3 w-3 text-green-600 dark:text-green-400" />
                 ) : (
-                  <ArrowDownRight className="h-3 w-3 text-red-600" />
+                  <ArrowDownRight className="h-3 w-3 text-red-600 dark:text-red-400" />
                 )}
-                <span className={stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'}>
+                <span className={stat.changeType === 'positive' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
                   {stat.change}
                 </span>
-                <span className="text-muted-foreground">from last month</span>
+                <span className="text-muted-foreground">par rapport au mois dernier</span>
               </div>
             </CardContent>
           </Card>
         ))}
       </motion.div>
 
-      {/* Charts Row */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Monthly Performance */}
         <motion.div variants={itemVariants}>
           <Card className="border-0 shadow-soft h-[400px]">
             <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
               <div>
-                <CardTitle className="text-lg font-semibold">Monthly Deliveries Completed</CardTitle>
-                <p className="text-sm text-muted-foreground">Deliveries completed per month</p>
+                <CardTitle className="text-lg font-semibold">Livraisons mensuelles effectuées</CardTitle>
+                <p className="text-sm text-muted-foreground">Livraisons effectuées par mois</p>
               </div>
               <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
                 2026
               </Badge>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="h-[320px] w-full min-w-0">
+                  <div className="h-[320px] w-full min-w-0">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                  <AreaChart data={mockWeeklyPerformance}>
+                  <AreaChart data={weekly} margin={{ left: -20, right: 8 }}>
                     <defs>
                       <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#eab308" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#eab308" stopOpacity={0} />
+                        <stop offset="5%" style={{ stopColor: 'var(--primary)', stopOpacity: 0.3 }} />
+                        <stop offset="95%" style={{ stopColor: 'var(--primary)', stopOpacity: 0 }} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                    <XAxis dataKey="name" stroke="#6b7280" fontSize={12} />
-                    <YAxis stroke="#6b7280" fontSize={12} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} />
+                    <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} />
+                    <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                        border: 'none',
+                        backgroundColor: 'var(--card)',
+                        border: '1px solid var(--border)',
                         borderRadius: '12px',
                         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        color: 'var(--foreground)',
                       }}
                     />
                     <Area
                       type="monotone"
-                      dataKey="value"
-                      stroke="#eab308"
+                      dataKey="deliveries"
+                      stroke="var(--primary)"
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorValue)"
@@ -218,7 +199,6 @@ export default function DashboardPage() {
           </Card>
         </motion.div>
 
-        {/* Deliveries by City */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -226,17 +206,24 @@ export default function DashboardPage() {
         >
           <Card className="border-0 shadow-soft h-[400px]">
             <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg font-semibold">Deliveries by City</CardTitle>
+              <CardTitle className="text-lg font-semibold">Livraisons par ville</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="h-[320px] w-full min-w-0">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                  <BarChart data={mockDeliveriesByCity}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.5} />
-                    <XAxis dataKey="name" stroke="#6b7280" fontSize={12} />
-                    <YAxis stroke="#6b7280" fontSize={12} />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="#eab308" radius={[8, 8, 0, 0]} />
+                  <BarChart data={byCity} margin={{ left: -20, right: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} vertical={false} />
+                    <XAxis dataKey="city" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} />
+                    <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'var(--card)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '12px',
+                        color: 'var(--foreground)',
+                      }}
+                    />
+                    <Bar dataKey="deliveries" fill="var(--primary)" radius={[8, 8, 0, 0]} maxBarSize={60} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -244,98 +231,102 @@ export default function DashboardPage() {
           </Card>
         </motion.div>
 
-        {/* Urgent Deliveries */}
         <motion.div variants={itemVariants}>
           <Card className="border-0 shadow-soft h-[400px]">
             <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
               <div>
-                <CardTitle className="text-lg font-semibold">Urgent Deliveries</CardTitle>
-                <p className="text-sm text-muted-foreground">Requires immediate attention</p>
+                <CardTitle className="text-lg font-semibold">Livraisons urgentes</CardTitle>
+                <p className="text-sm text-muted-foreground">Nécessite une attention immédiate</p>
               </div>
-              <Button variant="ghost" size="sm" className="text-yellow-500 hover:text-yellow-700" onClick={() => router.push('/logistics')}>
-                View All
+              <Button variant="ghost" size="sm" className="text-yellow-500 hover:text-yellow-700 dark:text-yellow-400 dark:hover:text-yellow-300" onClick={() => router.push('/logistics')}>
+                Voir tout
               </Button>
             </CardHeader>
             <CardContent className="pt-4 h-[calc(100%-80px)]">
               <div className="space-y-4">
-                {urgentDeliveries.map((delivery) => (
-                  <div
-                    key={delivery.id}
-                    className="flex items-center justify-between rounded-xl bg-muted/50 p-4 transition-colors hover:bg-muted"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white">
-                        <Package className="h-5 w-5" />
+                {urgentDeliveries.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Aucune livraison urgente.</p>
+                ) : (
+                  urgentDeliveries.map((delivery) => (
+                    <div
+                      key={delivery.id}
+                      className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-xl bg-muted/50 p-3 sm:p-4 transition-colors hover:bg-muted"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white dark:from-yellow-600 dark:to-amber-600">
+                          <Package className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-semibold">{delivery.trackingId}</p>
+                          <p className="text-sm text-muted-foreground">{delivery.clientName}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold">{delivery.trackingId}</p>
-                        <p className="text-sm text-muted-foreground">{delivery.clientName}</p>
+                      <div className="flex items-center gap-3">
+                        <Badge className={PRIORITIES[delivery.priority as keyof typeof PRIORITIES].color}>
+                          {PRIORITIES[delivery.priority as keyof typeof PRIORITIES].label}
+                        </Badge>
+                        <div className="text-right">
+                          <p className="text-sm font-medium">{delivery.city}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {delivery.scheduledDate.toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Badge className={PRIORITIES[delivery.priority].color}>
-                        {PRIORITIES[delivery.priority].label}
-                      </Badge>
-                      <div className="text-right">
-                        <p className="text-sm font-medium">{delivery.city}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(delivery.scheduledDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Deliveries with Issues */}
         <motion.div variants={itemVariants}>
           <Card className="border-0 shadow-soft h-[400px]">
             <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
               <div>
-                <CardTitle className="text-lg font-semibold">Deliveries with Issues – This Week</CardTitle>
-                <p className="text-sm text-muted-foreground">Problematic deliveries requiring attention</p>
+                <CardTitle className="text-lg font-semibold">Livraisons avec problèmes – Cette semaine</CardTitle>
+                <p className="text-sm text-muted-foreground">Livraisons problématiques nécessitant attention</p>
               </div>
             </CardHeader>
             <CardContent className="pt-4 h-[calc(100%-80px)]">
               <div className="h-full overflow-auto">
-                  <table className="w-full text-sm">
+                <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-2 font-medium text-muted-foreground">Event Name</th>
-                      <th className="text-left py-2 font-medium text-muted-foreground">Problem Type</th>
-                      <th className="text-center py-2 font-medium text-muted-foreground">Count</th>
-                      <th className="text-left py-2 font-medium text-muted-foreground">Status</th>
+                      <th className="text-left py-2 font-medium text-muted-foreground">Nom de l'événement</th>
+                      <th className="text-left py-2 font-medium text-muted-foreground">Type de problème</th>
+                      <th className="text-center py-2 font-medium text-muted-foreground">Nombre</th>
+                      <th className="text-left py-2 font-medium text-muted-foreground">Statut</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[
-                      { event: 'Ramadan Express', problem: 'Late delivery', count: 3, status: 'En attente', statusColor: 'bg-yellow-100 text-yellow-700' },
-                      { event: 'Tech Day Casablanca', problem: 'Wrong item', count: 2, status: 'Résolu', statusColor: 'bg-green-100 text-green-700' },
-                      { event: 'Marrakech Food Festival', problem: 'Damaged package', count: 1, status: 'En révision', statusColor: 'bg-blue-100 text-blue-700' },
-                    ].map((item, i) => (
-                      <tr key={i} className="border-b last:border-0">
-                        <td className="py-3 font-medium">{item.event}</td>
-                        <td className="py-3 text-muted-foreground">{item.problem}</td>
-                        <td className="py-3 text-center">
-                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-100 text-red-700 text-xs font-medium">
-                            {item.count}
-                          </span>
-                        </td>
-                        <td className="py-3">
-                          <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${item.statusColor}`}>
-                            {item.status}
-                          </span>
-                        </td>
+                    {issuesThisWeek.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="py-3 text-center text-muted-foreground">Aucun problème signalé</td>
                       </tr>
-                    ))}
+                    ) : (
+                      issuesThisWeek.map((item) => (
+                        <tr key={item.id} className="border-b last:border-0">
+                          <td className="py-3 font-medium">{item.event}</td>
+                          <td className="py-3 text-muted-foreground">{item.problem}</td>
+                          <td className="py-3 text-center">
+                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-medium">
+                              {item.count}
+                            </span>
+                          </td>
+                          <td className="py-3">
+                            <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${item.statusColor}`}>
+                              {item.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                   <tfoot>
                     <tr className="border-t-2 bg-muted/30">
-                      <td className="py-3 font-semibold" colSpan={2}>Total Issues</td>
-                      <td className="py-3 text-center font-semibold text-red-600">6</td>
+                      <td className="py-3 font-semibold" colSpan={2}>Total des problèmes</td>
+                      <td className="py-3 text-center font-semibold text-red-600 dark:text-red-400">{totalIssuesThisWeek}</td>
                       <td className="py-3"></td>
                     </tr>
                   </tfoot>

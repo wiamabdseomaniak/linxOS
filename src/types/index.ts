@@ -1,19 +1,11 @@
+// ------------------------------------------------------------------
+// Types alignés sur le schéma Supabase (français)
+// ------------------------------------------------------------------
+
+// ── Rôles utilisateur ──────────────────────────────────────────
 export type UserRole = 'manager' | 'driver' | 'client' | 'logistique';
 
-export type DeliveryStatus = 
-  | 'preparation'
-  | 'ready_to_deliver'
-  | 'on_route'
-  | 'delivered'
-  | 'received'
-  | 'delayed'
-  | 'cancelled'
-  | 'refused'
-  | 'problem'
-  | 'returned';
-
-export type Priority = 'low' | 'medium' | 'high' | 'urgent';
-
+// ── User (profil unifié) ──────────────────────────────────────
 export interface User {
   id: string;
   name: string;
@@ -23,6 +15,8 @@ export interface User {
   avatar?: string;
   department?: string;
   address?: string;
+  emailVerified?: Date;
+  twoFactorEnabled?: boolean;
   createdAt: Date;
   updatedAt: Date;
   totalDeliveries?: number;
@@ -31,99 +25,97 @@ export interface User {
   successRate?: number;
 }
 
-export interface DeliveryItem {
-  id: string;
-  name: string;
-  quantity: number;
-  weight?: number;
-  description?: string;
-}
+// ── Statuts livraison ──────────────────────────────────────────
+export type StatutPreparation =
+  | 'en_attente'
+  | 'en_preparation'
+  | 'prete'
+  | 'terminee';
 
-export interface Delivery {
-  id: string;
-  trackingId: string;
-  clientName: string;
-  clientPhone: string;
-  clientEmail?: string;
-  address: string;
-  city: string;
-  items: DeliveryItem[];
-  event?: string;
-  status: DeliveryStatus;
-  priority: Priority;
-  driverId?: string;
-  driver?: User;
-  scheduledDate: Date;
-  deliveredDate?: Date;
-  notes?: string;
-  proofOfDelivery?: string;
+export type StatutLivraison =
+  | 'planifie'
+  | 'en_cours'
+  | 'livree'
+  | 'echouee';
+
+export type StatutTracking =
+  | 'planifie'
+  | 'en_preparation'
+  | 'prete'
+  | 'en_cours'
+  | 'livree'
+  | 'echouee';
+
+// ── Utilisateur ────────────────────────────────────────────────
+export interface Utilisateur {
+  id_utilisateur: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  tele?: string;
+  mot_de_passe?: string;        // uniquement pour l'auth (jamais exposé)
+  role: UserRole;
   createdAt: Date;
   updatedAt: Date;
 }
 
+// ── Client ─────────────────────────────────────────────────────
+export interface Client {
+  id_client: string;
+  nomComplet: string;
+  telephone: string;
+  email?: string;
+  adresse?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ── Livraison ──────────────────────────────────────────────────
+export interface Livraison {
+  id_livraison: string;
+  nomEvenement: string;
+  organisateur?: string;
+  adresseLivraison: string;
+  ville: string;
+  datePrevue: Date;
+  quantite: number;
+  statutPreparation: StatutPreparation;
+  statutLivraison: StatutLivraison;
+  descriptionProbleme?: string;
+  idClient: string;
+  idUtilisateur: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ── Tracking (points de suivi) ─────────────────────────────────
+export interface Tracking {
+  id_tracking: string;
+  statut: StatutTracking;
+  dateTracking: Date;
+  description?: string;
+  idLivraison: string;
+  createdAt: Date;
+}
+
+// ── Note (commentaires internes) ───────────────────────────────
+export interface Note {
+  id_note: string;
+  contenu: string;
+  dateNote: Date;
+  idLivraison: string;
+}
+
+// ── Notification ───────────────────────────────────────────────
 export interface Notification {
-  id: string;
-  title: string;
+  id_notification: string;
+  titre: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  read: boolean;
+  type: string;
+  lue: boolean;
+  createdAt: Date;
+  dateNotification: Date;
+  idUtilisateur: string;
   actionUrl?: string;
-  createdAt: Date;
 }
 
-export interface ActivityLog {
-  id: string;
-  userId: string;
-  action: string;
-  description: string;
-  entityType: string;
-  entityId: string;
-  createdAt: Date;
-}
-
-export interface ProblemReport {
-  id: string;
-  deliveryId: string;
-  type: 'broken_product' | 'client_absent' | 'wrong_address' | 'client_refused' | 'delivery_damaged';
-  description: string;
-  attachments?: string[];
-  location?: { lat: number; lng: number };
-  priority: Priority;
-  status: 'pending' | 'resolved' | 'escalated';
-  createdAt: Date;
-  resolvedAt?: Date;
-}
-
-export interface DashboardStats {
-  totalDeliveries: number;
-  pendingDeliveries: number;
-  successfulDeliveries: number;
-  problematicDeliveries: number;
-  activeDrivers: number;
-  completionRate: number;
-  averageDeliveryTime: number;
-  todayDeliveries: number;
-}
-
-export interface ChartDataPoint {
-  name: string;
-  value: number;
-  date?: string;
-}
-
-export interface GeoLocation {
-  lat: number;
-  lng: number;
-  address?: string;
-}
-
-export interface Session {
-  id: string;
-  userId: string;
-  device: string;
-  browser: string;
-  ip: string;
-  location?: string;
-  lastActive: Date;
-  isCurrent: boolean;
-}

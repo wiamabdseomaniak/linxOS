@@ -92,6 +92,18 @@
   --info: 217 91% 60%;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  --status-planifie: #3498db;
+  --status-en-cours: #e74c3c;
+  --status-livree: #2ecc71;
+  --status-echouee: #e74c3c;
+  --status-planifie-bg: #dbeafe;
+  --status-en-cours-bg: #fde8e8;
+  --status-livree-bg: #d1fae5;
+  --status-echouee-bg: #fde8e8;
+  --status-planifie-text: #1e40af;
+  --status-en-cours-text: #991b1b;
+  --status-livree-text: #065f46;
+  --status-echouee-text: #991b1b;
 }
 
 .dark {
@@ -129,6 +141,18 @@
   --success: 142 71% 45%;
   --warning: 38 92% 50%;
   --info: 217 91% 60%;
+  --status-planifie: #5dade2;
+  --status-en-cours: #f1948a;
+  --status-livree: #58d68d;
+  --status-echouee: #f1948a;
+  --status-planifie-bg: #1e3a5f;
+  --status-en-cours-bg: #4a1a1a;
+  --status-livree-bg: #064e3b;
+  --status-echouee-bg: #4a1a1a;
+  --status-planifie-text: #93c5fd;
+  --status-en-cours-text: #fca5a5;
+  --status-livree-text: #6ee7b7;
+  --status-echouee-text: #fca5a5;
 }
 
 @layer base {

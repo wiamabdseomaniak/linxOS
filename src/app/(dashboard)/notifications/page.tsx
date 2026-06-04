@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { mockNotifications } from '@/lib/mock-data';
+import { useNotifications } from '@/features/notifications/hooks/use-notifications';
 import { cn } from '@/lib/utils';
 
 const notificationIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -56,62 +56,15 @@ const notificationColors: Record<string, string> = {
   system: 'text-gray-600 bg-gray-100 dark:bg-gray-900/30',
 };
 
-const mockNotificationList = [
-  ...mockNotifications,
-  {
-    id: 'notif-5',
-    title: 'Delivery Assigned',
-    message: 'A new delivery LNX-2026-008 has been assigned to your route',
-    type: 'info' as const,
-    read: false,
-    actionUrl: '/deliveries/del-008',
-    createdAt: new Date('2026-05-14T08:00:00'),
-  },
-  
-  {
-    id: 'notif-8',
-    title: 'New Message',
-    message: 'You have a new message from Fatima Zahra',
-    type: 'info' as const,
-    read: true,
-    actionUrl: '/messages',
-    createdAt: new Date('2026-05-14T07:15:00'),
-  },
-  {
-    id: 'notif-9',
-    title: 'System Update',
-    message: 'Scheduled maintenance will occur tonight at 11 PM',
-    type: 'warning' as const,
-    read: true,
-    createdAt: new Date('2026-05-13T18:00:00'),
-  },
-];
-
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(mockNotificationList);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, remove } = useNotifications();
   const [filterType, setFilterType] = useState('unread');
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
   const filteredNotifications = notifications.filter((n) => {
-    if (filterType === 'unread') return !n.read;
-    if (filterType === 'read') return n.read;
+    if (filterType === 'unread') return !n.lue;
+    if (filterType === 'read') return n.lue;
     return true;
   });
-
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
-
-  const deleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
 
   const formatTime = (date: Date) => {
     const now = new Date();
@@ -120,10 +73,10 @@ export default function NotificationsPage() {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    return `${days}d ago`;
+    if (minutes < 1) return "À l'instant";
+    if (minutes < 60) return `Il y a ${minutes} min`;
+    if (hours < 24) return `Il y a ${hours} h`;
+    return `Il y a ${days} j`;
   };
 
   return (
@@ -138,8 +91,8 @@ export default function NotificationsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
           <p className="text-muted-foreground">
             {unreadCount > 0
-              ? `You have ${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`
-              : 'All caught up!'}
+              ? `Vous avez ${unreadCount} notification${unreadCount > 1 ? 's' : ''} non lue${unreadCount > 1 ? 's' : ''}`
+              : 'Tout est à jour !'}
           </p>
         </div>
         <div className="flex gap-3">
@@ -150,7 +103,7 @@ export default function NotificationsPage() {
             className="rounded-xl"
           >
             <CheckCheck className="mr-2 h-4 w-4" />
-            Mark All Read
+            Tout marquer comme lu
           </Button>
         </div>
       </motion.div>
@@ -166,17 +119,17 @@ export default function NotificationsPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <Tabs defaultValue="unread" className="w-full sm:w-auto" onValueChange={(v) => setFilterType(v)}>
                 <TabsList className="grid w-full grid-cols-2 sm:w-auto">
-                  <TabsTrigger value="unread">Unread</TabsTrigger>
-                  <TabsTrigger value="read">Read</TabsTrigger>
+                  <TabsTrigger value="unread">Non lues</TabsTrigger>
+                  <TabsTrigger value="read">Lues</TabsTrigger>
                 </TabsList>
               </Tabs>
               <Select defaultValue="newest">
                 <SelectTrigger className="w-full rounded-xl sm:w-[180px]">
-                  <SelectValue placeholder="Sort by" />
+                  <SelectValue placeholder="Trier par" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
+                  <SelectItem value="newest">Plus récentes d'abord</SelectItem>
+                  <SelectItem value="oldest">Plus anciennes d'abord</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -197,9 +150,9 @@ export default function NotificationsPage() {
               <div className="rounded-full bg-violet-100 p-4 dark:bg-violet-900/30">
                 <Bell className="h-8 w-8 text-violet-600" />
               </div>
-              <h3 className="mt-4 text-lg font-semibold">No notifications</h3>
+              <h3 className="mt-4 text-lg font-semibold">Aucune notification</h3>
               <p className="text-sm text-muted-foreground">
-                You&apos;re all caught up! Check back later for updates.
+                Tout est à jour ! Revenez plus tard pour les mises à jour.
               </p>
             </CardContent>
           </Card>
@@ -208,7 +161,7 @@ export default function NotificationsPage() {
             const Icon = notificationIcons[notification.type];
             return (
               <motion.div
-                key={notification.id}
+                key={notification.id_notification}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
@@ -216,7 +169,7 @@ export default function NotificationsPage() {
                 <Card
                   className={cn(
                     'border-0 shadow-soft transition-all hover:shadow-md',
-                    !notification.read && 'bg-gradient-to-r from-violet-50/50 to-purple-50/50 dark:from-violet-950/10 dark:to-purple-950/10'
+                    !notification.lue && 'bg-gradient-to-r from-violet-50/50 to-purple-50/50 dark:from-violet-950/10 dark:to-purple-950/10'
                   )}
                 >
                   <CardContent className="p-4">
@@ -227,15 +180,15 @@ export default function NotificationsPage() {
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <h4 className={cn('font-semibold', !notification.read && 'text-violet-600')}>
-                              {notification.title}
+                            <h4 className={cn('font-semibold', !notification.lue && 'text-violet-600')}>
+                              {notification.titre}
                             </h4>
-                            {!notification.read && (
+                            {!notification.lue && (
                               <span className="h-2 w-2 rounded-full bg-violet-600" />
                             )}
                           </div>
                           <span className="text-xs text-muted-foreground">
-                            {formatTime(new Date(notification.createdAt))}
+                            {formatTime(new Date(notification.createdAt || notification.dateNotification))}
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground">
@@ -246,18 +199,18 @@ export default function NotificationsPage() {
                             href={notification.actionUrl}
                             className="text-sm text-violet-600 hover:text-violet-700 hover:underline"
                           >
-                            View Details
+                            Voir les détails
                           </a>
                         )}
                       </div>
                       <div className="flex items-center gap-1">
-                        {!notification.read && (
+                        {!notification.lue && (
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => markAsRead(notification.id)}
-                            title="Mark as read"
+                            onClick={() => markAsRead(notification.id_notification)}
+                            title="Marquer comme lu"
                           >
                             <Check className="h-4 w-4" />
                           </Button>
@@ -266,8 +219,8 @@ export default function NotificationsPage() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => deleteNotification(notification.id)}
-                          title="Delete"
+                          onClick={() => remove(notification.id_notification)}
+                          title="Supprimer"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

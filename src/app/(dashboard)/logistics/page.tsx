@@ -22,13 +22,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
@@ -43,8 +37,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import type { SportEvent } from '@/lib/mock-data';
-import { mockSportEvents } from '@/lib/mock-data';
+import type { StatutLivraison, LogisticsEvent } from '@/types/supabase';
+import { useLogistics } from '@/features/logistics/hooks/use-logistics';
 
 // ============================================
 // COMPOSANT PRINCIPAL: LogisticsPage
@@ -55,21 +49,18 @@ export default function LogisticsPage() {
   
   // ============================================
   // ETAT DU COMPOSANT (STATE)
-  // Variables d'état pour gérer les données et l'UI
+  // Variables d'état pour gérer l'UI
   // ============================================
 
   // Ville sélectionnée pour le filtrage (par défaut: toutes les villes)
   const [selectedCity, setSelectedCity] = useState('all');
-  
-  // Liste des événements/livraisons (données mockées)
-  const [events, setEvents] = useState<SportEvent[]>(mockSportEvents);
   
   // États des dialogues et feuilles
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   
   // Événement sélectionné pour affichage des détails
-  const [selectedEvent, setSelectedEvent] = useState<SportEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<LogisticsEvent | null>(null);
   
   // Contenu de la note à ajouter
   const [noteText, setNoteText] = useState('');
@@ -78,59 +69,23 @@ export default function LogisticsPage() {
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   
   // Statut actif pour le filtrage des cartes (par défaut: SCHEDULED)
-  const [activeStatus, setActiveStatus] = useState<'SCHEDULED' | 'IN_TRANSIT' | 'DELIVERED' | 'FAILED'>('SCHEDULED');
+  const [activeStatus, setActiveStatus] = useState<StatutLivraison>('planifie');
 
   // ============================================
-  // DONNÉES CALCULÉES
-  // Valeurs dérivées des données d'état
+  // HOOK SUPABASE
+  // Connexion à Supabase pour les données logistiques
   // ============================================
 
-  // Calcul du nombre d'événements par statut
-  const statusCounts = {
-    all: events.length,
-    scheduled: events.filter(e => e.status === 'SCHEDULED').length,
-    in_transit: events.filter(e => e.status === 'IN_TRANSIT').length,
-    delivered: events.filter(e => e.status === 'DELIVERED').length,
-    failed: events.filter(e => e.status === 'FAILED').length,
-  };
-
-  // Filtrage des événements selon le statut actif
-  const filteredEvents = events.filter(e => e.status === activeStatus);
-
-  // ============================================
-  // FONCTIONS DE GESTION
-  // Fonctions pour modifier l'état et gérer les interactions
-  // ============================================
-
-  // Met à jour le statut d'un événement (changement d'état de livraison)
-  // Permet de faire avancer une livraison: Scheduled -> In Transit -> Delivered
-  const updateEventStatus = (eventId: string, newStatus: SportEvent['status']) => {
-    setEvents(events.map(e => 
-      e.id === eventId ? { ...e, status: newStatus } : e
-    ));
-  };
-
-  // Ajoute une note à un événement avec gestion des fichiers joints
-  const updateEventNote = (eventId: string, note: string) => {
-    // Ajoute les noms des fichiers joints à la note
-    const fileNames = attachedFiles.length > 0
-      ? `\n\nAttached files: ${attachedFiles.map(f => f.name).join(', ')}`
-      : '';
-    setEvents(events.map(e =>
-      e.id === eventId ? { ...e, notes: note + fileNames } : e
-    ));
-    // Réinitialise les états après enregistrement
-    setNoteDialogOpen(false);
-    setNoteText('');
-    setAttachedFiles([]);
-  };
-
-  // Ouvre WhatsApp avec le numéro de téléphone du contact
-  // Formate le numéro pour WhatsApp (enlève les espaces, remplace +212 par 212)
-  const openWhatsApp = (phone: string) => {
-    const cleanPhone = phone.replace(/\s/g, '').replace('+212', '212');
-    window.open(`https://wa.me/${cleanPhone}`, '_blank');
-  };
+  const {
+    events,
+    loading,
+    error,
+    statusCounts,
+    filteredEvents,
+    handleUpdateStatus,
+    handleUpdateNote,
+    openWhatsApp,
+  } = useLogistics(activeStatus, selectedCity);
 
   // ============================================
   // RENDU DU COMPOSANT
@@ -151,53 +106,47 @@ export default function LogisticsPage() {
       >
         <div>
           {/* Titre du tableau de bord */}
-          <h1 className="text-3xl font-bold tracking-tight">Logistics Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Tableau de bord logistique</h1>
           <p className="text-muted-foreground">
-            Real-time overview of your logistics operations
+            Aperçu en temps réel de vos opérations logistiques
           </p>
         </div>
         
-        {/* Sélecteur de ville pour filtrer les événements */}
-        <div className="flex gap-3">
-          <Select value={selectedCity} onValueChange={(value) => setSelectedCity(value || 'all')}>
-            <SelectTrigger className="w-[180px] rounded-xl">
-              <SelectValue placeholder="All Cities" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Cities</SelectItem>
-              <SelectItem value="Casablanca">Casablanca</SelectItem>
-              <SelectItem value="Rabat">Rabat</SelectItem>
-              <SelectItem value="Marrakech">Marrakech</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+
       </motion.div>
+
+      {error && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-red-800 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300 text-sm">
+          Erreur : {error}
+        </div>
+      )}
 
       {/* ============================================ */}
       {/* CARTES DE STATISTIQUES */}
       {/* 4 cartes résumant l'état des livraisons */}
       {/* ============================================ */}
-      <div className="grid gap-4 grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         
         {/* Carte 1: Total des événements */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          className="flex-1"
         >
           <Card className="border-0 shadow-soft hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Total Events</p>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Total des événements</p>
                   <p className="text-3xl font-bold">{events.length}</p>
                   <div className="flex items-center gap-1 text-xs text-violet-600">
                     <Package className="h-3 w-3" />
-                    All time
+                    Tout temps confondu
                   </div>
                 </div>
-                <div className="rounded-full bg-violet-100 p-3 dark:bg-violet-900/30">
-                  <Package className="h-6 w-6 text-violet-600" />
+                <div className="rounded-full bg-violet-100 p-2 dark:bg-violet-900/30">
+                  <Package className="h-5 w-5 text-violet-600" />
                 </div>
               </div>
             </CardContent>
@@ -209,20 +158,21 @@ export default function LogisticsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
+          className="flex-1"
         >
           <Card className="border-0 shadow-soft hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Scheduled</p>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Planifié</p>
                   <p className="text-3xl font-bold">{statusCounts.scheduled}</p>
                   <div className="flex items-center gap-1 text-xs text-blue-600">
                     <Calendar className="h-3 w-3" />
-                    Pending delivery
+                    Livraison en attente
                   </div>
                 </div>
-                <div className="rounded-full bg-blue-100 p-3 dark:bg-blue-900/30">
-                  <Calendar className="h-6 w-6 text-blue-600" />
+                <div className="rounded-full bg-blue-100 p-2 dark:bg-blue-900/30">
+                  <Calendar className="h-5 w-5 text-blue-600" />
                 </div>
               </div>
             </CardContent>
@@ -234,20 +184,21 @@ export default function LogisticsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
+          className="flex-1"
         >
           <Card className="border-0 shadow-soft hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">In Transit</p>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">En transit</p>
                   <p className="text-3xl font-bold">{statusCounts.in_transit}</p>
                   <div className="flex items-center gap-1 text-xs text-red-600">
                     <Truck className="h-3 w-3" />
-                    On the way
+                    En cours d'acheminement
                   </div>
                 </div>
-                <div className="rounded-full bg-red-100 p-3 dark:bg-red-900/30">
-                  <Truck className="h-6 w-6 text-red-600" />
+                <div className="rounded-full bg-red-100 p-2 dark:bg-red-900/30">
+                  <Truck className="h-5 w-5 text-red-600" />
                 </div>
               </div>
             </CardContent>
@@ -259,20 +210,21 @@ export default function LogisticsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
+          className="flex-1"
         >
           <Card className="border-0 shadow-soft hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Completed</p>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Terminé</p>
                   <p className="text-3xl font-bold">{statusCounts.delivered}</p>
                   <div className="flex items-center gap-1 text-xs text-green-600">
                     <CheckCircle2 className="h-3 w-3" />
-                    {Math.round((statusCounts.delivered / events.length) * 100)}% success rate
+                    {Math.round((statusCounts.delivered / events.length) * 100)}% de succès
                   </div>
                 </div>
-                <div className="rounded-full bg-green-100 p-3 dark:bg-green-900/30">
-                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                <div className="rounded-full bg-green-100 p-2 dark:bg-green-900/30">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
                 </div>
               </div>
             </CardContent>
@@ -287,40 +239,40 @@ export default function LogisticsPage() {
       <Card className="border-0 shadow-soft">
         <CardContent className="p-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            {/* Bouton: Planifié (Scheduled) */}
+            {/* Bouton: Planifié */}
             <button
-              onClick={() => setActiveStatus('SCHEDULED')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'SCHEDULED' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
+              onClick={() => setActiveStatus('planifie')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'planifie' ? 'bg-[#f5c400] dark:bg-[#e6b800] text-black dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border'}`}
             >
               <Calendar className="h-4 w-4" />
-              Scheduled ({statusCounts.scheduled})
+              Planifié ({statusCounts.scheduled})
             </button>
             
-            {/* Bouton: En Transit (In Transit) */}
+            {/* Bouton: En transit */}
             <button
-              onClick={() => setActiveStatus('IN_TRANSIT')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'IN_TRANSIT' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
+              onClick={() => setActiveStatus('en_cours')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'en_cours' ? 'bg-[#f5c400] dark:bg-[#e6b800] text-black dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border'}`}
             >
               <Truck className="h-4 w-4" />
-              In Transit ({statusCounts.in_transit})
+              En transit ({statusCounts.in_transit})
             </button>
             
-            {/* Bouton: Livré (Delivered) */}
+            {/* Bouton: Livré */}
             <button
-              onClick={() => setActiveStatus('DELIVERED')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'DELIVERED' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
+              onClick={() => setActiveStatus('livree')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'livree' ? 'bg-[#f5c400] dark:bg-[#e6b800] text-black dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border'}`}
             >
               <CheckCircle2 className="h-4 w-4" />
-              Delivered ({statusCounts.delivered})
+              Livré ({statusCounts.delivered})
             </button>
             
-            {/* Bouton: Échoué (Failed) */}
+            {/* Bouton: Échoué */}
             <button
-              onClick={() => setActiveStatus('FAILED')}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'FAILED' ? 'bg-[#f5c400] text-black' : 'bg-white text-gray-600 border'}`}
+              onClick={() => setActiveStatus('echouee')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'echouee' ? 'bg-[#f5c400] dark:bg-[#e6b800] text-black dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border'}`}
             >
               <AlertTriangle className="h-4 w-4" />
-              Failed ({statusCounts.failed})
+              Échoué ({statusCounts.failed})
             </button>
           </div>
         </CardContent>
@@ -337,52 +289,58 @@ export default function LogisticsPage() {
       >
         <Card className="border-0 shadow-soft">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">Delivery Operations</CardTitle>
+            <CardTitle className="text-lg font-semibold">Opérations de livraison</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Grille responsive: 1 colonne mobile, 2 tablet, 3 laptop, 4 grand écran */}
+            {/* État de chargement */}
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-yellow-400 border-t-transparent" />
+              </div>
+            ) : (
+            /* Grille responsive: 1 colonne mobile, 2 tablet, 3 laptop, 4 grand écran */
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filteredEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="group rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md"
+                  className="group rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm transition-all duration-200 hover:shadow-md"
                 >
                   {/* Badge de statut avec couleur dynamique selon le statut */}
                   <div className="mb-3 flex items-center justify-between">
-                    {event.status === 'SCHEDULED' && (
-                      <span className="rounded-full px-3 py-1 text-xs font-medium text-white" style={{ backgroundColor: '#3498db' }}>
-                        Scheduled
+                    {event.status === 'planifie' && (
+                      <span className="rounded-full px-3 py-1 text-xs font-medium text-white bg-[var(--status-planifie)]">
+                        Planifié
                       </span>
                     )}
-                    {event.status === 'IN_TRANSIT' && (
-                      <span className="rounded-full px-3 py-1 text-xs font-medium text-white" style={{ backgroundColor: '#e74c3c' }}>
-                        In Transit
+                    {event.status === 'en_cours' && (
+                      <span className="rounded-full px-3 py-1 text-xs font-medium text-white bg-[var(--status-en-cours)]">
+                        En transit
                       </span>
                     )}
-                    {event.status === 'DELIVERED' && (
-                      <span className="rounded-full px-3 py-1 text-xs font-medium text-white" style={{ backgroundColor: '#2ecc71' }}>
-                        Delivered
+                    {event.status === 'livree' && (
+                      <span className="rounded-full px-3 py-1 text-xs font-medium text-white bg-[var(--status-livree)]">
+                        Livrée
                       </span>
                     )}
-                    {event.status === 'FAILED' && (
-                      <span className="rounded-full px-3 py-1 text-xs font-medium text-white" style={{ backgroundColor: '#e74c3c' }}>
-                        Failed
+                    {event.status === 'echouee' && (
+                      <span className="rounded-full px-3 py-1 text-xs font-medium text-white bg-[var(--status-echouee)]">
+                        Échouée
                       </span>
                     )}
                   </div>
 
                   {/* Titre de l'événement */}
-                  <h3 className="mb-3 text-base font-bold leading-tight text-gray-900">
+                  <h3 className="mb-3 text-base font-bold leading-tight text-gray-900 dark:text-gray-100">
                     {event.title}
                   </h3>
 
                   {/* Nom du contact */}
-                  <p className="mb-2 text-sm text-gray-700">
+                  <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
                     {event.contactName}
                   </p>
 
                   {/* Adresse de livraison avec icône de localisation */}
-                  <div className="mb-3 flex items-start gap-2 text-sm text-gray-500">
+                  <div className="mb-3 flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
                     <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0" />
                     <span className="line-clamp-2">
                       {event.address}
@@ -397,7 +355,7 @@ export default function LogisticsPage() {
                   </div>
 
                   {/* Date et heure de livraison */}
-                  <div className="mb-3 flex items-center gap-4 text-sm text-gray-600">
+                  <div className="mb-3 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
                       <span>{event.date}</span>
@@ -410,13 +368,13 @@ export default function LogisticsPage() {
 
                   {/* Quantité d'unités à livrer */}
                   <div className="mb-4">
-                    <span className="text-sm font-medium text-gray-700">
-                      {event.quantity} units
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {event.quantity} unités
                     </span>
                   </div>
 
                   {/* Boutons d'action selon le statut */}
-                  <div className="flex items-center gap-2 border-t border-gray-100 pt-3">
+                  <div className="flex items-center gap-2 border-t border-gray-100 dark:border-gray-700 pt-3 flex-wrap">
                     {/* Bouton Details - toujours visible */}
                     <Button
                       variant="ghost"
@@ -425,56 +383,57 @@ export default function LogisticsPage() {
                         setSelectedEvent(event);
                         setDetailsDialogOpen(true);
                       }}
-                      className="text-violet-600 hover:text-violet-700 hover:bg-violet-50"
+                      className="text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30"
                     >
                       <FileText className="mr-2 h-4 w-4" />
-                      Details
+                      Détails
                     </Button>
                     
                     {/* Bouton Start Route - affiché seulement pour Scheduled */}
-                    {event.status === 'SCHEDULED' && (
+                    {event.status === 'planifie' && (
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1 rounded-lg border-gray-200 text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200"
-                        onClick={() => updateEventStatus(event.id, 'IN_TRANSIT')}
+                        className="flex-1 rounded-lg border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 hover:border-blue-200"
+                        onClick={() => handleUpdateStatus(event.id, 'en_cours')}
                       >
-                        Start Route
+                        Démarrer la tournée
                       </Button>
                     )}
                     
                     {/* Boutons Delivered et Failed - affichés seulement pour In Transit */}
-                    {event.status === 'IN_TRANSIT' && (
+                    {event.status === 'en_cours' && (
                       <>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex-1 rounded-lg border-green-200 text-green-700 hover:bg-green-50 hover:text-green-600 hover:border-green-300"
-                          onClick={() => updateEventStatus(event.id, 'DELIVERED')}
+                          className="flex-1 rounded-lg border-green-200 dark:border-green-800 text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 hover:text-green-600 hover:border-green-300"
+                          onClick={() => handleUpdateStatus(event.id, 'livree')}
                         >
-                          Delivered
+                          Livrée
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="rounded-lg border-red-200 text-red-700 hover:bg-red-50 hover:text-red-600 hover:border-red-300"
-                          onClick={() => updateEventStatus(event.id, 'FAILED')}
+                          className="rounded-lg border-red-200 dark:border-red-800 text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 hover:border-red-300"
+                          onClick={() => handleUpdateStatus(event.id, 'echouee')}
                         >
-                          Failed
+                          Échouée
                         </Button>
                       </>
                     )}
                     
-                    {/* Message Completed/Failed - affiché pour Delivered ou Failed */}
-                    {(event.status === 'DELIVERED' || event.status === 'FAILED') && (
-                      <span className="flex flex-1 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700">
-                        {event.status === 'DELIVERED' ? 'Completed' : 'Failed'}
+                    {/* Message Completed/Failed */}
+                    {(event.status === 'livree' || event.status === 'echouee') && (
+                      <span className="flex flex-1 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {event.status === 'livree' ? 'Terminé' : 'Échouée'}
                       </span>
                     )}
                   </div>
                 </div>
               ))}
             </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
@@ -486,15 +445,15 @@ export default function LogisticsPage() {
       <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add Note</DialogTitle>
+            <DialogTitle>Ajouter une note</DialogTitle>
             <DialogDescription>
-              Add note for: {selectedEvent?.title}
+              Ajouter une note pour : {selectedEvent?.title}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             {/* Zone de texte pour la note */}
             <Textarea
-              placeholder="Enter your note..."
+              placeholder="Saisissez votre note..."
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
               rows={4}
@@ -502,7 +461,7 @@ export default function LogisticsPage() {
             
             {/* Zone de téléchargement de fichiers */}
             <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">Attach Files</label>
+              <label className="text-sm text-muted-foreground">Joindre des fichiers</label>
               <div
                 className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-violet-400 transition-colors"
                 onClick={() => document.getElementById('file-input')?.click()}
@@ -520,10 +479,10 @@ export default function LogisticsPage() {
                 <div className="flex flex-col items-center gap-2">
                   <FileText className="h-8 w-8 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
-                    Click to upload or drag and drop
+                    Cliquez pour télécharger ou glissez-déposez
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    PDF, PNG, JPG up to 10MB
+                    PDF, PNG, JPG jusqu'à 10 Mo
                   </p>
                 </div>
               </div>
@@ -558,14 +517,20 @@ export default function LogisticsPage() {
                 setNoteText('');
                 setAttachedFiles([]);
               }}>
-                Cancel
+                Annuler
               </Button>
               <Button
-                onClick={() => selectedEvent && updateEventNote(selectedEvent.id, noteText)}
+                onClick={async () => {
+                  if (!selectedEvent) return;
+                  await handleUpdateNote(selectedEvent.id, noteText, attachedFiles);
+                  setNoteDialogOpen(false);
+                  setNoteText('');
+                  setAttachedFiles([]);
+                }}
                 className="bg-yellow-400 hover:bg-yellow-500"
                 disabled={!noteText.trim() && attachedFiles.length === 0}
               >
-                Save
+                Enregistrer
               </Button>
             </div>
           </div>
@@ -579,27 +544,27 @@ export default function LogisticsPage() {
       <Sheet open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
         <SheetContent className="sm:max-w-lg overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>Event Details</SheetTitle>
+            <SheetTitle>Détails de l'événement</SheetTitle>
           </SheetHeader>
           <div className="space-y-6 mt-6">
             
             {/* Section principale: IDs, événement, club, adresse, date, contact, statut */}
             <div className="rounded-lg bg-muted/50 p-4 space-y-3">
               {/* IDs de livraison et tracking */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <p className="text-sm text-muted-foreground">Delivery ID</p>
+                  <p className="text-sm text-muted-foreground">ID de livraison</p>
                   <p className="font-mono font-medium text-violet-600">{selectedEvent?.id_livraison}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Tracking ID</p>
+                  <p className="text-sm text-muted-foreground">ID de suivi</p>
                   <p className="font-mono font-medium text-purple-600">{selectedEvent?.id_tracking}</p>
                 </div>
               </div>
               
               {/* Titre de l'événement */}
               <div>
-                <p className="text-sm text-muted-foreground">Event</p>
+                <p className="text-sm text-muted-foreground">Événement</p>
                 <p className="font-semibold">{selectedEvent?.title}</p>
               </div>
               
@@ -611,23 +576,23 @@ export default function LogisticsPage() {
               
               {/* Adresse complète */}
               <div>
-                <p className="text-sm text-muted-foreground">Address</p>
+                <p className="text-sm text-muted-foreground">Adresse</p>
                 <p className="text-sm">{selectedEvent?.address}, {selectedEvent?.city}</p>
               </div>
               
               {/* Date, heure et quantité */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <p className="text-sm text-muted-foreground">Date</p>
                   <p className="font-medium">{selectedEvent?.date}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Time</p>
+                  <p className="text-sm text-muted-foreground">Heure</p>
                   <p className="font-medium">{selectedEvent?.time}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Quantity</p>
-                  <p className="font-medium">{selectedEvent?.quantity} units</p>
+                  <p className="text-sm text-muted-foreground">Quantité</p>
+                  <p className="font-medium">{selectedEvent?.quantity} unités</p>
                 </div>
               </div>
               
@@ -640,17 +605,17 @@ export default function LogisticsPage() {
               
               {/* Statut actuel avec badge coloré */}
               <div>
-                <p className="text-sm text-muted-foreground">Status</p>
+                <p className="text-sm text-muted-foreground">Statut</p>
                 <Badge className={
-                  selectedEvent?.status === 'SCHEDULED' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                  selectedEvent?.status === 'IN_TRANSIT' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                  selectedEvent?.status === 'DELIVERED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                  selectedEvent?.status === 'planifie' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                  selectedEvent?.status === 'en_cours' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                  selectedEvent?.status === 'livree' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                   'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                 }>
-                  {selectedEvent?.status === 'SCHEDULED' && 'Scheduled'}
-                  {selectedEvent?.status === 'IN_TRANSIT' && 'In Transit'}
-                  {selectedEvent?.status === 'DELIVERED' && 'Delivered'}
-                  {selectedEvent?.status === 'FAILED' && 'Failed'}
+                  {selectedEvent?.status === 'planifie' && 'Planifié'}
+                  {selectedEvent?.status === 'en_cours' && 'En transit'}
+                  {selectedEvent?.status === 'livree' && 'Livrée'}
+                  {selectedEvent?.status === 'echouee' && 'Échouée'}
                 </Badge>
               </div>
               
@@ -665,7 +630,7 @@ export default function LogisticsPage() {
 
             {/* Actions rapides: WhatsApp et Ajouter une note */}
             <div>
-              <p className="text-sm font-medium mb-3">Quick Actions</p>
+              <p className="text-sm font-medium mb-3">Actions rapides</p>
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant="outline"
@@ -681,49 +646,49 @@ export default function LogisticsPage() {
                   onClick={() => setNoteDialogOpen(true)}
                 >
                   <FileText className="mr-2 h-4 w-4" />
-                  Add Note
+                  Ajouter une note
                 </Button>
               </div>
             </div>
 
             {/* Timeline du statut de livraison */}
             <div className="rounded-lg border border-border p-4">
-              <p className="text-sm font-medium mb-3">Status Timeline</p>
+              <p className="text-sm font-medium mb-3">Chronologie du statut</p>
               <div className="space-y-4">
                 
                 {/* Étape 1: Planifié (Scheduled) */}
                 <div className="flex gap-3">
                   <div className="flex flex-col items-center">
                     {/* Point vert si le statut est >= Scheduled, gris sinon */}
-                    <div className={`w-3 h-3 rounded-full ${selectedEvent?.status === 'DELIVERED' || selectedEvent?.status === 'IN_TRANSIT' || selectedEvent?.status === 'SCHEDULED' ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <div className={`w-3 h-3 rounded-full ${selectedEvent?.status === 'livree' || selectedEvent?.status === 'en_cours' || selectedEvent?.status === 'planifie' ? 'bg-green-500' : 'bg-gray-300'}`} />
                     <div className="w-px h-4 bg-border" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Scheduled</p>
-                    <p className="text-xs text-muted-foreground">Event scheduled for delivery</p>
+                    <p className="text-sm font-medium">Planifié</p>
+                    <p className="text-xs text-muted-foreground">Événement planifié pour livraison</p>
                   </div>
                 </div>
                 
                 {/* Étape 2: En Transit (In Transit) */}
                 <div className="flex gap-3">
                   <div className="flex flex-col items-center">
-                    <div className={`w-3 h-3 rounded-full ${selectedEvent?.status === 'DELIVERED' || selectedEvent?.status === 'IN_TRANSIT' ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <div className={`w-3 h-3 rounded-full ${selectedEvent?.status === 'livree' || selectedEvent?.status === 'en_cours' ? 'bg-green-500' : 'bg-gray-300'}`} />
                     <div className="w-px h-4 bg-border" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">In Transit</p>
-                    <p className="text-xs text-muted-foreground">Package on the way</p>
+                    <p className="text-sm font-medium">En transit</p>
+                    <p className="text-xs text-muted-foreground">Colis en cours d'acheminement</p>
                   </div>
                 </div>
                 
                 {/* Étape 3: Livré ou Échoué */}
                 <div className="flex gap-3">
                   <div className="flex flex-col items-center">
-                    <div className={`w-3 h-3 rounded-full ${selectedEvent?.status === 'DELIVERED' ? 'bg-green-500' : selectedEvent?.status === 'FAILED' ? 'bg-red-500' : 'bg-gray-300'}`} />
+                    <div className={`w-3 h-3 rounded-full ${selectedEvent?.status === 'livree' ? 'bg-green-500' : selectedEvent?.status === 'echouee' ? 'bg-red-500' : 'bg-gray-300'}`} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">{selectedEvent?.status === 'FAILED' ? 'Failed' : 'Delivered'}</p>
-                    <p className="text-xs text-muted-foreground">{selectedEvent?.status === 'FAILED' ? 'Delivery could not be completed' : 'Successfully delivered'}</p>
+                    <p className="text-sm font-medium">{selectedEvent?.status === 'echouee' ? 'Échouée' : 'Livrée'}</p>
+                    <p className="text-xs text-muted-foreground">{selectedEvent?.status === 'echouee' ? 'La livraison n\'a pas pu être effectuée' : 'Livrée avec succès'}</p>
                   </div>
                 </div>
               </div>

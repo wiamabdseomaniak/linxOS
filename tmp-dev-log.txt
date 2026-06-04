@@ -1,0 +1,812 @@
+﻿Ôû▓ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3055
+- Network:       http://10.2.0.2:3055
+- Environments: .env.local
+Ô£ô Ready in 1092ms
+node.exe : ÔÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+Au caractère Ligne:1 : 1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\oujda\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (ÔÜá Warning: Ne...not be correct.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ We detected multiple lockfiles and selected the directory of C:\Users\oujda\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if 
+it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\oujda\Desktop\linxos-platform\package-lock.json
+
+
+ GET /logistics 200 in 4.5s (next.js: 1668ms, application-code: 2.8s)
+ GET /api/logistics?statut_livraison=planifie 200 in 1242ms (next.js: 490ms, application-code: 752ms)
+ GET /logistics 200 in 409ms (next.js: 82ms, application-code: 326ms)
+ GET /api/logistics?statut_livraison=planifie 200 in 1345ms (next.js: 100ms, application-code: 1245ms)
+Ô£ô Compiled in 657ms
+ GET /logistics 200 in 649ms (next.js: 407ms, application-code: 242ms)
+ GET /api/logistics? 200 in 1183ms (next.js: 100ms, application-code: 1083ms)
+Ô£ô Compiled in 244ms
+ GET /logistics 200 in 308ms (next.js: 100ms, application-code: 208ms)
+ GET /api/logistics? 200 in 687ms (next.js: 55ms, application-code: 632ms)
+ GET /logistics 200 in 739ms (next.js: 45ms, application-code: 694ms)
+ GET /api/logistics? 200 in 759ms (next.js: 12ms, application-code: 746ms)
+Ôùï Compiling /delivered ...
+ GET /delivered 200 in 4.9s (next.js: 4.7s, application-code: 201ms)
+ GET /delivered 200 in 128ms (next.js: 18ms, application-code: 110ms)
+ GET /api/logistics? 200 in 967ms (next.js: 29ms, application-code: 938ms)
+ GET /api/logistics? 200 in 341ms (next.js: 3ms, application-code: 337ms)
+ GET /logistics 200 in 79ms (next.js: 10ms, application-code: 69ms)
+ GET /api/logistics? 200 in 558ms (next.js: 9ms, application-code: 549ms)
+ GET /api/logistics? 200 in 183ms (next.js: 1967┬Ás, application-code: 181ms)
+ GET /delivered 200 in 72ms (next.js: 15ms, application-code: 57ms)
+ GET /api/logistics? 200 in 554ms (next.js: 7ms, application-code: 547ms)
+ GET /api/logistics? 200 in 185ms (next.js: 3ms, application-code: 182ms)
+ GET /logistics 200 in 99ms (next.js: 18ms, application-code: 81ms)
+ GET /notifications 200 in 2.8s (next.js: 2.8s, application-code: 65ms)
+ GET /api/logistics? 200 in 853ms (next.js: 6ms, application-code: 848ms)
+ GET /api/logistics? 200 in 332ms (next.js: 9ms, application-code: 323ms)
+ GET /delivered 200 in 134ms (next.js: 30ms, application-code: 103ms)
+ GET /api/logistics? 200 in 376ms (next.js: 25ms, application-code: 351ms)
+ GET /api/logistics? 200 in 175ms (next.js: 3ms, application-code: 171ms)
+Ô£ô Compiled in 242ms
+ GET /delivered 200 in 358ms (next.js: 153ms, application-code: 205ms)
+ GET /api/logistics? 200 in 1393ms (next.js: 96ms, application-code: 1296ms)
+ GET /dashboard 200 in 409ms (next.js: 309ms, application-code: 100ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /api/dashboard 200 in 2.4s (next.js: 202ms, application-code: 2.2s)
+ GET /api/dashboard 200 in 731ms (next.js: 7ms, application-code: 725ms)
+ GET /api/dashboard 200 in 989ms (next.js: 5ms, application-code: 984ms)
+ GET /api/dashboard 200 in 817ms (next.js: 3ms, application-code: 814ms)
+ GET /api/dashboard 200 in 713ms (next.js: 8ms, application-code: 705ms)
+ GET /api/dashboard 200 in 833ms (next.js: 2ms, application-code: 831ms)
+ GET /api/dashboard 200 in 726ms (next.js: 8ms, application-code: 718ms)
+ GET /api/dashboard 200 in 710ms (next.js: 3ms, application-code: 707ms)
+ GET /api/dashboard 200 in 835ms (next.js: 3ms, application-code: 831ms)
+ GET /api/dashboard 200 in 690ms (next.js: 6ms, application-code: 684ms)
+ GET /api/dashboard 200 in 603ms (next.js: 5ms, application-code: 598ms)
+ GET /api/dashboard 200 in 944ms (next.js: 14ms, application-code: 931ms)
+ GET /api/dashboard 200 in 699ms (next.js: 8ms, application-code: 691ms)
+ GET /api/dashboard 200 in 669ms (next.js: 4ms, application-code: 665ms)
+ GET /notifications 200 in 98ms (next.js: 45ms, application-code: 53ms)
+Ôùï Compiling /settings ...
+ GET /settings 200 in 4.7s (next.js: 4.6s, application-code: 132ms)
+ GET /profile 200 in 2.4s (next.js: 2.2s, application-code: 156ms)
+ GET /logistics 200 in 136ms (next.js: 60ms, application-code: 76ms)
+ GET /api/logistics? 200 in 610ms (next.js: 7ms, application-code: 603ms)
+ GET /api/logistics? 200 in 194ms (next.js: 6ms, application-code: 187ms)
+ PATCH /api/logistics/00000000-0000-0000-0000-000000001007 200 in 1654ms (next.js: 1283ms, application-code: 371ms)
+ GET /logistics 200 in 634ms (next.js: 4ms, application-code: 630ms)
+ GET /api/logistics? 200 in 250ms (next.js: 15ms, application-code: 234ms)
+ GET /settings 200 in 58ms (next.js: 10ms, application-code: 48ms)
+ GET /notifications 200 in 89ms (next.js: 13ms, application-code: 76ms)
+ GET /profile 200 in 75ms (next.js: 12ms, application-code: 64ms)
+ GET /settings 200 in 56ms (next.js: 14ms, application-code: 42ms)
+ GET /settings 200 in 402ms (next.js: 6ms, application-code: 395ms)
+ GET /profile 200 in 164ms (next.js: 9ms, application-code: 155ms)
+ GET /settings 200 in 55ms (next.js: 6ms, application-code: 49ms)
+ GET /profile 200 in 57ms (next.js: 15ms, application-code: 43ms)
+Ô£ô Compiled in 1831ms
+ GET /profile 200 in 3.4s (next.js: 1803ms, application-code: 1597ms)
+Ô£ô Compiled in 338ms
+ GET /profile 200 in 491ms (next.js: 204ms, application-code: 287ms)
+Ô£ô Compiled in 147ms
+ GET /profile 200 in 292ms (next.js: 126ms, application-code: 166ms)
+ GET /profile 200 in 545ms (next.js: 10ms, application-code: 535ms)
+ GET /settings 200 in 348ms (next.js: 216ms, application-code: 132ms)
+ GET /profile 200 in 282ms (next.js: 83ms, application-code: 198ms)
+Ô£ô Compiled in 1277ms
+ GET /profile 200 in 1645ms (next.js: 334ms, application-code: 1310ms)
+Ô£ô Compiled in 1017ms
+ GET /profile 200 in 558ms (next.js: 210ms, application-code: 348ms)
+Ô£ô Compiled in 349ms
+ GET /profile 200 in 432ms (next.js: 152ms, application-code: 280ms)
+Ô£ô Compiled in 489ms
+ GET /profile 200 in 429ms (next.js: 149ms, application-code: 280ms)
+Ô£ô Compiled in 124ms
+ GET /profile 200 in 315ms (next.js: 141ms, application-code: 174ms)
+Ô£ô Compiled in 142ms
+ GET /profile 200 in 274ms (next.js: 140ms, application-code: 133ms)
+ GET /settings 200 in 571ms (next.js: 397ms, application-code: 174ms)
+ GET /profile 200 in 147ms (next.js: 20ms, application-code: 126ms)
+ GET /settings 200 in 131ms (next.js: 15ms, application-code: 116ms)
+Ô£ô Compiled in 1333ms
+ GET /settings 200 in 2.3s (next.js: 958ms, application-code: 1301ms)
+[browser] Base UI: A component is changing the uncontrolled value state of FieldControl to be controlled.
+Elements should not switch from uncontrolled to controlled (or vice versa).
+Decide between using a controlled or uncontrolled FieldControl element for the lifetime of the component.
+The nature of the state is determined during the first render. It's considered controlled if the value is not 
+`undefined`.
+More info: https://fb.me/react-controlled-components 
+Ô£ô Compiled in 448ms
+ GET /settings 200 in 349ms (next.js: 211ms, application-code: 138ms)
+Ô£ô Compiled in 141ms
+ GET /settings 200 in 518ms (next.js: 196ms, application-code: 322ms)
+ GET /settings 200 in 2.1s (next.js: 17ms, application-code: 2.1s)
+Ô£ô Compiled in 327ms
+ GET /settings 200 in 873ms (next.js: 646ms, application-code: 228ms)
+ GET /profile 200 in 515ms (next.js: 159ms, application-code: 355ms)
+ GET /dashboard 200 in 639ms (next.js: 437ms, application-code: 202ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /api/dashboard 200 in 5.2s (next.js: 260ms, application-code: 4.9s)
+ GET /api/dashboard 200 in 1699ms (next.js: 13ms, application-code: 1686ms)
+ GET /api/dashboard 200 in 1949ms (next.js: 6ms, application-code: 1942ms)
+ GET /api/dashboard 200 in 1679ms (next.js: 11ms, application-code: 1668ms)
+ GET /api/dashboard 200 in 2.5s (next.js: 14ms, application-code: 2.5s)
+The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /api/dashboard 200 in 1542ms (next.js: 5ms, application-code: 1537ms)
+ GET /dashboard 200 in 1598ms (next.js: 16ms, application-code: 1582ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /api/dashboard 200 in 4.0s (next.js: 6ms, application-code: 4.0s)
+ GET /api/dashboard 200 in 1368ms (next.js: 7ms, application-code: 1361ms)
+ GET /api/dashboard 200 in 1523ms (next.js: 8ms, application-code: 1515ms)
+ GET /api/dashboard 200 in 2.7s (next.js: 13ms, application-code: 2.7s)
+ GET /logistics 200 in 443ms (next.js: 273ms, application-code: 170ms)
+ GET /api/dashboard 200 in 1207ms (next.js: 5ms, application-code: 1202ms)
+ GET /api/logistics? 200 in 1414ms (next.js: 80ms, application-code: 1335ms)
+ GET /api/logistics? 200 in 258ms (next.js: 11ms, application-code: 246ms)
+ GET /api/dashboard 200 in 2.4s (next.js: 19ms, application-code: 2.3s)
+ GET /api/dashboard 200 in 1631ms (next.js: 5ms, application-code: 1626ms)
+ GET /delivered 200 in 400ms (next.js: 255ms, application-code: 145ms)
+ GET /api/logistics? 200 in 460ms (next.js: 9ms, application-code: 450ms)
+ GET /api/logistics? 200 in 412ms (next.js: 6ms, application-code: 405ms)
+ GET /logistics 200 in 201ms (next.js: 21ms, application-code: 180ms)
+ GET /api/logistics? 200 in 1374ms (next.js: 48ms, application-code: 1326ms)
+ GET /api/logistics? 200 in 362ms (next.js: 6ms, application-code: 355ms)
+ GET /delivered 200 in 100ms (next.js: 11ms, application-code: 89ms)
+ GET /api/logistics? 200 in 1363ms (next.js: 4ms, application-code: 1359ms)
+ GET /api/logistics? 200 in 804ms (next.js: 8ms, application-code: 796ms)
+ GET /api/logistics? 200 in 407ms (next.js: 3ms, application-code: 403ms)
+ GET /api/logistics? 200 in 250ms (next.js: 8ms, application-code: 242ms)
+ GET /api/logistics? 200 in 1327ms (next.js: 34ms, application-code: 1293ms)
+ GET /api/logistics? 200 in 320ms (next.js: 6ms, application-code: 314ms)
+ GET /delivered 200 in 2.6s (next.js: 42ms, application-code: 2.5s)
+ GET /api/logistics? 200 in 978ms (next.js: 6ms, application-code: 972ms)
+ GET /logistics 200 in 87ms (next.js: 11ms, application-code: 76ms)
+ GET /api/logistics? 200 in 575ms (next.js: 3ms, application-code: 572ms)
+ GET /api/logistics? 200 in 192ms (next.js: 16ms, application-code: 176ms)
+ GET /delivered 200 in 70ms (next.js: 9ms, application-code: 61ms)
+ GET /api/logistics? 200 in 615ms (next.js: 32ms, application-code: 584ms)
+ GET /api/logistics? 200 in 200ms (next.js: 5ms, application-code: 195ms)
+ GET /logistics 200 in 72ms (next.js: 9ms, application-code: 63ms)
+ GET /api/logistics? 200 in 971ms (next.js: 16ms, application-code: 955ms)
+ GET /api/logistics? 200 in 150ms (next.js: 6ms, application-code: 144ms)
+ GET /delivered 200 in 79ms (next.js: 11ms, application-code: 68ms)
+ GET /api/logistics? 200 in 934ms (next.js: 5ms, application-code: 930ms)
+ GET /api/logistics? 200 in 207ms (next.js: 8ms, application-code: 199ms)
+ PATCH /api/logistics/00000000-0000-0000-0000-000000001008 200 in 1606ms (next.js: 162ms, application-code: 1444ms)
+ GET /logistics 200 in 106ms (next.js: 18ms, application-code: 88ms)
+ GET /api/logistics? 200 in 1358ms (next.js: 5ms, application-code: 1353ms)
+ GET /api/logistics? 200 in 297ms (next.js: 7ms, application-code: 290ms)
+Ô£ô Compiled in 563ms
+ GET /logistics 200 in 1608ms (next.js: 586ms, application-code: 1023ms)
+ GET /logistics 200 in 678ms (next.js: 90ms, application-code: 588ms)
+ GET /api/logistics? 200 in 2.6s (next.js: 173ms, application-code: 2.4s)
+ GET /api/logistics? 200 in 216ms (next.js: 4ms, application-code: 212ms)
+ GET /logistics 200 in 1872ms (next.js: 27ms, application-code: 1845ms)
+ GET /api/logistics? 200 in 1213ms (next.js: 14ms, application-code: 1200ms)
+ GET /delivered 200 in 963ms (next.js: 691ms, application-code: 272ms)
+ GET /api/logistics? 200 in 158ms (next.js: 14ms, application-code: 144ms)
+ GET /api/logistics? 200 in 236ms (next.js: 44ms, application-code: 193ms)
+ GET /notifications 200 in 431ms (next.js: 307ms, application-code: 125ms)
+ GET /logistics 200 in 88ms (next.js: 13ms, application-code: 75ms)
+ GET /api/logistics? 200 in 1748ms (next.js: 8ms, application-code: 1740ms)
+ GET /api/logistics? 200 in 381ms (next.js: 8ms, application-code: 373ms)
+ GET /delivered 200 in 72ms (next.js: 5ms, application-code: 66ms)
+ GET /api/logistics? 200 in 579ms (next.js: 9ms, application-code: 569ms)
+ GET /api/logistics? 200 in 198ms (next.js: 5ms, application-code: 193ms)
+Ô£ô Compiled in 360ms
+ GET /delivered 200 in 648ms (next.js: 336ms, application-code: 312ms)
+ GET /api/logistics? 200 in 2.3s (next.js: 598ms, application-code: 1722ms)
+Ô£ô Compiled in 246ms
+ GET /delivered 200 in 457ms (next.js: 293ms, application-code: 165ms)
+ GET /api/logistics? 200 in 1081ms (next.js: 163ms, application-code: 918ms)
+ GET /dashboard 200 in 259ms (next.js: 109ms, application-code: 149ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /api/dashboard 200 in 1747ms (next.js: 63ms, application-code: 1684ms)
+ GET /api/dashboard 200 in 738ms (next.js: 9ms, application-code: 729ms)
+ GET /api/dashboard 200 in 930ms (next.js: 7ms, application-code: 923ms)
+ GET /api/dashboard 200 in 1012ms (next.js: 7ms, application-code: 1005ms)
+ GET /logistics 200 in 183ms (next.js: 71ms, application-code: 111ms)
+ GET /api/logistics? 200 in 440ms (next.js: 6ms, application-code: 434ms)
+ GET /api/dashboard 200 in 643ms (next.js: 4ms, application-code: 639ms)
+ GET /api/logistics? 200 in 202ms (next.js: 6ms, application-code: 197ms)
+ GET /api/dashboard 200 in 1248ms (next.js: 5ms, application-code: 1242ms)
+ GET /api/dashboard 200 in 731ms (next.js: 8ms, application-code: 723ms)
+ GET /api/dashboard 200 in 718ms (next.js: 7ms, application-code: 711ms)
+ GET /api/dashboard 200 in 975ms (next.js: 5ms, application-code: 969ms)
+ GET /api/dashboard 200 in 692ms (next.js: 6ms, application-code: 687ms)
+ GET /api/dashboard 200 in 826ms (next.js: 5ms, application-code: 821ms)
+ GET /api/dashboard 200 in 858ms (next.js: 6ms, application-code: 853ms)
+ GET /api/dashboard 200 in 951ms (next.js: 6ms, application-code: 945ms)
+ GET /api/dashboard 200 in 715ms (next.js: 5ms, application-code: 711ms)
+ GET /login 200 in 921ms (next.js: 255ms, application-code: 666ms)
+The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /dashboard 200 in 1006ms (next.js: 14ms, application-code: 992ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /api/dashboard 200 in 1528ms (next.js: 8ms, application-code: 1520ms)
+ GET /api/dashboard 200 in 759ms (next.js: 7ms, application-code: 752ms)
+ GET /api/dashboard 200 in 844ms (next.js: 12ms, application-code: 832ms)
+ GET /api/dashboard 200 in 604ms (next.js: 5ms, application-code: 599ms)
+ GET /api/dashboard 200 in 644ms (next.js: 6ms, application-code: 638ms)
+ GET /api/dashboard 200 in 988ms (next.js: 6ms, application-code: 981ms)
+ GET /api/dashboard 200 in 955ms (next.js: 12ms, application-code: 943ms)
+ GET /logistics 200 in 109ms (next.js: 15ms, application-code: 94ms)
+ GET /api/logistics? 200 in 903ms (next.js: 6ms, application-code: 896ms)
+ GET /api/logistics? 200 in 244ms (next.js: 7ms, application-code: 238ms)
+ PATCH /api/logistics/00000000-0000-0000-0000-000000001012 200 in 863ms (next.js: 162ms, application-code: 702ms)
+ GET /dashboard 200 in 81ms (next.js: 10ms, application-code: 72ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /delivered 200 in 104ms (next.js: 25ms, application-code: 79ms)
+ GET /api/logistics? 200 in 449ms (next.js: 9ms, application-code: 440ms)
+ GET /api/logistics? 200 in 335ms (next.js: 6ms, application-code: 329ms)
+ GET /logistics 200 in 86ms (next.js: 15ms, application-code: 72ms)
+ GET /api/logistics? 200 in 220ms (next.js: 9ms, application-code: 211ms)
+ GET /api/logistics? 200 in 127ms (next.js: 5ms, application-code: 122ms)
+ GET /delivered 200 in 92ms (next.js: 15ms, application-code: 78ms)
+ GET /api/logistics? 200 in 151ms (next.js: 6ms, application-code: 145ms)
+ GET /api/logistics? 200 in 199ms (next.js: 6ms, application-code: 192ms)
+ GET /logistics 200 in 58ms (next.js: 14ms, application-code: 44ms)
+ GET /api/logistics? 200 in 196ms (next.js: 4ms, application-code: 191ms)
+ GET /api/logistics? 200 in 190ms (next.js: 9ms, application-code: 181ms)
+ GET /delivered 200 in 82ms (next.js: 7ms, application-code: 75ms)
+ GET /api/logistics? 200 in 431ms (next.js: 11ms, application-code: 420ms)
+ GET /api/logistics? 200 in 616ms (next.js: 35ms, application-code: 581ms)
+ GET /logistics 200 in 83ms (next.js: 12ms, application-code: 72ms)
+ GET /api/logistics? 200 in 187ms (next.js: 4ms, application-code: 183ms)
+ GET /api/logistics? 200 in 192ms (next.js: 8ms, application-code: 184ms)
+ PATCH /api/logistics/00000000-0000-0000-0000-000000001001 200 in 461ms (next.js: 34ms, application-code: 427ms)
+ GET /delivered 200 in 87ms (next.js: 11ms, application-code: 76ms)
+ GET /api/logistics? 200 in 461ms (next.js: 10ms, application-code: 451ms)
+ GET /api/logistics? 200 in 198ms (next.js: 9ms, application-code: 189ms)
+ GET /logistics 200 in 78ms (next.js: 14ms, application-code: 65ms)
+ GET /api/logistics? 200 in 147ms (next.js: 18ms, application-code: 129ms)
+ GET /api/logistics? 200 in 130ms (next.js: 4ms, application-code: 127ms)
+ GET /delivered 200 in 80ms (next.js: 12ms, application-code: 68ms)
+ GET /api/logistics? 200 in 424ms (next.js: 5ms, application-code: 419ms)
+ GET /api/logistics? 200 in 194ms (next.js: 9ms, application-code: 185ms)
+ GET /notifications 200 in 204ms (next.js: 68ms, application-code: 136ms)
+ GET /profile 200 in 175ms (next.js: 83ms, application-code: 92ms)
+ GET /settings 200 in 168ms (next.js: 79ms, application-code: 89ms)
+ GET /profile 200 in 84ms (next.js: 26ms, application-code: 58ms)
+ GET /profile 200 in 262ms (next.js: 15ms, application-code: 248ms)
+ GET /logistics 200 in 89ms (next.js: 12ms, application-code: 77ms)
+ GET /api/logistics? 200 in 452ms (next.js: 4ms, application-code: 449ms)
+ GET /api/logistics? 200 in 226ms (next.js: 10ms, application-code: 215ms)
+ GET /delivered 200 in 324ms (next.js: 13ms, application-code: 311ms)
+ GET /api/logistics? 200 in 201ms (next.js: 14ms, application-code: 188ms)
+ GET /api/logistics? 200 in 179ms (next.js: 42ms, application-code: 137ms)
+ GET /logistics 200 in 77ms (next.js: 8ms, application-code: 69ms)
+ GET /api/logistics? 200 in 545ms (next.js: 6ms, application-code: 539ms)
+ GET /api/logistics? 200 in 126ms (next.js: 7ms, application-code: 119ms)
+Ô£ô Compiled in 1714ms
+Ô£ô Compiled in 733ms
+Ô£ô Compiled in 1050ms
+Ô£ô Compiled in 905ms
+Ô£ô Compiled in 655ms
+Ô£ô Compiled in 928ms
+Ô£ô Compiled in 6.9s
+Ô£ô Compiled in 532ms
+Ô£ô Compiled in 467ms
+Ô£ô Compiled in 407ms
+Ô£ô Compiled in 311ms
+Ô£ô Compiled in 279ms
+Ô£ô Compiled in 279ms
+Ô£ô Compiled in 1233ms
+Ô£ô Compiled in 559ms
+Ô£ô Compiled in 275ms
+Ô£ô Compiled in 171ms
+Ô£ô Compiled in 545ms
+Ô£ô Compiled in 260ms
+Ô£ô Compiled in 435ms
+Ô£ô Compiled in 286ms
+Ô£ô Compiled in 189ms
+Ô£ô Compiled in 214ms
+Ô£ô Compiled in 359ms
+Ô£ô Compiled in 197ms
+Ô£ô Compiled in 830ms
+Ô£ô Compiled in 381ms
+Ô£ô Compiled in 428ms
+Ô£ô Compiled in 909ms
+Ô£ô Compiled in 642ms
+Ô£ô Compiled in 345ms
+Ô£ô Compiled in 219ms
+Ô£ô Compiled in 156ms
+Ô£ô Compiled in 173ms
+Ô£ô Compiled in 325ms
+Ô£ô Compiled in 218ms
+Ô£ô Compiled in 193ms
+Ô£ô Compiled in 175ms
+Ô£ô Compiled in 155ms
+Ô£ô Compiled in 269ms
+Ô£ô Compiled in 208ms
+Ô£ô Compiled in 181ms
+Ô£ô Compiled in 239ms
+Ô£ô Compiled in 293ms
+Ô£ô Compiled in 414ms
+Ô£ô Compiled in 868ms
+Ô£ô Compiled in 791ms
+Ô£ô Compiled in 1068ms
+Ô£ô Compiled in 297ms
+Ô£ô Compiled in 1023ms
+Ô£ô Compiled in 358ms
+Ô£ô Compiled in 688ms
+Ô£ô Compiled in 742ms
+Ô£ô Compiled in 581ms
+Ô£ô Compiled in 763ms
+Ô£ô Compiled in 485ms
+Ô£ô Compiled in 978ms
+Ô£ô Compiled in 174ms
+Ô£ô Compiled in 212ms
+Ô£ô Compiled in 197ms
+Ô£ô Compiled in 626ms
+Ô£ô Compiled in 448ms
+Ô£ô Compiled in 285ms
+Ô£ô Compiled in 243ms
+Ô£ô Compiled in 239ms
+Ô£ô Compiled in 265ms
+Ô£ô Compiled in 871ms
+Ô£ô Compiled in 226ms
+Ô£ô Compiled in 458ms
+Ô£ô Compiled in 239ms
+Ô£ô Compiled in 263ms
+ GET /logistics 200 in 5.4s (next.js: 4.0s, application-code: 1443ms)
+ GET /logistics 200 in 1397ms (next.js: 12ms, application-code: 1385ms)
+ GET /api/logistics? 200 in 5.4s (next.js: 494ms, application-code: 4.9s)
+ GET /logistics 200 in 1141ms (next.js: 16ms, application-code: 1125ms)
+ GET /logistics 200 in 1279ms (next.js: 124ms, application-code: 1156ms)
+ GET /logistics 200 in 1271ms (next.js: 336ms, application-code: 935ms)
+ GET /logistics 200 in 829ms (next.js: 45ms, application-code: 784ms)
+ GET /logistics 200 in 745ms (next.js: 34ms, application-code: 712ms)
+ GET /logistics 200 in 602ms (next.js: 21ms, application-code: 582ms)
+ GET /logistics 200 in 598ms (next.js: 119ms, application-code: 479ms)
+ GET /logistics 200 in 484ms (next.js: 14ms, application-code: 470ms)
+ GET /logistics 200 in 484ms (next.js: 82ms, application-code: 402ms)
+ GET /logistics 200 in 431ms (next.js: 19ms, application-code: 412ms)
+ GET /logistics 200 in 348ms (next.js: 20ms, application-code: 329ms)
+ GET /logistics 200 in 268ms (next.js: 8ms, application-code: 260ms)
+ GET /logistics 200 in 268ms (next.js: 44ms, application-code: 224ms)
+ GET /logistics 200 in 180ms (next.js: 11ms, application-code: 169ms)
+ GET /logistics 200 in 185ms (next.js: 55ms, application-code: 130ms)
+ GET /logistics 200 in 283ms (next.js: 8ms, application-code: 275ms)
+ GET /logistics 200 in 253ms (next.js: 14ms, application-code: 239ms)
+ GET /logistics 200 in 249ms (next.js: 38ms, application-code: 211ms)
+ GET /logistics 200 in 249ms (next.js: 68ms, application-code: 181ms)
+ GET /logistics 200 in 158ms (next.js: 6ms, application-code: 152ms)
+ GET /logistics 200 in 157ms (next.js: 32ms, application-code: 125ms)
+ GET /logistics 200 in 241ms (next.js: 7ms, application-code: 234ms)
+ GET /logistics 200 in 254ms (next.js: 9ms, application-code: 245ms)
+ GET /logistics 200 in 269ms (next.js: 39ms, application-code: 229ms)
+ GET /logistics 200 in 273ms (next.js: 72ms, application-code: 200ms)
+ GET /logistics 200 in 173ms (next.js: 7ms, application-code: 166ms)
+ GET /logistics 200 in 176ms (next.js: 37ms, application-code: 138ms)
+ GET /logistics 200 in 371ms (next.js: 7ms, application-code: 364ms)
+ GET /logistics 200 in 368ms (next.js: 15ms, application-code: 353ms)
+ GET /logistics 200 in 369ms (next.js: 61ms, application-code: 308ms)
+ GET /logistics 200 in 369ms (next.js: 103ms, application-code: 266ms)
+ GET /logistics 200 in 274ms (next.js: 56ms, application-code: 219ms)
+ GET /logistics 200 in 237ms (next.js: 52ms, application-code: 186ms)
+ GET /logistics 200 in 527ms (next.js: 10ms, application-code: 517ms)
+ GET /logistics 200 in 607ms (next.js: 17ms, application-code: 590ms)
+ GET /logistics 200 in 606ms (next.js: 127ms, application-code: 478ms)
+ GET /logistics 200 in 606ms (next.js: 226ms, application-code: 380ms)
+ GET /logistics 200 in 530ms (next.js: 20ms, application-code: 511ms)
+ GET /logistics 200 in 535ms (next.js: 106ms, application-code: 429ms)
+ GET /logistics 200 in 355ms (next.js: 9ms, application-code: 346ms)
+ GET /logistics 200 in 382ms (next.js: 4ms, application-code: 378ms)
+ GET /logistics 200 in 480ms (next.js: 66ms, application-code: 415ms)
+ GET /logistics 200 in 422ms (next.js: 57ms, application-code: 365ms)
+ GET /logistics 200 in 399ms (next.js: 8ms, application-code: 391ms)
+ GET /logistics 200 in 400ms (next.js: 57ms, application-code: 343ms)
+ GET /logistics 200 in 338ms (next.js: 7ms, application-code: 330ms)
+ GET /logistics 200 in 295ms (next.js: 11ms, application-code: 284ms)
+ GET /logistics 200 in 304ms (next.js: 53ms, application-code: 251ms)
+ GET /logistics 200 in 306ms (next.js: 5ms, application-code: 301ms)
+ GET /logistics 200 in 376ms (next.js: 6ms, application-code: 371ms)
+ GET /logistics 200 in 326ms (next.js: 7ms, application-code: 319ms)
+ GET /logistics 200 in 271ms (next.js: 6ms, application-code: 264ms)
+ GET /logistics 200 in 314ms (next.js: 13ms, application-code: 301ms)
+ GET /logistics 200 in 311ms (next.js: 9ms, application-code: 302ms)
+ GET /logistics 200 in 311ms (next.js: 65ms, application-code: 245ms)
+ GET /logistics 200 in 395ms (next.js: 5ms, application-code: 390ms)
+ GET /logistics 200 in 346ms (next.js: 8ms, application-code: 338ms)
+ GET /logistics 200 in 298ms (next.js: 10ms, application-code: 288ms)
+ GET /logistics 200 in 601ms (next.js: 5ms, application-code: 596ms)
+ GET /logistics 200 in 699ms (next.js: 26ms, application-code: 673ms)
+ GET /logistics 200 in 703ms (next.js: 75ms, application-code: 628ms)
+ GET /logistics 200 in 714ms (next.js: 19ms, application-code: 695ms)
+ GET /logistics 200 in 351ms (next.js: 12ms, application-code: 340ms)
+ GET /logistics 200 in 348ms (next.js: 79ms, application-code: 269ms)
+ GET /logistics 200 in 250ms (next.js: 7ms, application-code: 243ms)
+ GET /logistics 200 in 301ms (next.js: 6ms, application-code: 295ms)
+ GET /logistics 200 in 301ms (next.js: 62ms, application-code: 239ms)
+ GET /logistics 200 in 339ms (next.js: 8ms, application-code: 330ms)
+ GET /logistics 200 in 281ms (next.js: 62ms, application-code: 219ms)
+ GET /logistics 200 in 284ms (next.js: 6ms, application-code: 278ms)
+ GET /logistics 200 in 166ms (next.js: 5ms, application-code: 161ms)
+ GET /logistics 200 in 112ms (next.js: 10ms, application-code: 102ms)
+ GET /api/logistics? 200 in 456ms (next.js: 66ms, application-code: 390ms)
+ GET /api/logistics? 200 in 182ms (next.js: 8ms, application-code: 174ms)
+ GET /api/logistics? 200 in 125ms (next.js: 7ms, application-code: 118ms)
+ GET /api/logistics? 200 in 189ms (next.js: 13ms, application-code: 176ms)
+ GET /api/logistics? 200 in 213ms (next.js: 10ms, application-code: 203ms)
+ GET /api/logistics? 200 in 195ms (next.js: 4ms, application-code: 191ms)
+ GET /api/logistics? 200 in 185ms (next.js: 3ms, application-code: 182ms)
+ GET /api/logistics? 200 in 132ms (next.js: 8ms, application-code: 124ms)
+ GET /api/logistics? 200 in 186ms (next.js: 5ms, application-code: 182ms)
+ GET /api/logistics? 200 in 121ms (next.js: 4ms, application-code: 116ms)
+ GET /api/logistics? 200 in 123ms (next.js: 5ms, application-code: 119ms)
+ GET /api/logistics? 200 in 113ms (next.js: 2ms, application-code: 110ms)
+ GET /api/logistics? 200 in 119ms (next.js: 4ms, application-code: 114ms)
+ GET /api/logistics? 200 in 180ms (next.js: 5ms, application-code: 175ms)
+ GET /api/logistics? 200 in 178ms (next.js: 6ms, application-code: 172ms)
+ GET /api/logistics? 200 in 131ms (next.js: 4ms, application-code: 127ms)
+ GET /api/logistics? 200 in 150ms (next.js: 4ms, application-code: 145ms)
+ GET /api/logistics? 200 in 132ms (next.js: 11ms, application-code: 121ms)
+ GET /api/logistics? 200 in 134ms (next.js: 6ms, application-code: 128ms)
+ GET /api/logistics? 200 in 126ms (next.js: 8ms, application-code: 118ms)
+ GET /api/logistics? 200 in 133ms (next.js: 5ms, application-code: 128ms)
+ GET /api/logistics? 200 in 134ms (next.js: 12ms, application-code: 121ms)
+ GET /api/logistics? 200 in 159ms (next.js: 21ms, application-code: 138ms)
+ GET /api/logistics? 200 in 131ms (next.js: 6ms, application-code: 124ms)
+ GET /api/logistics? 200 in 132ms (next.js: 3ms, application-code: 130ms)
+ GET /api/logistics? 200 in 136ms (next.js: 8ms, application-code: 128ms)
+ GET /api/logistics? 200 in 129ms (next.js: 6ms, application-code: 123ms)
+ GET /dashboard 200 in 335ms (next.js: 252ms, application-code: 83ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /api/dashboard 200 in 1319ms (next.js: 91ms, application-code: 1228ms)
+ GET /api/dashboard 200 in 839ms (next.js: 5ms, application-code: 834ms)
+ GET /api/dashboard 200 in 852ms (next.js: 4ms, application-code: 848ms)
+ GET /api/dashboard 200 in 943ms (next.js: 5ms, application-code: 939ms)
+ GET /api/dashboard 200 in 943ms (next.js: 3ms, application-code: 941ms)
+ GET /api/dashboard 200 in 904ms (next.js: 3ms, application-code: 901ms)
+ GET /api/dashboard 200 in 579ms (next.js: 6ms, application-code: 573ms)
+ GET /api/dashboard 200 in 992ms (next.js: 9ms, application-code: 984ms)
+ GET /api/dashboard 200 in 996ms (next.js: 9ms, application-code: 987ms)
+ GET /api/dashboard 200 in 614ms (next.js: 7ms, application-code: 607ms)
+ GET /api/dashboard 200 in 812ms (next.js: 2ms, application-code: 809ms)
+ GET /api/dashboard 200 in 825ms (next.js: 2ms, application-code: 823ms)
+ GET /api/dashboard 200 in 684ms (next.js: 4ms, application-code: 679ms)
+ GET /api/dashboard 200 in 902ms (next.js: 9ms, application-code: 893ms)
+The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /dashboard 200 in 2.5s (next.js: 110ms, application-code: 2.4s)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /api/dashboard 200 in 1845ms (next.js: 25ms, application-code: 1820ms)
+ GET /api/dashboard 200 in 900ms (next.js: 4ms, application-code: 896ms)
+ GET /api/dashboard 200 in 613ms (next.js: 4ms, application-code: 609ms)
+ GET /api/dashboard 200 in 686ms (next.js: 3ms, application-code: 683ms)
+ GET /api/dashboard 200 in 705ms (next.js: 8ms, application-code: 697ms)
+ GET /api/dashboard 200 in 689ms (next.js: 6ms, application-code: 683ms)
+ GET /api/dashboard 200 in 1945ms (next.js: 4ms, application-code: 1941ms)
+ GET /delivered 200 in 433ms (next.js: 285ms, application-code: 147ms)
+ GET /api/logistics? 200 in 1033ms (next.js: 13ms, application-code: 1020ms)
+ GET /logistics 200 in 68ms (next.js: 30ms, application-code: 38ms)
+ GET /api/logistics? 200 in 198ms (next.js: 6ms, application-code: 192ms)
+ GET /api/logistics? 200 in 187ms (next.js: 6ms, application-code: 180ms)
+ GET /api/logistics? 200 in 417ms (next.js: 3ms, application-code: 414ms)
+ PATCH /api/logistics/00000000-0000-0000-0000-000000001012 200 in 588ms (next.js: 129ms, application-code: 459ms)
+ GET /dashboard 200 in 50ms (next.js: 13ms, application-code: 36ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /logistics 200 in 47ms (next.js: 9ms, application-code: 39ms)
+ GET /api/logistics? 200 in 516ms (next.js: 12ms, application-code: 504ms)
+ GET /api/logistics? 200 in 126ms (next.js: 7ms, application-code: 119ms)
+ PATCH /api/logistics/00000000-0000-0000-0000-000000001012 200 in 486ms (next.js: 64ms, application-code: 422ms)
+ GET /logistics 200 in 1085ms (next.js: 9ms, application-code: 1076ms)
+ GET /api/logistics? 200 in 731ms (next.js: 15ms, application-code: 716ms)
+ GET /dashboard 200 in 119ms (next.js: 8ms, application-code: 111ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /api/dashboard 200 in 1895ms (next.js: 33ms, application-code: 1862ms)
+ GET /api/dashboard 200 in 913ms (next.js: 13ms, application-code: 899ms)
+ GET /api/dashboard 200 in 750ms (next.js: 8ms, application-code: 742ms)
+ GET /api/dashboard 200 in 828ms (next.js: 5ms, application-code: 823ms)
+ GET /api/dashboard 200 in 756ms (next.js: 5ms, application-code: 751ms)
+ GET /api/dashboard 200 in 799ms (next.js: 7ms, application-code: 792ms)
+ GET /api/dashboard 200 in 740ms (next.js: 4ms, application-code: 735ms)
+The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /api/dashboard 200 in 488ms (next.js: 5ms, application-code: 483ms)
+ GET /dashboard 200 in 378ms (next.js: 5ms, application-code: 373ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /api/dashboard 200 in 767ms (next.js: 16ms, application-code: 750ms)
+ GET /api/dashboard 200 in 739ms (next.js: 3ms, application-code: 736ms)
+ GET /api/dashboard 200 in 707ms (next.js: 8ms, application-code: 699ms)
+ GET /api/dashboard 200 in 863ms (next.js: 7ms, application-code: 856ms)
+ GET /api/dashboard 200 in 603ms (next.js: 6ms, application-code: 597ms)
+ GET /api/dashboard 200 in 746ms (next.js: 4ms, application-code: 742ms)
+ GET /api/dashboard 200 in 726ms (next.js: 4ms, application-code: 721ms)
+ GET /logistics 200 in 83ms (next.js: 20ms, application-code: 63ms)
+ GET /api/logistics? 200 in 584ms (next.js: 2ms, application-code: 582ms)
+ GET /api/logistics? 200 in 197ms (next.js: 14ms, application-code: 184ms)
+ PATCH /api/logistics/00000000-0000-0000-0000-000000001012 200 in 788ms (next.js: 23ms, application-code: 764ms)
+ GET /dashboard 200 in 85ms (next.js: 4ms, application-code: 81ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /logistics 200 in 57ms (next.js: 11ms, application-code: 46ms)
+ GET /api/logistics? 200 in 543ms (next.js: 6ms, application-code: 537ms)
+ GET /api/logistics? 200 in 139ms (next.js: 4ms, application-code: 134ms)
+ PATCH /api/logistics/00000000-0000-0000-0000-000000001004 200 in 1080ms (next.js: 19ms, application-code: 1062ms)
+ PATCH /api/logistics/00000000-0000-0000-0000-000000001004 200 in 359ms (next.js: 16ms, application-code: 343ms)
+ GET /logistics 200 in 114ms (next.js: 5ms, application-code: 108ms)
+ GET /api/logistics? 200 in 129ms (next.js: 3ms, application-code: 126ms)
+ GET /dashboard 200 in 84ms (next.js: 13ms, application-code: 72ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+ GET /api/dashboard 200 in 1138ms (next.js: 5ms, application-code: 1132ms)
+ GET /api/dashboard 200 in 869ms (next.js: 6ms, application-code: 863ms)
+ GET /api/dashboard 200 in 664ms (next.js: 8ms, application-code: 656ms)
+ GET /api/dashboard 200 in 1026ms (next.js: 7ms, application-code: 1020ms)
+ GET /api/dashboard 200 in 824ms (next.js: 6ms, application-code: 818ms)
+ GET /api/dashboard 200 in 858ms (next.js: 3ms, application-code: 855ms)
+ GET /api/dashboard 200 in 666ms (next.js: 2ms, application-code: 664ms)
+ GET /api/dashboard 200 in 909ms (next.js: 34ms, application-code: 875ms)
+ GET /api/dashboard 200 in 1096ms (next.js: 7ms, application-code: 1089ms)
+ GET /api/dashboard 200 in 763ms (next.js: 8ms, application-code: 754ms)
+ GET /api/dashboard 200 in 728ms (next.js: 7ms, application-code: 721ms)
+ GET /api/dashboard 200 in 714ms (next.js: 2ms, application-code: 712ms)
+ GET /api/dashboard 200 in 1011ms (next.js: 3ms, application-code: 1008ms)
+ GET /api/dashboard 200 in 808ms (next.js: 18ms, application-code: 791ms)
+Ô£ô Compiled in 1582ms
+ GET /dashboard 200 in 3.1s (next.js: 2.4s, application-code: 755ms)
+ GET /dashboard 200 in 1559ms (next.js: 771ms, application-code: 788ms)
+Ô£ô Compiled in 3.6s
+ GET /dashboard 200 in 2.6s (next.js: 1919ms, application-code: 641ms)
+ GET /dashboard 200 in 176ms (next.js: 22ms, application-code: 155ms)
+ GET /dashboard 200 in 736ms (next.js: 364ms, application-code: 372ms)
+ GET /dashboard 200 in 856ms (next.js: 339ms, application-code: 517ms)
+Ô£ô Compiled in 265ms
+ GET /dashboard 200 in 825ms (next.js: 401ms, application-code: 424ms)
+ GET /dashboard 200 in 467ms (next.js: 283ms, application-code: 184ms)
+Ô£ô Compiled in 983ms
+ GET /dashboard 200 in 1710ms (next.js: 1407ms, application-code: 303ms)
+Ô£ô Compiled in 1134ms
+ GET /dashboard 200 in 707ms (next.js: 436ms, application-code: 271ms)
+Ô£ô Compiled in 2.4s
+ GET /dashboard 200 in 4.6s (next.js: 560ms, application-code: 4.1s)
+Ô£ô Compiled in 2.8s
+ GET /logistics 200 in 614ms (next.js: 419ms, application-code: 195ms)
+ GET /api/logistics? 200 in 2.1s (next.js: 1236ms, application-code: 890ms)
+ GET /api/logistics? 200 in 534ms (next.js: 7ms, application-code: 527ms)
+ GET /notifications 200 in 687ms (next.js: 462ms, application-code: 225ms)
+ GET /profile 200 in 272ms (next.js: 182ms, application-code: 90ms)
+ GET /dashboard 200 in 90ms (next.js: 41ms, application-code: 49ms)
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+[browser] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(0) or use aspect(undefined) to control the
+       height and width.
+Ô£ô Compiled in 452ms
+ GET /dashboard 200 in 3.9s (next.js: 908ms, application-code: 3.0s)
+Ô£ô Compiled in 487ms
+ GET /dashboard 200 in 2.1s (next.js: 900ms, application-code: 1208ms)
+Ô£ô Compiled in 228ms
+ GET /dashboard 200 in 1563ms (next.js: 574ms, application-code: 989ms)

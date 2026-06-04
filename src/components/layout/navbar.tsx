@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '@/components/providers/theme-provider';
 import { cn } from '@/lib/utils';
 import { useUIStore, useNotificationStore } from '@/stores';
-import { mockCurrentUser } from '@/lib/mock-data';
+import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu,
@@ -52,6 +52,7 @@ export function Navbar() {
   const router = useRouter();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { toggleMobileSidebar } = useUIStore();
+  const { user: fetchedUser, loading: userLoading } = useCurrentUser();
   const { markAllAsRead, notifications } = useNotificationStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Array<{ id: string; type: string; title: string; subtitle: string; path: string }>>([]);
@@ -60,11 +61,11 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
 
   const pageTitles: Record<string, string> = {
-    '/dashboard': 'Dashboard',
-    '/logistics': 'Logistics',
+    '/dashboard': 'Tableau de bord',
+    '/logistics': 'Logistique',
     '/notifications': 'Notifications',
-    '/settings': 'Settings',
-    '/profile': 'Profile',
+    '/settings': 'Paramètres',
+    '/profile': 'Profil',
     
   };
 
@@ -80,11 +81,11 @@ export function Navbar() {
   };
 
   const notificationColors = {
-    delivery: 'text-violet-600',
+    delivery: 'text-violet-600 dark:text-violet-400',
     event: 'text-blue-600',
     system: 'text-muted-foreground',
     alert: 'text-amber-600',
-    success: 'text-green-600',
+    success: 'text-green-600 dark:text-green-400',
     error: 'text-red-600',
     warning: 'text-amber-600',
     info: 'text-blue-600',
@@ -130,7 +131,7 @@ export function Navbar() {
     pathname.startsWith(key)
   );
 
-  const unreadNotifications = notifications.filter((n) => !n.read).length;
+  const unreadNotifications = notifications.filter((n) => !n.lue).length;
 
   const formatDate = (date: Date | string) => {
     const d = typeof date === 'string' ? new Date(date) : date;
@@ -156,7 +157,7 @@ export function Navbar() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 autoFocus
-                placeholder="Search..."
+                placeholder="Rechercher..."
                 className="h-10 w-full rounded-xl bg-muted/50 pl-10 pr-4 text-sm"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
@@ -180,9 +181,9 @@ export function Navbar() {
                       router.push(result.path);
                     }}
                   >
-                    <div className="mt-0.5 rounded-full bg-violet-500/10 p-1.5">
-                      {result.type === 'delivery' && <Package className="h-3.5 w-3.5 text-violet-600" />}
-                      {result.type === 'client' && <User className="h-3.5 w-3.5 text-violet-600" />}
+                    <div className="mt-0.5 rounded-full bg-violet-500/10 dark:bg-violet-500/20 p-1.5">
+                      {result.type === 'delivery' && <Package className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400" />}
+                      {result.type === 'client' && <User className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400" />}
                     </div>
                     <div className="flex-1 space-y-1">
                       <p className="text-sm font-medium">{result.title}</p>
@@ -193,11 +194,11 @@ export function Navbar() {
               </div>
             ) : searchQuery.length >= 2 ? (
               <div className="p-8 text-center text-sm text-muted-foreground">
-                No results found for &quot;{searchQuery}&quot;
+                Aucun résultat trouvé pour &quot;{searchQuery}&quot;
               </div>
             ) : (
               <div className="p-8 text-center text-sm text-muted-foreground">
-                Type to search...
+                Tapez pour rechercher...
               </div>
             )}
           </ScrollArea>
@@ -220,16 +221,16 @@ export function Navbar() {
         <nav className="flex items-center gap-2 text-sm">
           <span className="text-muted-foreground">LINXOS</span>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          <span className="font-semibold">
-            {currentPage ? pageTitles[currentPage] : 'Dashboard'}
+            <span className="font-semibold">
+            {currentPage ? pageTitles[currentPage] : 'Tableau de bord'}
           </span>
         </nav>
 
         {/* Live indicator */}
-        <div className="hidden items-center gap-2 rounded-full bg-green-500/10 px-3 py-1 lg:flex">
+        <div className="hidden items-center gap-2 rounded-full bg-green-500/10 dark:bg-green-400/10 px-3 py-1 lg:flex">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 dark:bg-green-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 dark:bg-green-400" />
           </span>
           <span className="text-xs font-medium text-green-600 dark:text-green-400">
             Live
@@ -246,7 +247,7 @@ export function Navbar() {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="navbar-search"
-                  placeholder="Search deliveries, drivers, clients..."
+                  placeholder="Rechercher livraisons, chauffeurs, clients..."
                   className="h-10 w-full rounded-xl bg-muted/50 pl-10 pr-4 text-sm"
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
@@ -275,10 +276,10 @@ export function Navbar() {
                           router.push(result.path);
                         }}
                       >
-                        <div className="mt-0.5 rounded-full bg-violet-500/10 p-1.5">
-                          {result.type === 'delivery' && <Package className="h-3.5 w-3.5 text-violet-600" />}
-                          {result.type === 'driver' && <Truck className="h-3.5 w-3.5 text-violet-600" />}
-                          {result.type === 'client' && <User className="h-3.5 w-3.5 text-violet-600" />}
+                        <div className="mt-0.5 rounded-full bg-violet-500/10 dark:bg-violet-500/20 p-1.5">
+                          {result.type === 'delivery' && <Package className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400" />}
+                          {result.type === 'driver' && <Truck className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400" />}
+                          {result.type === 'client' && <User className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400" />}
                         </div>
                         <div className="flex-1 space-y-1">
                           <p className="text-sm font-medium">{result.title}</p>
@@ -289,7 +290,7 @@ export function Navbar() {
                   </div>
                 ) : searchQuery.length >= 2 ? (
                   <div className="p-4 text-center text-sm text-muted-foreground">
-                    No results found for &quot;{searchQuery}&quot;
+                    Aucun résultat trouvé pour &quot;{searchQuery}&quot;
                   </div>
                 ) : null}
               </ScrollArea>
@@ -350,13 +351,14 @@ export function Navbar() {
         <NotificationDropdown />
 
         {/* User menu */}
+        {fetchedUser ? (
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none">
             <div className="cursor-pointer rounded-full transition-all hover:opacity-80">
-              <Avatar className="h-10 w-10 border-2 border-violet-500 hover:border-violet-600">
-                <AvatarImage src={mockCurrentUser.avatar} alt={mockCurrentUser.name} />
-                <AvatarFallback className="bg-gradient-to-br from-violet-600 to-purple-600 text-white font-semibold">
-                  {mockCurrentUser.name.split(' ').map((n) => n[0]).join('')}
+              <Avatar className="h-10 w-10 border-2 border-violet-500 hover:border-violet-600 dark:border-violet-400 dark:hover:border-violet-300">
+                <AvatarImage src={fetchedUser?.avatar ?? ""} alt={fetchedUser?.name ?? ""} />
+                <AvatarFallback className="bg-gradient-to-br from-violet-600 to-purple-600 text-white dark:from-violet-700 dark:to-purple-700 font-semibold">
+                  {(fetchedUser?.name ?? '').split(' ').map((n) => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -367,14 +369,14 @@ export function Navbar() {
                 <div className="flex flex-col space-y-2">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={mockCurrentUser.avatar} />
-                      <AvatarFallback className="bg-gradient-to-br from-violet-600 to-purple-600 text-white">
-                        {mockCurrentUser.name.split(' ').map((n) => n[0]).join('')}
+                      <AvatarImage src={fetchedUser?.avatar ?? ""} />
+                      <AvatarFallback className="bg-gradient-to-br from-violet-600 to-purple-600 text-white dark:from-violet-700 dark:to-purple-700">
+                        {(fetchedUser?.name ?? '').split(' ').map((n) => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="text-sm font-semibold">{mockCurrentUser.name}</p>
-                      <p className="text-xs text-muted-foreground">{mockCurrentUser.email}</p>
+                      <p className="text-sm font-semibold">{fetchedUser?.name ?? ""}</p>
+                      <p className="text-xs text-muted-foreground">{fetchedUser?.email ?? ""}</p>
                     </div>
                   </div>
                   <Badge variant="secondary" className="w-fit bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
@@ -387,7 +389,7 @@ export function Navbar() {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => router.push('/profile')}>
               <User className="mr-2 h-4 w-4" />
-              Profile
+              Profil
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
@@ -397,10 +399,15 @@ export function Navbar() {
               }}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Log out
+              Déconnexion
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        ) : (
+        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full" disabled>
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </Button>
+        )}
       </div>
       </header>
     </>

@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "LINXOS - Logistics & Sponsoring Platform",
-  description: "Enterprise-grade logistics and delivery management platform for modern businesses",
+  title: "LINXOS - Plateforme de Logistique et Sponsoring",
+  description: "Plateforme de gestion logistique et de livraison de niveau entreprise pour les entreprises modernes",
   icons: {
     icon: [
       {
@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={cn("font-sans", inter.variable)} data-scroll-behavior="smooth">
+    <html lang="fr" suppressHydrationWarning className={cn("font-sans", inter.variable)} data-scroll-behavior="smooth">
       <body className={`${inter.variable} min-h-full font-sans antialiased`}>
         <ThemeProvider>
           <TooltipProvider>

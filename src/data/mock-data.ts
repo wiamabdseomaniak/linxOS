@@ -11,7 +11,7 @@ export interface SportEvent {
   quantity: number;
   contactName: string;
   contactPhone: string;
-  status: 'SCHEDULED' | 'IN_TRANSIT' | 'DELIVERED' | 'FAILED';
+  status: 'planifie' | 'en_cours' | 'livree' | 'echouee';
   notes?: string;
 }
 
@@ -29,7 +29,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 200,
     contactName: 'Marie Dupont',
     contactPhone: '+33 6 12 34 56 78',
-    status: 'SCHEDULED',
+    status: 'planifie',
     notes: '',
   },
   {
@@ -45,7 +45,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 25,
     contactName: 'Sara Benjelloun',
     contactPhone: '+212 6 56 78 90 12',
-    status: 'SCHEDULED',
+    status: 'planifie',
     notes: 'VIP client',
   },
   {
@@ -61,7 +61,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 180,
     contactName: 'Karim Tazi',
     contactPhone: '+212 6 67 89 01 23',
-    status: 'SCHEDULED',
+    status: 'planifie',
     notes: '',
   },
   {
@@ -77,7 +77,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 15,
     contactName: 'Nadia Cherkaoui',
     contactPhone: '+212 6 78 90 12 34',
-    status: 'IN_TRANSIT',
+    status: 'en_cours',
     notes: '',
   },
   {
@@ -93,7 +93,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 8,
     contactName: 'Omar Bensouda',
     contactPhone: '+212 6 89 01 23 45',
-    status: 'IN_TRANSIT',
+    status: 'en_cours',
     notes: 'Objet fragile - soins spéciaux requis',
   },
   {
@@ -109,7 +109,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 5,
     contactName: 'Hind Alaoui',
     contactPhone: '+212 6 90 12 34 56',
-    status: 'IN_TRANSIT',
+    status: 'en_cours',
     notes: '',
   },
   {
@@ -125,7 +125,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 400,
     contactName: 'Mohamed Rida',
     contactPhone: '+212 6 77 88 99 00',
-    status: 'IN_TRANSIT',
+    status: 'en_cours',
     notes: '',
   },
   {
@@ -141,7 +141,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 250,
     contactName: 'Nadia Idrissi',
     contactPhone: '+212 6 88 99 00 11',
-    status: 'DELIVERED',
+    status: 'livree',
     notes: '',
   },
   {
@@ -157,7 +157,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 600,
     contactName: 'Karim Tazi',
     contactPhone: '+212 6 99 00 11 22',
-    status: 'DELIVERED',
+    status: 'livree',
     notes: '',
   },
   {
@@ -173,7 +173,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 120,
     contactName: 'Olivia Benjelloun',
     contactPhone: '+212 6 10 11 22 33',
-    status: 'DELIVERED',
+    status: 'livree',
     notes: '',
   },
   {
@@ -189,7 +189,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 180,
     contactName: 'Mehdi El Amrani',
     contactPhone: '+212 6 11 22 33 44',
-    status: 'SCHEDULED',
+    status: 'planifie',
     notes: '',
   },
   {
@@ -205,7 +205,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 90,
     contactName: 'Yassine El Fassi',
     contactPhone: '+212 6 12 33 44 55',
-    status: 'SCHEDULED',
+    status: 'planifie',
     notes: '',
   },
   {
@@ -221,7 +221,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 200,
     contactName: 'Abdellah Bentaleb',
     contactPhone: '+212 6 13 44 55 66',
-    status: 'IN_TRANSIT',
+    status: 'en_cours',
     notes: '',
   },
   {
@@ -237,7 +237,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 350,
     contactName: 'Rachid El Idrissi',
     contactPhone: '+212 6 14 55 66 77',
-    status: 'IN_TRANSIT',
+    status: 'en_cours',
     notes: '',
   },
   {
@@ -253,7 +253,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 140,
     contactName: 'Laila Benali',
     contactPhone: '+212 6 15 66 77 88',
-    status: 'IN_TRANSIT',
+    status: 'en_cours',
     notes: '',
   },
   {
@@ -269,7 +269,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 50,
     contactName: 'Mehdi El Fassi',
     contactPhone: '+212 6 11 22 33 44',
-    status: 'DELIVERED',
+    status: 'livree',
     notes: 'Équipement pour scène principale',
   },
   {
@@ -285,7 +285,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 45,
     contactName: 'Lina Rami',
     contactPhone: '+212 6 22 33 44 55',
-    status: 'DELIVERED',
+    status: 'livree',
     notes: '',
   },
   {
@@ -301,7 +301,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 18,
     contactName: 'Yassine Bennis',
     contactPhone: '+212 6 33 44 55 66',
-    status: 'DELIVERED',
+    status: 'livree',
     notes: 'Exposition ouvre le 18 mai',
   },
   {
@@ -317,7 +317,7 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 30,
     contactName: 'Sara Tahiri',
     contactPhone: '+212 6 44 55 66 77',
-    status: 'SCHEDULED',
+    status: 'planifie',
     notes: '',
   },
   {
@@ -333,14 +333,14 @@ export const mockSportEvents: SportEvent[] = [
     quantity: 130,
     contactName: 'Omar Choukri',
     contactPhone: '+212 6 55 66 77 88',
-    status: 'SCHEDULED',
+    status: 'planifie',
     notes: '',
   },
 ];
 
-import { Delivery, User, UserRole } from '@/types';
+import { User, UserRole } from '@/types';
 
-export const mockDeliveries: Delivery[] = [
+export const mockDeliveries = [
   {
     id: 'del-001',
     trackingId: 'LNX-2026-001',
@@ -435,7 +435,7 @@ interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'delivery' | 'event' | 'system' | 'alert';
+  type: 'delivery' | 'event' | 'system' | 'alert' | 'success' | 'warning' | 'error' | 'info';
   read: boolean;
   createdAt: string;
   actionUrl?: string;
@@ -444,43 +444,99 @@ interface Notification {
 export const mockNotifications: Notification[] = [
   {
     id: 'notif-001',
-    title: 'Delivery Completed',
-    message: 'Your package LIV-2026-001 has been delivered successfully.',
+    title: 'Livraison terminée',
+    message: 'Votre colis LIV-2026-001 a été livré avec succès.',
     type: 'delivery',
     read: false,
     createdAt: '2026-05-15T10:30:00Z',
   },
   {
     id: 'notif-002',
-    title: 'New Event Scheduled',
-    message: 'Championnat Régional de Basketball has been scheduled for 15 May 2026.',
+    title: 'Nouvel événement planifié',
+    message: 'Le Championnat Régional de Basketball a été planifié pour le 15 mai 2026.',
     type: 'event',
     read: false,
     createdAt: '2026-05-14T09:00:00Z',
   },
   {
     id: 'notif-003',
-    title: 'Delivery Failed',
-    message: 'Package LIV-2026-005 delivery attempt failed. Will retry tomorrow.',
+    title: 'Livraison échouée',
+    message: 'La tentative de livraison du colis LIV-2026-005 a échoué. Nouvelle tentative demain.',
     type: 'alert',
     read: true,
     createdAt: '2026-05-13T16:45:00Z',
   },
   {
     id: 'notif-004',
-    title: 'System Update',
-    message: 'Linxos Platform will undergo maintenance on 20 May 2026 from 02:00 to 04:00.',
+    title: 'Mise à jour système',
+    message: 'La plateforme Linxos sera en maintenance le 20 mai 2026 de 02h00 à 04h00.',
     type: 'system',
     read: true,
     createdAt: '2026-05-12T14:00:00Z',
   },
   {
     id: 'notif-005',
-    title: 'New Delivery Assigned',
-    message: 'You have been assigned to deliver Tournoi de Tennis Casablanca.',
+    title: 'Nouvelle livraison assignée',
+    message: 'Vous avez été assigné pour livrer le Tournoi de Tennis Casablanca.',
     type: 'delivery',
     read: false,
     createdAt: '2026-05-14T11:20:00Z',
+  },
+  {
+    id: 'notif-006',
+    title: 'Paiement confirmé',
+    message: 'Le paiement de 12 500 MAD pour la livraison LIV-2026-003 a été confirmé.',
+    type: 'success',
+    read: false,
+    createdAt: '2026-05-15T08:45:00Z',
+  },
+  {
+    id: 'notif-007',
+    title: 'Retard signalé',
+    message: 'La livraison LIV-2026-008 est en retard à cause des conditions de circulation.',
+    type: 'warning',
+    read: false,
+    createdAt: '2026-05-15T09:30:00Z',
+  },
+  {
+    id: 'notif-008',
+    title: 'Nouveau message du chauffeur',
+    message: 'Mohammed Idrissi a signalé un problème d\'accès au site de livraison.',
+    type: 'info',
+    read: true,
+    createdAt: '2026-05-14T15:20:00Z',
+  },
+  {
+    id: 'notif-009',
+    title: 'Livraison retournée',
+    message: 'Le colis LIV-2026-007 a été retourné à l\'entrepôt suite à une adresse incorrecte.',
+    type: 'error',
+    read: false,
+    createdAt: '2026-05-15T07:10:00Z',
+  },
+  {
+    id: 'notif-010',
+    title: 'Rapport hebdomadaire disponible',
+    message: 'Le rapport de performance de la semaine 19 est maintenant disponible dans votre tableau de bord.',
+    type: 'system',
+    read: true,
+    createdAt: '2026-05-13T12:00:00Z',
+  },
+  {
+    id: 'notif-011',
+    title: 'Événement ajouté',
+    message: 'Un nouvel événement "Marathon de Marrakech" a été ajouté à votre planning.',
+    type: 'event',
+    read: false,
+    createdAt: '2026-05-15T06:30:00Z',
+  },
+  {
+    id: 'notif-012',
+    title: 'Vérification requise',
+    message: 'Veuillez vérifier les documents de livraison pour le colis LIV-2026-010.',
+    type: 'alert',
+    read: false,
+    createdAt: '2026-05-14T10:15:00Z',
   },
 ];
 
@@ -541,10 +597,10 @@ export interface StatusDistribution {
 }
 
 export const mockStatusDistribution: StatusDistribution[] = [
-  { name: 'Delivered', value: 1120, color: '#22c55e' },
-  { name: 'In Transit', value: 89, color: '#ef4444' },
-  { name: 'Scheduled', value: 45, color: '#3b82f6' },
-  { name: 'Failed', value: 38, color: '#f97316' },
+  { name: 'Livrée', value: 1120, color: '#22c55e' },
+  { name: 'En transit', value: 89, color: '#ef4444' },
+  { name: 'Planifiée', value: 45, color: '#3b82f6' },
+  { name: 'Échouée', value: 38, color: '#f97316' },
 ];
 
 export interface ActivityItem {
@@ -556,12 +612,12 @@ export interface ActivityItem {
 }
 
 export const mockActivityTimeline: ActivityItem[] = [
-  { id: 'act-001', action: 'Delivery completed', driver: 'Mohammed Idrissi', time: '09:30', status: 'delivered' },
-  { id: 'act-002', action: 'Package picked up', driver: 'Fatima Alaoui', time: '09:15', status: 'delivered' },
-  { id: 'act-003', action: 'Out for delivery', driver: 'Youssef Benali', time: '09:00', status: 'in_transit' },
-  { id: 'act-004', action: 'Assigned to driver', driver: null, time: '08:30', status: 'scheduled' },
-  { id: 'act-005', action: 'Order confirmed', driver: null, time: '08:00', status: 'scheduled' },
-  { id: 'act-006', action: 'Delivery failed - retry scheduled', driver: 'Sara Tazi', time: '07:45', status: 'failed' },
-  { id: 'act-007', action: 'Package arrived at hub', driver: null, time: '07:30', status: 'in_transit' },
-  { id: 'act-008', action: 'Order picked up from sender', driver: 'Karim Alaoui', time: '07:00', status: 'in_transit' },
+  { id: 'act-001', action: 'Livraison terminée', driver: 'Mohammed Idrissi', time: '09:30', status: 'delivered' },
+  { id: 'act-002', action: 'Colis ramassé', driver: 'Fatima Alaoui', time: '09:15', status: 'delivered' },
+  { id: 'act-003', action: 'En cours de livraison', driver: 'Youssef Benali', time: '09:00', status: 'in_transit' },
+  { id: 'act-004', action: 'Assigné au chauffeur', driver: null, time: '08:30', status: 'scheduled' },
+  { id: 'act-005', action: 'Commande confirmée', driver: null, time: '08:00', status: 'scheduled' },
+  { id: 'act-006', action: 'Livraison échouée - nouvelle tentative planifiée', driver: 'Sara Tazi', time: '07:45', status: 'failed' },
+  { id: 'act-007', action: 'Colis arrivé au centre', driver: null, time: '07:30', status: 'in_transit' },
+  { id: 'act-008', action: 'Colis récupéré chez l\'expéditeur', driver: 'Karim Alaoui', time: '07:00', status: 'in_transit' },
 ];

@@ -77,38 +77,20 @@ export function Sidebar() {
         )}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center justify-between border-b border-border/50 px-4">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-300 to-yellow-500 shadow-lg shadow-yellow-400/25">
-              <span className="text-lg font-bold text-white">LX</span>
-            </div>
-            <AnimatePresence>
-              {!sidebarCollapsed && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 'auto' }}
-                  exit={{ opacity: 0, width: 0 }}
-                  className="overflow-hidden whitespace-nowrap text-xl font-bold"
-                >
-                  <span className="bg-gradient-to-r from-yellow-400 to-yellow-900 dark:from-black-600 dark:to-black-400 bg-clip-text text-transparent">
-                    LINXOS
-                  </span>
-                </motion.span>
-              )}
-            </AnimatePresence>
+        <div className="flex h-16 items-center justify-between border-b border-border/50 px-2">
+          <Link href="/dashboard" className="flex items-center pt-4">
+            <img
+              src="/L__2_-removebg-preview.png"
+              alt="LINXOS"
+              className="h-16 w-auto dark:hidden"
+            />
+            <img
+              src="/L-removebg-preview.png"
+              alt="LINXOS"
+              className="hidden h-16 w-auto dark:block"
+            />
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className="hidden lg:flex"
-          >
-            {sidebarCollapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <ChevronLeft className="h-4 w-4" />
-            )}
-          </Button>
+          
         </div>
 
         {/* Navigation */}
@@ -125,11 +107,11 @@ export function Sidebar() {
                   className={cn(
                     'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
                     isActive
-                      ? 'bg-gradient-to-r from-yellow-400 to-yellow-400 text-white shadow-lg shadow-yellow-400/25'
+                      ? 'bg-gradient-to-r from-yellow-400 to-yellow-400 text-white shadow-lg shadow-yellow-400/25 dark:from-yellow-600 dark:to-yellow-600 dark:shadow-yellow-600/25'
                       : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                   )}
                 >
-                  {Icon && <Icon className={cn('h-5 w-5 flex-shrink-0', isActive && 'text-white')} />}
+                  {Icon && <Icon className={cn('h-5 w-5 flex-shrink-0', isActive && 'text-white dark:text-gray-900')} />}
                   <AnimatePresence>
                     {!sidebarCollapsed && (
                       <motion.span
@@ -171,7 +153,7 @@ export function Sidebar() {
               sidebarCollapsed && 'justify-center'
             )}
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-white-100 to-yellow-500">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-white to-yellow-500 dark:from-gray-800 dark:to-yellow-600">
               <span className="text-sm font-semibold text-white">AB</span>
             </div>
             <AnimatePresence>
@@ -183,7 +165,7 @@ export function Sidebar() {
                   className="overflow-hidden"
                 >
                   <p className="text-sm font-semibold">Ahmed Benali</p>
-                  <p className="text-xs text-muted-foreground">Logistique Manager</p>
+                  <p className="text-xs text-muted-foreground">Responsable Logistique</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -192,12 +174,12 @@ export function Sidebar() {
           <Button
             variant="ghost"
             onClick={() => {
-              if (confirm('Are you sure you want to log out?')) {
+              if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
                 window.location.href = '/login';
               }
             }}
             className={cn(
-              'mt-2 w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700',
+              'mt-2 w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-300',
               sidebarCollapsed && 'justify-center px-2'
             )}
           >
@@ -210,7 +192,7 @@ export function Sidebar() {
                   exit={{ opacity: 0, width: 0 }}
                   className="ml-3 overflow-hidden whitespace-nowrap"
                 >
-                  Log Out
+                  Déconnexion
                 </motion.span>
               )}
             </AnimatePresence>

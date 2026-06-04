@@ -8,40 +8,43 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { mockSportEvents } from '@/lib/mock-data';
+import { trackByQuery } from '@/features/tracking/api/supabase-tracking';
 import { cn } from '@/lib/utils';
+import type { LogisticsEvent } from '@/types/supabase';
 
 const steps = [
-  { id: 'SCHEDULED', label: 'Scheduled', icon: Calendar },
-  { id: 'IN_TRANSIT', label: 'In Transit', icon: Truck },
-  { id: 'DELIVERED', label: 'Delivered', icon: CheckCircle2 },
+  { id: 'planifie', label: 'Planifié', icon: Calendar },
+  { id: 'en_cours', label: 'En transit', icon: Truck },
+  { id: 'livree', label: 'Livré', icon: CheckCircle2 },
 ];
 
 export default function TrackPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [foundEvent, setFoundEvent] = useState<typeof mockSportEvents[0] | null>(null);
+  const [foundEvent, setFoundEvent] = useState<LogisticsEvent | null>(null);
+  const [searching, setSearching] = useState(false);
 
-  const handleSearch = () => {
-    const event = mockSportEvents.find(
-      (e) =>
-        e.id_tracking.toLowerCase() === searchQuery.toLowerCase() ||
-        e.id_livraison.toLowerCase() === searchQuery.toLowerCase() ||
-        e.contactPhone.includes(searchQuery)
-    );
-    setFoundEvent(event || null);
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    setSearching(true);
+    try {
+      const event = await trackByQuery(searchQuery);
+      setFoundEvent(event);
+    } finally {
+      setSearching(false);
+    }
   };
 
   const getCurrentStepIndex = (status: string) => {
-    if (status === 'FAILED') return -1;
+    if (status === 'echouee') return -1;
     return steps.findIndex((s) => s.id === status);
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'SCHEDULED': return 'Scheduled';
-      case 'IN_TRANSIT': return 'In Transit';
-      case 'DELIVERED': return 'Delivered';
-      case 'FAILED': return 'Failed';
+      case 'planifie': return 'Planifié';
+      case 'en_cours': return 'En transit';
+      case 'livree': return 'Livré';
+      case 'echouee': return 'Échouée';
       default: return status;
     }
   };
@@ -52,7 +55,7 @@ export default function TrackPage() {
         <div className="mx-auto max-w-6xl px-4 py-4">
           <Link href="/login" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" />
-            Back to Login
+            Retour à la connexion
           </Link>
         </div>
       </header>
@@ -63,12 +66,19 @@ export default function TrackPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 text-center"
         >
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-400 to-yellow-400 shadow-lg shadow-yellow-500/25">
-            <span className="text-2xl font-bold text-white">LX</span>
-          </div>
-          <h1 className="text-3xl font-bold">Track Your Delivery</h1>
+          <img
+            src="/L__2_-removebg-preview.png"
+            alt="LINXOS"
+            className="mx-auto mb-4 h-16 w-auto dark:hidden"
+          />
+          <img
+            src="/L-removebg-preview.png"
+            alt="LINXOS"
+            className="mx-auto mb-4 hidden h-16 w-auto dark:block"
+          />
+          <h1 className="text-3xl font-bold">Suivez votre livraison</h1>
           <p className="mt-2 text-muted-foreground">
-            Enter your tracking ID, delivery ID, or phone number
+            Saisissez votre ID de suivi, ID de livraison ou numéro de téléphone
           </p>
         </motion.div>
 
@@ -79,7 +89,7 @@ export default function TrackPage() {
         >
           <Card className="border-0 shadow-2xl">
             <CardContent className="p-6">
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="relative flex-1">
                   <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -87,15 +97,16 @@ export default function TrackPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    className="h-14 rounded-xl pl-12 text-lg"
+                    className="h-12 sm:h-14 rounded-xl pl-10 sm:pl-12 text-base sm:text-lg"
                   />
                 </div>
                 <Button
                   onClick={handleSearch}
                   size="lg"
-                  className="h-14 rounded-xl bg-yellow-400 text-white hover:bg-yellow-500 px-8 shadow-lg shadow-yellow-500/25"
+                  disabled={searching || !searchQuery.trim()}
+                  className="h-12 sm:h-14 rounded-xl bg-yellow-400 text-white hover:bg-yellow-500 px-4 sm:px-8 w-full sm:w-auto shadow-lg shadow-yellow-500/25 dark:bg-yellow-600 dark:hover:bg-yellow-500"
                 >
-                  Track
+                  {searching ? 'Recherche…' : 'Suivre'}
                 </Button>
               </div>
             </CardContent>
@@ -109,15 +120,15 @@ export default function TrackPage() {
             className="mt-8 space-y-6"
           >
             <Card className="border-0 shadow-2xl">
-              <CardHeader className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white">
+              <CardHeader className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white dark:from-yellow-600 dark:to-yellow-600">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-2xl">{foundEvent.id_tracking}</CardTitle>
-                    <p className="mt-1 text-white/80">
+                    <p className="mt-1 text-white/80 dark:text-white/60">
                       {getStatusLabel(foundEvent.status)}
                     </p>
                   </div>
-                  <Badge className="bg-white/20 text-white text-lg px-4 py-1">
+                  <Badge className="bg-white/20 text-white dark:bg-black/20 dark:text-gray-200 text-lg px-4 py-1">
                     {foundEvent.quantity} units
                   </Badge>
                 </div>
@@ -137,21 +148,21 @@ export default function TrackPage() {
                             className={cn(
                               'relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-4 transition-all',
                               isActive
-                                ? 'border-yellow-500 bg-yellow-500 text-white'
-                                : 'border-gray-200 bg-white text-gray-400',
+                                ? 'border-yellow-500 bg-yellow-500 text-white dark:border-yellow-600 dark:bg-yellow-600'
+                                : 'border-gray-200 bg-white text-gray-400 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500',
                               isCurrent && 'scale-110 shadow-lg shadow-yellow-500/25'
                             )}
                           >
                             <Icon className="h-5 w-5" />
                           </div>
-                          <p className={cn('mt-2 text-xs font-medium', isActive ? 'text-yellow-500' : 'text-gray-400')}>
+                          <p className={cn('mt-2 whitespace-nowrap text-[10px] sm:text-xs font-medium', isActive ? 'text-yellow-500 dark:text-yellow-400' : 'text-gray-400 dark:text-gray-500')}>
                             {step.label}
                           </p>
                           {index < steps.length - 1 && (
                             <div
                               className={cn(
                                 'absolute left-1/2 top-6 h-0.5 w-full -translate-x-1/2',
-                                currentIndex > index ? 'bg-yellow-500' : 'bg-gray-200'
+                                currentIndex > index ? 'bg-yellow-500 dark:bg-yellow-600' : 'bg-gray-200 dark:bg-gray-700'
                               )}
                             />
                           )}
@@ -161,22 +172,22 @@ export default function TrackPage() {
                   </div>
                 </div>
 
-                {foundEvent.status === 'FAILED' && (
-                  <div className="mb-6 rounded-xl bg-red-50 p-4 text-red-700 dark:bg-red-950 dark:text-red-400">
+                {foundEvent.status === 'echouee' && (
+                  <div className="mb-6 rounded-xl bg-red-50 p-4 text-red-700 dark:bg-red-900/30 dark:text-red-300">
                     <div className="flex items-center gap-2">
                       <AlertCircle className="h-5 w-5" />
-                      <p className="font-medium">There is an issue with this delivery</p>
+                      <p className="font-medium">Il y a un problème avec cette livraison</p>
                     </div>
-                    <p className="mt-1 text-sm">Our team is working to resolve it. Please contact support for more information.</p>
+                    <p className="mt-1 text-sm">Notre équipe travaille à le résoudre. Veuillez contacter le support pour plus d'informations.</p>
                   </div>
                 )}
 
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Event Details</h3>
+                    <h3 className="font-semibold text-lg">Détails de l'événement</h3>
                     <div className="space-y-3">
                       <div>
-                        <p className="text-sm text-muted-foreground">Event Name</p>
+                        <p className="text-sm text-muted-foreground">Nom de l'événement</p>
                         <p className="font-medium">{foundEvent.title}</p>
                       </div>
                       <div>
@@ -184,24 +195,24 @@ export default function TrackPage() {
                         <p className="font-medium">{foundEvent.club}</p>
                       </div>
                       <div className="flex items-start gap-3">
-                        <MapPin className="mt-1 h-4 w-4 text-yellow-500" />
+                        <MapPin className="mt-1 h-4 w-4 text-yellow-500 dark:text-yellow-400" />
                         <div>
-                          <p className="text-sm text-muted-foreground">Delivery Address</p>
+                          <p className="text-sm text-muted-foreground">Adresse de livraison</p>
                           <p className="font-medium">{foundEvent.address}</p>
                           <p className="text-sm text-muted-foreground">{foundEvent.city}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Calendar className="mt-1 h-4 w-4 text-yellow-500" />
+                        <Calendar className="mt-1 h-4 w-4 text-yellow-500 dark:text-yellow-400" />
                         <div>
-                          <p className="text-sm text-muted-foreground">Event Date</p>
+                          <p className="text-sm text-muted-foreground">Date de l'événement</p>
                           <p className="font-medium">{foundEvent.date} at {foundEvent.time}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Package className="mt-1 h-4 w-4 text-yellow-500" />
+                        <Package className="mt-1 h-4 w-4 text-yellow-500 dark:text-yellow-400" />
                         <div>
-                          <p className="text-sm text-muted-foreground">Quantity</p>
+                          <p className="text-sm text-muted-foreground">Quantité</p>
                           <p className="font-medium">{foundEvent.quantity} units</p>
                         </div>
                       </div>
@@ -209,7 +220,7 @@ export default function TrackPage() {
                   </div>
 
                   <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Recipient</h3>
+                    <h3 className="font-semibold text-lg">Destinataire</h3>
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500 to-yellow-500 text-white font-semibold">
@@ -220,13 +231,13 @@ export default function TrackPage() {
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <Phone className="mt-1 h-4 w-4 text-yellow-500" />
+                        <Phone className="mt-1 h-4 w-4 text-yellow-500 dark:text-yellow-400" />
                         <p className="font-medium">{foundEvent.contactPhone}</p>
                       </div>
                     </div>
 
                     <div className="mt-4 space-y-2">
-                      <p className="text-sm text-muted-foreground">Delivery ID</p>
+                      <p className="text-sm text-muted-foreground">ID de livraison</p>
                       <p className="font-mono font-medium text-violet-600">{foundEvent.id_livraison}</p>
                     </div>
 
@@ -254,9 +265,9 @@ export default function TrackPage() {
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-950">
                   <AlertCircle className="h-8 w-8 text-red-600" />
                 </div>
-                <h2 className="text-xl font-semibold">No Delivery Found</h2>
+                <h2 className="text-xl font-semibold">Aucune livraison trouvée</h2>
                 <p className="mt-2 text-muted-foreground">
-                  We couldn&apos;t find a delivery matching your search. Please check your tracking ID or contact support.
+                  Nous n&apos;avons pas trouvé de livraison correspondant à votre recherche. Veuillez vérifier votre ID de suivi ou contacter le support.
                 </p>
               </CardContent>
             </Card>
@@ -266,7 +277,7 @@ export default function TrackPage() {
 
       <footer className="mt-16 border-t bg-white/80 backdrop-blur-xl dark:bg-gray-900/80">
         <div className="mx-auto max-w-6xl px-4 py-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2026 LINXOS. All rights reserved.</p>
+          <p>&copy; 2026 LINXOS. Tous droits réservés.</p>
         </div>
       </footer>
     </div>

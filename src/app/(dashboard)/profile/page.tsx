@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   User,
@@ -22,6 +22,7 @@ import {
   Save,
   X,
   Upload,
+  Loader2,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,7 +40,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { mockCurrentUser } from '@/lib/mock-data';
+import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
 import type { User as UserType } from '@/types';
 
 export default function ProfilePage() {
@@ -47,11 +48,37 @@ export default function ProfilePage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [user, setUser] = useState<UserType>({
-    ...mockCurrentUser,
-    createdAt: new Date(mockCurrentUser.createdAt),
-    updatedAt: new Date(mockCurrentUser.updatedAt),
+  const { user: fetchedUser, loading: userLoading, updateProfile } = useCurrentUser();
+
+  const [user, setUser] = useState<UserType>(() => {
+    if (fetchedUser) {
+      return {
+        ...fetchedUser,
+        createdAt: fetchedUser.createdAt ? new Date(fetchedUser.createdAt) : new Date(),
+        updatedAt: fetchedUser.updatedAt ? new Date(fetchedUser.updatedAt) : new Date(),
+      };
+    }
+    return {
+      id: '',
+      name: '',
+      email: '',
+      role: 'manager',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+
   });
+
+  useEffect(() => {
+    if (fetchedUser) {
+      setUser({
+        ...fetchedUser,
+        createdAt: fetchedUser.createdAt ? new Date(fetchedUser.createdAt) : new Date(),
+        updatedAt: fetchedUser.updatedAt ? new Date(fetchedUser.updatedAt) : new Date(),
+      });
+    }
+  }, [fetchedUser]);
 
   const [formData, setFormData] = useState({
     name: user.name,
@@ -66,10 +93,10 @@ export default function ProfilePage() {
 
 
   const achievements = [
-    { name: 'Top Performer', icon: Award, description: 'Completed 1000+ deliveries', unlocked: true },
-    { name: 'Speed Star', icon: TrendingUp, description: '30+ deliveries in a day', unlocked: true },
-    { name: 'Customer Favorite', icon: Star, description: '4.9+ average rating', unlocked: true },
-    { name: 'Early Bird', icon: Clock, description: '100+ early morning deliveries', unlocked: false },
+    { name: 'Meilleur performeur', icon: Award, description: 'Plus de 1000 livraisons effectuées', unlocked: true },
+    { name: 'Étoile de la vitesse', icon: TrendingUp, description: 'Plus de 30 livraisons en un jour', unlocked: true },
+    { name: 'Favori des clients', icon: Star, description: 'Note moyenne de 4.9+', unlocked: true },
+    { name: 'Matinaux', icon: Clock, description: 'Plus de 100 livraisons matinales', unlocked: false },
   ];
 
   
@@ -102,7 +129,13 @@ export default function ProfilePage() {
 
   const handleSaveProfile = async () => {
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const success = await updateProfile({
+      name: formData.name,
+      phone: formData.phone,
+      address: formData.address,
+      department: formData.department,
+    });
+    if (success) {
     setUser((prev) => ({
       ...prev,
       name: formData.name,
@@ -112,8 +145,9 @@ export default function ProfilePage() {
       department: formData.department,
       updatedAt: new Date(),
     }));
-    setIsSaving(false);
     setEditDialogOpen(false);
+    }
+    setIsSaving(false);
   };
 
   const formatMemberSince = (date: Date) => {
@@ -124,11 +158,19 @@ export default function ProfilePage() {
   };
 
   const stats = [
-    { label: 'Total Deliveries', value: '156', color: 'blue', icon: Package },
-    { label: 'On-Time Rate', value: '98%', color: 'green', icon: Clock },
-    { label: 'Active Routes', value: '12', color: 'purple', icon: Truck },
-    { label: 'Success Rate', value: '99%', color: 'yellow', icon: TrendingUp },
+    { label: 'Total des livraisons', value: '156', color: 'blue', icon: Package },
+    { label: 'Taux de ponctualité', value: '98%', color: 'green', icon: Clock },
+    { label: 'Tournées actives', value: '12', color: 'purple', icon: Truck },
+    { label: 'Taux de réussite', value: '99%', color: 'yellow', icon: TrendingUp },
   ];
+
+  if (userLoading && !user.id) {
+    return (
+      <div className="flex items-center justify-center p-16">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -150,7 +192,7 @@ export default function ProfilePage() {
           <div className="relative">
             <Avatar className="h-32 w-32 border-4 border-white shadow-2xl">
               <AvatarImage src={avatarPreview || user.avatar} alt={user.name} />
-              <AvatarFallback className="text-4xl bg-gradient-to-br from-yellow-500 to-yellow-500 text-white">
+              <AvatarFallback className="text-4xl bg-gradient-to-br from-yellow-500 to-yellow-500 text-white dark:from-yellow-600 dark:to-yellow-600">
                 {user.name.split(' ').map((n) => n[0]).join('')}
               </AvatarFallback>
             </Avatar>
@@ -169,21 +211,21 @@ export default function ProfilePage() {
             <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
               <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
                 <Award className="mr-1 h-3 w-3" />
-                Logistique Manager
+                Responsable Logistique
               </Badge>
               <Badge variant="secondary">
                 <Activity className="mr-1 h-3 w-3" />
-                Online
+                En ligne
               </Badge>
             </div>
           </div>
         </div>
         <Button
           onClick={handleOpenEditDialog}
-          className="rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-400 shadow-lg shadow-yellow-500/25"
+          className="rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-400 shadow-lg shadow-yellow-500/25 dark:from-yellow-600 dark:to-yellow-600"
         >
           <Edit className="mr-2 h-4 w-4" />
-          Edit Profile
+          Modifier le profil
         </Button>
       </motion.div>
 
@@ -198,8 +240,8 @@ export default function ProfilePage() {
           className="lg:col-span-2"
         >
           <Card className="border-0 shadow-soft overflow-hidden">
-            <div className="bg-gradient-to-r from-yellow-500 to-amber-500 px-6 py-4">
-              <CardTitle className="text-lg font-semibold text-white">Personal Information</CardTitle>
+            <div className="bg-gradient-to-r from-yellow-500 to-amber-500 px-6 py-4 dark:from-yellow-600 dark:to-amber-600">
+              <CardTitle className="text-lg font-semibold text-white">Informations personnelles</CardTitle>
             </div>
             <CardContent className="p-6">
               <div className="grid gap-4 sm:grid-cols-2">
@@ -207,9 +249,9 @@ export default function ProfilePage() {
                   <div className="absolute top-0 right-0 h-16 w-16 translate-x-8 translate-y-(-50%) rotate-12 bg-gradient-to-br from-yellow-100 to-amber-100 opacity-50 transition-transform group-hover:scale-110 dark:from-yellow-900/30 dark:to-amber-900/30" />
                   <div className="relative">
                     <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900/30">
-                      <User className="h-5 w-5 text-yellow-600" />
+                      <User className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                     </div>
-                    <p className="text-xs font-medium text-muted-foreground">Full Name</p>
+                    <p className="text-xs font-medium text-muted-foreground">Nom complet</p>
                     <p className="mt-1 text-sm font-semibold">{user.name}</p>
                   </div>
                 </div>
@@ -217,9 +259,9 @@ export default function ProfilePage() {
                   <div className="absolute top-0 right-0 h-16 w-16 translate-x-8 translate-y-(-50%) rotate-12 bg-gradient-to-br from-yellow-100 to-amber-100 opacity-50 transition-transform group-hover:scale-110 dark:from-yellow-900/30 dark:to-amber-900/30" />
                   <div className="relative">
                     <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900/30">
-                      <Briefcase className="h-5 w-5 text-yellow-600" />
+                      <Briefcase className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                     </div>
-                    <p className="text-xs font-medium text-muted-foreground">Role</p>
+                    <p className="text-xs font-medium text-muted-foreground">Rôle</p>
                     <p className="mt-1 text-sm font-semibold">{user.role}</p>
                   </div>
                 </div>
@@ -227,7 +269,7 @@ export default function ProfilePage() {
                   <div className="absolute top-0 right-0 h-16 w-16 translate-x-8 translate-y-(-50%) rotate-12 bg-gradient-to-br from-yellow-100 to-amber-100 opacity-50 transition-transform group-hover:scale-110 dark:from-yellow-900/30 dark:to-amber-900/30" />
                   <div className="relative">
                     <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900/30">
-                      <Mail className="h-5 w-5 text-yellow-600" />
+                      <Mail className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                     </div>
                     <p className="text-xs font-medium text-muted-foreground">Email</p>
                     <p className="mt-1 text-sm font-semibold">{user.email}</p>
@@ -237,9 +279,9 @@ export default function ProfilePage() {
                   <div className="absolute top-0 right-0 h-16 w-16 translate-x-8 translate-y-(-50%) rotate-12 bg-gradient-to-br from-yellow-100 to-amber-100 opacity-50 transition-transform group-hover:scale-110 dark:from-yellow-900/30 dark:to-amber-900/30" />
                   <div className="relative">
                     <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900/30">
-                      <Phone className="h-5 w-5 text-yellow-600" />
+                      <Phone className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                     </div>
-                    <p className="text-xs font-medium text-muted-foreground">Phone</p>
+                    <p className="text-xs font-medium text-muted-foreground">Téléphone</p>
                     <p className="mt-1 text-sm font-semibold">{user.phone}</p>
                   </div>
                 </div>
@@ -247,9 +289,9 @@ export default function ProfilePage() {
                   <div className="absolute top-0 right-0 h-16 w-16 translate-x-8 translate-y-(-50%) rotate-12 bg-gradient-to-br from-yellow-100 to-amber-100 opacity-50 transition-transform group-hover:scale-110 dark:from-yellow-900/30 dark:to-amber-900/30" />
                   <div className="relative">
                     <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900/30">
-                      <MapPin className="h-5 w-5 text-yellow-600" />
+                      <MapPin className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                     </div>
-                    <p className="text-xs font-medium text-muted-foreground">Address</p>
+                    <p className="text-xs font-medium text-muted-foreground">Adresse</p>
                     <p className="mt-1 text-sm font-semibold">{user.address}</p>
                   </div>
                 </div>
@@ -266,8 +308,8 @@ export default function ProfilePage() {
         >
           <Card className="border-0 shadow-soft">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">Achievements</CardTitle>
-              <CardDescription>Your badges and accomplishments</CardDescription>
+              <CardTitle className="text-lg font-semibold">Réalisations</CardTitle>
+              <CardDescription>Vos badges et réalisations</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {achievements.map((achievement) => (
@@ -288,7 +330,7 @@ export default function ProfilePage() {
                   >
                     <achievement.icon
                       className={`h-5 w-5 ${
-                        achievement.unlocked ? 'text-yellow-600' : 'text-muted-foreground'
+                        achievement.unlocked ? 'text-yellow-600 dark:text-yellow-400' : 'text-muted-foreground'
                       }`}
                     />
                   </div>
@@ -299,7 +341,7 @@ export default function ProfilePage() {
                     <p className="text-xs text-muted-foreground">{achievement.description}</p>
                   </div>
                   {achievement.unlocked && (
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
                   )}
                 </div>
               ))}
@@ -316,14 +358,14 @@ export default function ProfilePage() {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogTitle>Modifier le profil</DialogTitle>
             <DialogDescription>
-              Update your personal information
+              Mettre à jour vos informations personnelles
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">Nom complet</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -340,7 +382,7 @@ export default function ProfilePage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="phone">Phone</Label>
+              <Label htmlFor="phone">Téléphone</Label>
               <Input
                 id="phone"
                 value={formData.phone}
@@ -348,7 +390,7 @@ export default function ProfilePage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="address">Address</Label>
+              <Label htmlFor="address">Adresse</Label>
               <Input
                 id="address"
                 value={formData.address}
@@ -358,18 +400,18 @@ export default function ProfilePage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-              Cancel
+              Annuler
             </Button>
             <Button onClick={handleSaveProfile} disabled={isSaving}>
               {isSaving ? (
                 <>
                   <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Saving...
+                  Enregistrement...
                 </>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  Save Changes
+                  Enregistrer les modifications
                 </>
               )}
             </Button>

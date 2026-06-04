@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Notification, FilterTab } from './types';
-import { mockNotifications } from './data';
+import { FilterTab, Notification as DropdownNotification } from './types';
+import type { Notification as StoreNotification } from '@/types';
+import { useNotificationStore } from '@/stores';
 import { NotificationItem } from './notification-item';
 import { FilterTabs } from './filter-tabs';
 import { Bell, Settings, ChevronRight, X } from 'lucide-react';
@@ -19,13 +20,22 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
   const [filter, setFilter] = useState<FilterTab>('all');
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationStore();
+
+  const toDropdownNotif = (n: StoreNotification): DropdownNotification => ({
+    id: n.id_notification,
+    type: n.type === 'error' ? 'error' : n.type === 'success' ? 'success' : n.type === 'warning' ? 'warning' : 'info',
+    title: n.titre,
+    message: n.message,
+    read: n.lue,
+    actionUrl: n.actionUrl,
+    timestamp: new Date(n.createdAt || n.dateNotification),
+  });
 
   const filteredNotifications = useCallback(() => {
-    let filtered = [...notifications];
+    let filtered = [...notifications].map(toDropdownNotif);
 
     switch (filter) {
       case 'unread':
@@ -38,14 +48,8 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
     );
   }, [notifications, filter]);
 
-  const handleMarkAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
-
-  const handleNotificationClick = (notification: Notification) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
-    );
+  const handleNotificationClick = (notification: DropdownNotification) => {
+    markAsRead(notification.id);
     if (notification.actionUrl) {
       router.push(notification.actionUrl);
       setIsOpen(false);
@@ -158,7 +162,7 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
                   onClick={handleViewAll}
                   className="flex h-6 items-center gap-0.5 whitespace-nowrap rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <span>View all</span>
+                  <span>Voir tout</span>
                   <ChevronRight className="h-3 w-3" />
                 </button>
               </div>
@@ -179,7 +183,7 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
                   <div className="flex flex-col items-center justify-center py-12 px-4">
                     <Bell className="h-8 w-8 text-muted-foreground/30" />
                     <p className="mt-3 text-[13px] text-muted-foreground">
-                      {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
+                      {filter === 'unread' ? 'Aucune notification non lue' : 'Aucune notification pour le moment'}
                     </p>
                   </div>
                 ) : (

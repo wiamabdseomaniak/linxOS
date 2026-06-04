@@ -7,228 +7,142 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  manager
-  client
+enum StatutPreparation {
+  en_attente
+  en_preparation
+  prete
+  terminee
 }
 
-enum DeliveryStatus {
-  preparation
-  ready_to_deliver
-  on_route
-  delivered
-  received
-  delayed
-  cancelled
-  refused
-  problem
-  returned
+enum StatutLivraison {
+  planifie
+  en_cours
+  livree
+  echouee
 }
 
-enum Priority {
-  low
-  medium
-  high
-  urgent
+enum StatutTracking {
+  planifie
+  en_preparation
+  prete
+  en_cours
+  livree
+  echouee
 }
 
-enum ProblemType {
-  broken_product
-  client_absent
-  wrong_address
-  client_refused
-  delivery_damaged
+model Utilisateur {
+  id_utilisateur String    @id @default(dbgenerated("gen_random_uuid()"))
+  nom            String
+  prenom         String
+  email          String    @unique
+  tele           String?
+  mot_de_passe   String
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @default(now())
+
+  livraisons    Livraison[]
+  notifications Notification[]
+
+  @@map("utilisateur")
 }
 
-enum ProblemStatus {
-  pending
-  resolved
-  escalated
+model Client {
+  id_client   String   @id @default(dbgenerated("gen_random_uuid()"))
+  nom_complet String
+  telephone   String?
+  email       String?
+  adresse     String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+
+  livraisons Livraison[]
+
+  @@map("client")
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String
-  email         String    @unique
-  password      String
-  phone         String?
-  role          UserRole  @default(client)
-  avatar        String?
-  address       String?
-  emailVerified DateTime?
-  twoFactorEnabled Boolean @default(false)
-  twoFactorSecret  String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+model Livraison {
+  id_livraison         String            @id @default(dbgenerated("gen_random_uuid()"))
+  nom_evenement        String
+  organisateur         String
+  adresse_livraison    String
+  ville                String
+  date_prevue          DateTime
+  quantite             Int               @default(0)
+  statut_preparation   String            @default("en_attente")
+  statut_livraison     String            @default("planifie")
+  description_probleme String?
+  id_client            String?
+  id_utilisateur       String?
+  created_at           DateTime          @default(now())
+  updated_at           DateTime          @default(now())
 
-  deliveries     Delivery[]
-  sessions       Session[]
-  devices        Device[]
-  activityLogs   ActivityLog[]
-  notifications  Notification[]
+  client      Client?      @relation(fields: [id_client], references: [id_client], onDelete: SetNull)
+  utilisateur Utilisateur? @relation(fields: [id_utilisateur], references: [id_utilisateur], onDelete: SetNull)
+  trackings   Tracking[]
+  notes       Note[]
 
-  @@map("users")
+  @@index([statut_preparation])
+  @@index([statut_livraison])
+  @@index([ville])
+  @@index([date_prevue])
+  @@index([id_client])
+  @@map("livraison")
 }
 
-model Delivery {
-  id            String         @id @default(cuid())
-  trackingId    String         @unique
-  clientName    String
-  clientPhone   String
-  clientEmail   String?
-  address       String
-  city          String
-  status        DeliveryStatus @default(preparation)
-  priority      Priority       @default(medium)
-  driverId      String?
-  scheduledDate DateTime
-  deliveredDate DateTime?
-  notes         String?
-  proofOfDelivery String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+model Tracking {
+  id_tracking   String   @id @default(dbgenerated("gen_random_uuid()"))
+  statut        String
+  date_tracking DateTime @default(now())
+  description   String?
+  id_livraison  String?
+  created_at    DateTime @default(now())
 
-  driver       User?           @relation(fields: [driverId], references: [id])
-  items        DeliveryItem[]
-  proofs       DeliveryProof[]
-  problemReport ProblemReport?
+  livraison Livraison? @relation(fields: [id_livraison], references: [id_livraison], onDelete: Cascade)
 
-  @@index([trackingId])
-  @@index([status])
-  @@index([driverId])
-  @@map("deliveries")
+  @@index([id_livraison])
+  @@index([date_tracking])
+  @@map("tracking")
 }
 
-model DeliveryItem {
-  id          String   @id @default(cuid())
-  deliveryId  String
-  name        String
-  quantity    Int
-  weight      Float?
-  description String?
-  createdAt   DateTime @default(now())
+model Note {
+  id_note      String   @id @default(dbgenerated("gen_random_uuid()"))
+  contenu      String
+  date_note    DateTime @default(now())
+  id_livraison String?
 
-  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  livraison Livraison? @relation(fields: [id_livraison], references: [id_livraison], onDelete: Cascade)
 
-  @@map("delivery_items")
-}
-
-model DeliveryProof {
-  id          String   @id @default(cuid())
-  deliveryId  String
-  type        String
-  url         String
-  signature   String?
-  latitude    Float?
-  longitude   Float?
-  notes       String?
-  createdAt   DateTime @default(now())
-
-  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
-
-  @@map("delivery_proofs")
-}
-
-model ProblemReport {
-  id          String        @id @default(cuid())
-  deliveryId  String        @unique
-  type        ProblemType
-  description String
-  latitude    Float?
-  longitude   Float?
-  status      ProblemStatus @default(pending)
-  priority    Priority      @default(medium)
-  attachments String[]
-  createdAt   DateTime      @default(now())
-  resolvedAt  DateTime?
-
-  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
-
-  @@map("problem_reports")
+  @@index([id_livraison])
+  @@map("note")
 }
 
 model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  title     String
-  message   String
-  type      String
-  read      Boolean  @default(false)
-  actionUrl String?
-  createdAt DateTime @default(now())
+  id_notification   String   @id @default(dbgenerated("gen_random_uuid()"))
+  titre             String
+  message           String
+  date_notification DateTime @default(now())
+  lue               Boolean  @default(false)
+  id_utilisateur    String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  utilisateur Utilisateur? @relation(fields: [id_utilisateur], references: [id_utilisateur], onDelete: Cascade)
 
-  @@index([userId])
-  @@map("notifications")
+  @@index([id_utilisateur])
+  @@index([lue])
+  @@index([date_notification])
+  @@map("notification")
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  userId       String
-  token        String   @unique
-  device       String
-  browser      String
-  ip           String
-  location     String?
-  lastActive   DateTime @default(now())
-  isCurrent    Boolean  @default(true)
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
+model EmailVerification {
+  id             String   @id @default(dbgenerated("gen_random_uuid()"))
+  email          String
+  code_hash      String
+  expires_at     DateTime
+  attempts       Int      @default(0)
+  resend_attempts Int     @default(0)
+  used           Boolean  @default(false)
+  created_at     DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([token])
-  @@map("sessions")
-}
-
-model Device {
-  id           String   @id @default(cuid())
-  userId       String
-  name         String
-  type         String
-  browser      String
-  os           String
-  ip           String
-  location     String?
-  lastActive   DateTime @default(now())
-  isTrusted    Boolean  @default(false)
-  createdAt    DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("devices")
-}
-
-model ActivityLog {
-  id          String   @id @default(cuid())
-  userId      String
-  action      String
-  description String
-  entityType  String
-  entityId    String
-  metadata    Json?
-  createdAt   DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([entityType, entityId])
-  @@map("activity_logs")
-}
-
-model File {
-  id          String   @id @default(cuid())
-  name        String
-  type        String
-  url         String
-  size        Int
-  mimeType    String
-  uploadedBy  String
-  entityType  String?
-  entityId    String?
-  createdAt   DateTime @default(now())
-
-  @@map("files")
+  @@index([email])
+  @@index([expires_at])
+  @@map("email_verifications")
 }

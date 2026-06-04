@@ -44,22 +44,16 @@ export default function LoginPage() {
     if (validateForm()) {
       setIsLoading(true)
       try {
-        // Request OTP via our custom API
-        const response = await fetch('/api/auth/request-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
-        
-        const result = await response.json();
-        
-        if (!result.success) {
-          setErrors({ email: result.error || 'Failed to send OTP' })
+
+        if (signInError) {
+          setErrors({ email: signInError.message })
         } else {
-          sessionStorage.setItem('pending_2fa_email', email);
-          sessionStorage.setItem('2fa_required', 'true');
-          sessionStorage.setItem('otp_sent', 'true');
-          router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+          sessionStorage.setItem('2fa_completed', 'true');
+          router.push('/dashboard');
         }
       } catch (error) {
         console.error("Login error:", error)
@@ -83,7 +77,7 @@ export default function LoginPage() {
       
       if (googleError) {
         console.error("Google login error:", googleError)
-        setErrors({ email: "Failed to sign in with Google" })
+        setErrors({ email: "Échec de la connexion avec Google" })
         return
       }
     } catch (error) {
@@ -104,7 +98,11 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-br from-linxos-green/90 via-linxos-green/70 to-slate-900/90" />
         <div className="relative z-10 text-center px-8">
-          <h1 className="text-5xl font-bold tracking-tight text-white mb-4">LINXOS</h1>
+          <img
+            src="/L-removebg-preview.png"
+            alt="LINXOS"
+            className="mx-auto h-16 w-auto mb-4"
+          />
           <p className="text-xl text-white/80">Logistique & Sponsoring</p>
           <div className="mt-8 w-24 h-1 bg-yellow-400 mx-auto rounded-full" />
           <p className="mt-8 text-white/60 text-sm">Gérez votre logistique efficacement</p>
@@ -116,10 +114,10 @@ export default function LoginPage() {
           <Card className="border border-white/10 bg-white/95 backdrop-blur-sm shadow-2xl dark:bg-slate-950/95">
             <CardHeader className="space-y-1 pb-2 pt-8">
               <CardTitle className="text-3xl font-bold text-center text-slate-900 dark:text-slate-50">
-                Welcome back
+                Bon retour
               </CardTitle>
               <CardDescription className="text-center text-slate-600 dark:text-slate-400">
-                Enter your credentials to access your account
+                Entrez vos identifiants pour accéder à votre compte
               </CardDescription>
             </CardHeader>
 
@@ -137,13 +135,13 @@ export default function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className={`transition-all duration-200 focus:ring-2 focus:ring-blue-500/50 ${
-                      errors.email ? "border-red-500 focus:ring-red-500/50" : ""
+                    className={`transition-all duration-200 focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 ${
+                      errors.email ? "border-red-500 focus:ring-red-500/50 dark:border-red-400 dark:focus:ring-red-400/50" : ""
                     }`}
                     placeholder="logistique.linxos@gmail.com"
                   />
                   {errors.email && (
-                    <p className="text-xs text-red-500">{errors.email}</p>
+                    <p className="text-xs text-red-500 dark:text-red-400">{errors.email}</p>
                   )}
                 </div>
 
@@ -161,14 +159,14 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className={`pr-10 transition-all duration-200 focus:ring-2 focus:ring-yellow-500/50 ${
-                        errors.password ? "border-red-500 focus:ring-red-500/50" : ""
+                      className={`pr-10 transition-all duration-200 focus:ring-2 focus:ring-yellow-500/50 dark:focus:ring-yellow-400/50 ${
+                        errors.password ? "border-red-500 focus:ring-red-500/50 dark:border-red-400 dark:focus:ring-red-400/50" : ""
                       }`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4" />
@@ -178,17 +176,17 @@ export default function LoginPage() {
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-xs text-red-500">{errors.password}</p>
+                    <p className="text-xs text-red-500 dark:text-red-400">{errors.password}</p>
                   )}
                 </div>
 
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-yellow-500 text-slate-900 hover:bg-yellow-400 active:bg-yellow-600 transition-all duration-200 hover:shadow-lg hover:shadow-yellow-500/25 disabled:opacity-50"
+                  className="w-full bg-yellow-500 text-slate-900 hover:bg-yellow-400 active:bg-yellow-600 transition-all duration-200 hover:shadow-lg hover:shadow-yellow-500/25 dark:bg-yellow-600 dark:text-white dark:hover:bg-yellow-500 disabled:opacity-50"
                 >
                   {isLoading ? (
-                    <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-slate-900 border-t-yellow-400" />
+                    <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-slate-900 border-t-yellow-400 dark:border-slate-200 dark:border-t-yellow-400" />
                   ) : (
                     <ArrowRight className="ml-2 h-4 w-4" />
                   )}
@@ -212,7 +210,7 @@ export default function LoginPage() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-white px-2 text-slate-500 dark:bg-slate-950 dark:text-slate-400">
-                    Or continue with
+                    Ou continuer avec
                   </span>
                 </div>
               </div>
@@ -237,20 +235,20 @@ export default function LoginPage() {
                 {isLoadingGoogle ? "Connexion..." : "Google"}
               </Button>
 
-              <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
-                By continuing, you agree to our{" "}
+                <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
+                En continuant, vous acceptez nos{" "}
                 <a
                   href="#"
                   className="underline decoration-slate-400 underline-offset-2 transition-colors hover:text-blue-600 hover:decoration-blue-600"
                 >
-                  Terms of Service
+                  Conditions d'utilisation
                 </a>{" "}
-                and{" "}
+                et{" "}
                 <a
                   href="#"
                   className="underline decoration-slate-400 underline-offset-2 transition-colors hover:text-blue-600 hover:decoration-blue-600"
                 >
-                  Privacy Policy
+                  Politique de confidentialité
                 </a>
               </p>
             </CardContent>
@@ -319,7 +317,7 @@ export default function LoginPage() {
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
                       placeholder="managerlogistic@linxos.com"
-                      className="transition-all duration-200 focus:ring-2 focus:ring-blue-500/50"
+                      className="transition-all duration-200 focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50"
                       required
                     />
                   </div>

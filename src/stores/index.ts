@@ -1,14 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { User, Delivery, Notification, DeliveryStatus } from '@/types';
-import { mockNotifications } from '@/lib/mock-data';
+import type { Utilisateur, Livraison, Notification, StatutLivraison, StatutPreparation } from '@/types';
 
 interface AuthState {
-  user: User | null;
+  user: Utilisateur | null;
   isAuthenticated: boolean;
-  login: (user: User) => void;
+  login: (user: Utilisateur) => void;
   logout: () => void;
-  updateUser: (user: Partial<User>) => void;
+  updateUser: (user: Partial<Utilisateur>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -27,53 +26,60 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
-interface DeliveryState {
-  deliveries: Delivery[];
-  selectedDelivery: Delivery | null;
+interface LivraisonState {
+  livraisons: Livraison[];
+  selectedLivraison: Livraison | null;
   filter: {
-    status: DeliveryStatus | 'all';
-    city: string;
-    priority: string;
+    statutPreparation: StatutPreparation | 'all';
+    statutLivraison: StatutLivraison | 'all';
+    ville: string;
     search: string;
   };
-  setDeliveries: (deliveries: Delivery[]) => void;
-  addDelivery: (delivery: Delivery) => void;
-  updateDelivery: (id: string, data: Partial<Delivery>) => void;
-  deleteDelivery: (id: string) => void;
-  setSelectedDelivery: (delivery: Delivery | null) => void;
-  setFilter: (filter: Partial<DeliveryState['filter']>) => void;
-  updateDeliveryStatus: (id: string, status: DeliveryStatus) => void;
+  setLivraisons: (livraisons: Livraison[]) => void;
+  addLivraison: (livraison: Livraison) => void;
+  updateLivraison: (id: string, data: Partial<Livraison>) => void;
+  deleteLivraison: (id: string) => void;
+  setSelectedLivraison: (livraison: Livraison | null) => void;
+  setFilter: (filter: Partial<LivraisonState['filter']>) => void;
+  updateLivraisonPreparation: (id: string, statut: StatutPreparation) => void;
+  updateLivraisonStatus: (id: string, statut: StatutLivraison) => void;
 }
 
-export const useDeliveryStore = create<DeliveryState>((set) => ({
-  deliveries: [],
-  selectedDelivery: null,
+export const useLivraisonStore = create<LivraisonState>((set) => ({
+  livraisons: [],
+  selectedLivraison: null,
   filter: {
-    status: 'all',
-    city: '',
-    priority: '',
+    statutPreparation: 'all',
+    statutLivraison: 'all',
+    ville: '',
     search: '',
   },
-  setDeliveries: (deliveries) => set({ deliveries }),
-  addDelivery: (delivery) =>
-    set((state) => ({ deliveries: [...state.deliveries, delivery] })),
-  updateDelivery: (id, data) =>
+  setLivraisons: (livraisons) => set({ livraisons }),
+  addLivraison: (livraison) =>
+    set((state) => ({ livraisons: [...state.livraisons, livraison] })),
+  updateLivraison: (id, data) =>
     set((state) => ({
-      deliveries: state.deliveries.map((d) =>
-        d.id === id ? { ...d, ...data } : d
+      livraisons: state.livraisons.map((l) =>
+        l.id_livraison === id ? { ...l, ...data } : l
       ),
     })),
-  deleteDelivery: (id) =>
+  deleteLivraison: (id) =>
     set((state) => ({
-      deliveries: state.deliveries.filter((d) => d.id !== id),
+      livraisons: state.livraisons.filter((l) => l.id_livraison !== id),
     })),
-  setSelectedDelivery: (delivery) => set({ selectedDelivery: delivery }),
+  setSelectedLivraison: (livraison) => set({ selectedLivraison: livraison }),
   setFilter: (filter) =>
     set((state) => ({ filter: { ...state.filter, ...filter } })),
-  updateDeliveryStatus: (id, status) =>
+  updateLivraisonPreparation: (id, statut) =>
     set((state) => ({
-      deliveries: state.deliveries.map((d) =>
-        d.id === id ? { ...d, status } : d
+      livraisons: state.livraisons.map((l) =>
+        l.id_livraison === id ? { ...l, statutPreparation: statut } : l
+      ),
+    })),
+  updateLivraisonStatus: (id, statut) =>
+    set((state) => ({
+      livraisons: state.livraisons.map((l) =>
+        l.id_livraison === id ? { ...l, statutLivraison: statut } : l
       ),
     })),
 }));
@@ -88,8 +94,8 @@ interface NotificationState {
 }
 
 export const useNotificationStore = create<NotificationState>((set) => ({
-  notifications: mockNotifications as unknown as Notification[],
-  unreadCount: mockNotifications.filter((n) => !n.read).length,
+  notifications: [],
+  unreadCount: 0,
   addNotification: (notification) =>
     set((state) => ({
       notifications: [notification, ...state.notifications],
@@ -98,19 +104,19 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   markAsRead: (id) =>
     set((state) => ({
       notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
+        n.id_notification === id ? { ...n, lue: true } : n
       ),
       unreadCount: Math.max(0, state.unreadCount - 1),
     })),
   markAllAsRead: () =>
     set((state) => ({
-      notifications: state.notifications.map((n) => ({ ...n, read: true })),
+      notifications: state.notifications.map((n) => ({ ...n, lue: true })),
       unreadCount: 0,
     })),
   removeNotification: (id) =>
     set((state) => ({
-      notifications: state.notifications.filter((n) => n.id !== id),
-      unreadCount: state.notifications.find((n) => n.id === id && !n.read)
+      notifications: state.notifications.filter((n) => n.id_notification !== id),
+      unreadCount: state.notifications.find((n) => n.id_notification === id && !n.lue)
         ? state.unreadCount - 1
         : state.unreadCount,
     })),
