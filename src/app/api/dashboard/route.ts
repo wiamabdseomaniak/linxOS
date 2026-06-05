@@ -22,13 +22,13 @@ export async function GET() {
   const echouees = stats?.filter(r => r.statut_livraison === 'echouee').length ?? 0;
   const clientsActifs = new Set(stats?.map(r => r.id_client).filter(Boolean)).size;
 
-  // Weekly
-  const { data: weekly } = await supabase.from('livraison').select('date_prevue');
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const counts = new Array(7).fill(0);
-  weekly?.forEach(r => {
+  // Monthly
+  const { data: monthly } = await supabase.from('livraison').select('date_prevue');
+  const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+  const counts = new Array(12).fill(0);
+  monthly?.forEach(r => {
     if (r.date_prevue) {
-      counts[new Date(r.date_prevue).getUTCDay()]++;
+      counts[new Date(r.date_prevue).getUTCMonth()]++;
     }
   });
 
@@ -64,7 +64,7 @@ export async function GET() {
       totalRevenue: 0,
       activeClients: clientsActifs,
     },
-    weekly: days.map((day, i) => ({ day, deliveries: counts[i], revenue: 0 })),
+    weekly: monthNames.map((month, i) => ({ day: month, deliveries: counts[i], revenue: 0 })),
     byCity: Array.from(cityMap.entries()).map(([city, deliveries]) => ({ city, deliveries, revenue: 0 })),
     activity: (activity ?? []).map(r => ({
       id: r.id_livraison,

@@ -1,3 +1,4 @@
+// Page Livraisons effectuées — liste des événements livrés avec statuts, progression et détails
 'use client';
 
 import { useState } from 'react';
@@ -23,6 +24,13 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import type { LogisticsEvent } from '@/types/supabase';
 import { useLogistics } from '@/features/logistics/hooks/use-logistics';
+
+const DELIVERY_TO_PREP: Record<string, string> = {
+  planifie: 'en_preparation',
+  en_cours: 'prete',
+  livree: 'terminee',
+  echouee: 'terminee',
+};
 
 const PREP_LABELS: Record<string, string> = {
   en_attente: 'En attente',
@@ -193,7 +201,8 @@ export default function DeliveredPage() {
             ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {events.map((event) => {
-                const prepIdx = PREP_STEPS.indexOf(event.statut_preparation);
+                const prepStatus = DELIVERY_TO_PREP[event.status] || event.statut_preparation;
+                const prepIdx = PREP_STEPS.indexOf(prepStatus);
                 const prepProgress = prepIdx >= 0 ? ((prepIdx + 1) / PREP_STEPS.length) * 100 : 0;
 
                 return (
@@ -204,8 +213,8 @@ export default function DeliveredPage() {
                     {/* Status Badges */}
                     <div className="mb-3 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className={`rounded-full px-3 py-1 text-xs font-medium ${PREP_COLORS[event.statut_preparation] || 'bg-gray-100 text-gray-700 dark:text-gray-300'}`}>
-                          {PREP_LABELS[event.statut_preparation] || event.statut_preparation}
+                        <span className={`rounded-full px-3 py-1 text-xs font-medium ${PREP_COLORS[prepStatus] || 'bg-gray-100 text-gray-700 dark:text-gray-300'}`}>
+                          {PREP_LABELS[prepStatus] || prepStatus}
                         </span>
                       </div>
                       <Button
@@ -227,7 +236,7 @@ export default function DeliveredPage() {
                         <ProgressTrack className="h-1.5">
                           <ProgressIndicator
                             className="rounded-full"
-                            style={{ backgroundColor: STATUS_COLORS[event.statut_preparation] || 'var(--muted-foreground)' }}
+                            style={{ backgroundColor: STATUS_COLORS[prepStatus] || 'var(--muted-foreground)' }}
                           />
                         </ProgressTrack>
                       </Progress>
@@ -341,15 +350,15 @@ export default function DeliveredPage() {
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Statut préparation</p>
                   <div className="flex items-center gap-2">
-                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${PREP_COLORS[selectedEvent?.statut_preparation || ''] || 'bg-gray-100 text-gray-700 dark:text-gray-300'}`}>
-                      {PREP_LABELS[selectedEvent?.statut_preparation || ''] || selectedEvent?.statut_preparation}
+                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${PREP_COLORS[selectedEvent ? (DELIVERY_TO_PREP[selectedEvent.status] || selectedEvent.statut_preparation) : ''] || 'bg-gray-100 text-gray-700 dark:text-gray-300'}`}>
+                      {PREP_LABELS[selectedEvent ? (DELIVERY_TO_PREP[selectedEvent.status] || selectedEvent.statut_preparation) : ''] || selectedEvent?.statut_preparation}
                     </span>
                     <div className="flex-1 max-w-[100px] sm:max-w-[120px]">
-                      <Progress value={selectedEvent ? ((PREP_STEPS.indexOf(selectedEvent.statut_preparation) + 1) / PREP_STEPS.length) * 100 : 0}>
+                      <Progress value={selectedEvent ? ((PREP_STEPS.indexOf(DELIVERY_TO_PREP[selectedEvent.status] || selectedEvent.statut_preparation) + 1) / PREP_STEPS.length) * 100 : 0}>
                         <ProgressTrack className="h-1.5">
                           <ProgressIndicator
                             className="rounded-full"
-                            style={{ backgroundColor: STATUS_COLORS[selectedEvent?.statut_preparation || ''] || 'var(--muted-foreground)' }}
+                            style={{ backgroundColor: STATUS_COLORS[selectedEvent ? (DELIVERY_TO_PREP[selectedEvent.status] || selectedEvent.statut_preparation) : ''] || 'var(--muted-foreground)' }}
                           />
                         </ProgressTrack>
                       </Progress>
@@ -383,7 +392,8 @@ export default function DeliveredPage() {
               <p className="text-sm font-medium mb-3">Chronologie de la préparation</p>
               <div className="space-y-3">
                 {PREP_STEPS.map((step, i) => {
-                  const currentIdx = PREP_STEPS.indexOf(selectedEvent?.statut_preparation || '');
+                  const derivedStatus = DELIVERY_TO_PREP[selectedEvent?.status || ''] || selectedEvent?.statut_preparation || '';
+                  const currentIdx = PREP_STEPS.indexOf(derivedStatus);
                   const isActive = currentIdx >= i;
                   const label = PREP_LABELS[step] || step;
                   const color = STATUS_COLORS[step] || '#94a3b8';

@@ -1,3 +1,4 @@
+// Page Paramètres — configuration du profil, notifications, thème et langue
 'use client';
 
 import { useState, useEffect } from 'react';

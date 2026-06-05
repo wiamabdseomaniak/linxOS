@@ -1,9 +1,5 @@
+// Page Logistique — gestion et suivi des livraisons avec filtres, vue Kanban et détails
 'use client';
-
-// ============================================
-// IMPORTS
-// Bibliothèques et composants nécessaires
-// ============================================
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';

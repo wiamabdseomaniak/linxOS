@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { FilterTab, Notification as DropdownNotification } from './types';
 import type { Notification as StoreNotification } from '@/types';
-import { useNotificationStore } from '@/stores';
+import { useNotifications } from '@/features/notifications/hooks/use-notifications';
 import { NotificationItem } from './notification-item';
 import { FilterTabs } from './filter-tabs';
 import { Bell, Settings, ChevronRight, X } from 'lucide-react';
@@ -22,7 +22,7 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [filter, setFilter] = useState<FilterTab>('all');
 
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationStore();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, loading } = useNotifications();
 
   const toDropdownNotif = (n: StoreNotification): DropdownNotification => ({
     id: n.id_notification,
@@ -179,7 +179,11 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
 
               {/* Notification List */}
               <div className="max-h-[420px] overflow-y-auto">
-                {filteredNotifications().length === 0 ? (
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-yellow-400 border-t-transparent" />
+                  </div>
+                ) : filteredNotifications().length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 px-4">
                     <Bell className="h-8 w-8 text-muted-foreground/30" />
                     <p className="mt-3 text-[13px] text-muted-foreground">

@@ -581,13 +581,13 @@ export interface WeeklyPerformance {
 }
 
 export const mockWeeklyPerformance: WeeklyPerformance[] = [
-  { day: 'Mon', deliveries: 45, revenue: 90000 },
-  { day: 'Tue', deliveries: 52, revenue: 104000 },
-  { day: 'Wed', deliveries: 48, revenue: 96000 },
-  { day: 'Thu', deliveries: 61, revenue: 122000 },
-  { day: 'Fri', deliveries: 73, revenue: 146000 },
-  { day: 'Sat', deliveries: 38, revenue: 76000 },
-  { day: 'Sun', deliveries: 22, revenue: 44000 },
+  { day: 'Jan', deliveries: 180, revenue: 360000 },
+  { day: 'Fév', deliveries: 210, revenue: 420000 },
+  { day: 'Mar', deliveries: 195, revenue: 390000 },
+  { day: 'Avr', deliveries: 240, revenue: 480000 },
+  { day: 'Mai', deliveries: 270, revenue: 540000 },
+  { day: 'Jun', deliveries: 220, revenue: 440000 },
+  { day: 'Jul', deliveries: 190, revenue: 380000 },
 ];
 
 export interface StatusDistribution {

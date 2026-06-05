@@ -1,3 +1,4 @@
+// Page de réinitialisation de mot de passe — mise à jour du mot de passe via token
 "use client"
 
 import { useState, useEffect } from "react"

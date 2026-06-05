@@ -1,8 +1,9 @@
+// Page de connexion — authentification utilisateur (email/mot de passe, OAuth)
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowRight, Eye, EyeOff, X } from "lucide-react"
+import { ArrowRight, Eye, EyeOff, X, KeyRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,6 +21,13 @@ export default function LoginPage() {
   const [resetEmail, setResetEmail] = useState("")
   const [resetSent, setResetSent] = useState(false)
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [showOtp, setShowOtp] = useState(false)
+  const [otpEmail, setOtpEmail] = useState("")
+  const [otpCode, setOtpCode] = useState(["", "", "", "", "", ""])
+  const [otpSent, setOtpSent] = useState(false)
+  const [otpLoading, setOtpLoading] = useState(false)
+  const [otpError, setOtpError] = useState("")
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([])
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {}
@@ -85,6 +93,40 @@ export default function LoginPage() {
     } finally {
       setIsLoadingGoogle(false)
     }
+  }
+
+  const handleSendOtp = async () => {
+    if (!otpEmail.trim()) { setOtpError("Veuillez entrer votre email"); return }
+    setOtpLoading(true); setOtpError("")
+    const { error } = await supabase.auth.signInWithOtp({
+      email: otpEmail,
+      options: { shouldCreateUser: false },
+    })
+    if (error) { setOtpError(error.message); setOtpLoading(false); return }
+    setOtpSent(true); setOtpLoading(false)
+  }
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d?$/.test(value)) return
+    const newCode = [...otpCode]
+    newCode[index] = value
+    setOtpCode(newCode)
+    if (value && index < 5) otpRefs.current[index + 1]?.focus()
+  }
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !otpCode[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus()
+    }
+  }
+
+  const handleVerifyOtp = async () => {
+    const code = otpCode.join("")
+    if (code.length !== 6) { setOtpError("Veuillez entrer le code à 6 chiffres"); return }
+    setOtpLoading(true); setOtpError("")
+    const { error } = await supabase.auth.verifyOtp({ email: otpEmail, token: code, type: "email" })
+    if (error) { setOtpError(error.message); setOtpLoading(false); return }
+    router.push("/dashboard")
   }
 
   return (
@@ -193,13 +235,22 @@ export default function LoginPage() {
                   {isLoading ? "Connexion..." : "Se connecter"}
                 </Button>
 
-                <div className="text-center">
+                <div className="flex items-center justify-center gap-4">
                   <button
                     type="button"
                     onClick={() => setShowForgotPassword(true)}
                     className="text-xs text-slate-500 hover:text-yellow-600 dark:text-slate-400 dark:hover:text-yellow-400 underline underline-offset-2 transition-colors"
                   >
                     Mot de passe oublié ?
+                  </button>
+                  <span className="text-xs text-slate-300 dark:text-slate-600">|</span>
+                  <button
+                    type="button"
+                    onClick={() => { setShowOtp(true); setOtpEmail(email); setOtpError(""); setOtpSent(false); setOtpCode(["", "", "", "", "", ""]) }}
+                    className="flex items-center gap-1 text-xs text-slate-500 hover:text-yellow-600 dark:text-slate-400 dark:hover:text-yellow-400 underline underline-offset-2 transition-colors"
+                  >
+                    <KeyRound className="h-3 w-3" />
+                    Connexion par code
                   </button>
                 </div>
               </form>
@@ -339,6 +390,82 @@ export default function LoginPage() {
                 >
                   Retour à la connexion
                 </Button>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {showOtp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <Card className="w-full max-w-md border border-white/10 bg-white/95 backdrop-blur-sm shadow-2xl dark:bg-slate-950/95 mx-4">
+            <CardHeader className="relative pb-2 pt-6">
+              <button
+                onClick={() => { setShowOtp(false); setOtpSent(false); setOtpCode(["", "", "", "", "", ""]); setOtpError("") }}
+                className="absolute right-4 top-4 text-slate-400 hover:text-slate-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <CardTitle className="text-xl font-bold text-slate-900 dark:text-slate-50">
+                {otpSent ? "Entrez le code" : "Connexion par code"}
+              </CardTitle>
+              <CardDescription className="text-slate-600 dark:text-slate-400">
+                {otpSent
+                  ? `Un code à 6 chiffres a été envoyé à ${otpEmail}`
+                  : "Recevez un code à usage unique par email"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-4">
+              {!otpSent ? (
+                <form onSubmit={(e) => { e.preventDefault(); handleSendOtp() }} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="otpEmail" className="text-sm font-medium text-slate-700 dark:text-slate-300">Email</Label>
+                    <Input
+                      id="otpEmail"
+                      type="email"
+                      value={otpEmail}
+                      onChange={(e) => setOtpEmail(e.target.value)}
+                      placeholder="logistique.linxos@gmail.com"
+                      className="transition-all duration-200 focus:ring-2 focus:ring-blue-500/50"
+                      required
+                    />
+                  </div>
+                  {otpError && <p className="text-xs text-red-500">{otpError}</p>}
+                  <Button type="submit" disabled={otpLoading} className="w-full bg-yellow-500 text-slate-900 hover:bg-yellow-400 transition-all duration-200">
+                    {otpLoading ? "Envoi..." : "Envoyer le code"}
+                  </Button>
+                </form>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-center gap-2">
+                    {otpCode.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => { otpRefs.current[index] = el }}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                        className="h-12 w-10 rounded-lg border border-slate-300 text-center text-lg font-bold focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/50 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                      />
+                    ))}
+                  </div>
+                  {otpError && <p className="text-center text-xs text-red-500">{otpError}</p>}
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleVerifyOtp}
+                      disabled={otpLoading || otpCode.join("").length !== 6}
+                      className="flex-1 bg-yellow-500 text-slate-900 hover:bg-yellow-400 transition-all duration-200"
+                    >
+                      {otpLoading ? "Vérification..." : "Vérifier le code"}
+                    </Button>
+                    <Button variant="outline" onClick={handleSendOtp} disabled={otpLoading} className="px-3">
+                      Renvoyer
+                    </Button>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>

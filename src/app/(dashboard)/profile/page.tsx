@@ -1,3 +1,4 @@
+// Page Profil — affichage et modification des informations personnelles de l'utilisateur
 'use client';
 
 import { useState, useRef, useEffect } from 'react';

@@ -1,3 +1,4 @@
+// Page Notifications — historique des notifications avec filtres, marquage lecture/suppression
 'use client';
 
 import { useState } from 'react';

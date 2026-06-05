@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { supabase, SUPABASE_TABLES } from '@/lib/supabase';
+import { supabase, SUPABASE_TABLES, isSupabaseConfigured } from '@/lib/supabase';
 import {
   fetchNotifications,
   markNotificationAsRead,
@@ -49,6 +49,8 @@ export function useNotifications(): UseNotificationsResult {
 
   // Realtime subscription
   useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+
     const channel = supabase
       .channel('notifications-changes')
       .on(

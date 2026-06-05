@@ -1,4 +1,5 @@
-﻿'use client';
+﻿// Page Tableau de bord — vue d'ensemble des statistiques, graphiques et livraisons urgentes
+'use client';
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -156,15 +157,14 @@ export default function DashboardPage() {
             <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
               <div>
                 <CardTitle className="text-lg font-semibold">Livraisons mensuelles effectuées</CardTitle>
-                <p className="text-sm text-muted-foreground">Livraisons effectuées par mois</p>
               </div>
               <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
                 2026
               </Badge>
             </CardHeader>
             <CardContent className="pt-6">
-                  <div className="h-[320px] w-full min-w-0">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                  <div className="h-[260px] w-full min-w-0">
+                <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={weekly} margin={{ left: -20, right: 8 }}>
                     <defs>
                       <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -209,8 +209,8 @@ export default function DashboardPage() {
               <CardTitle className="text-lg font-semibold">Livraisons par ville</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="h-[320px] w-full min-w-0">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+              <div className="h-[260px] w-full min-w-0">
+                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={byCity} margin={{ left: -20, right: 8 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} vertical={false} />
                     <XAxis dataKey="city" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} />
