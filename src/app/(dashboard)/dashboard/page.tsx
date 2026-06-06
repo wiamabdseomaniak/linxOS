@@ -10,6 +10,12 @@ import {
   AlertTriangle,
   ArrowUpRight,
   ArrowDownRight,
+  TrendingUp,
+  Sparkles,
+  Calendar,
+  MapPin,
+  Truck,
+  Activity,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,72 +30,113 @@ import {
   ResponsiveContainer,
   Area,
   AreaChart,
+  RadialBarChart,
+  RadialBar,
+  PolarAngleAxis,
 } from 'recharts';
 import { useDashboard } from '@/features/dashboard/hooks/use-dashboard';
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
+import { useTranslation } from '@/lib/i18n';
 import { PRIORITIES } from '@/lib/constants';
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 },
+    transition: { staggerChildren: 0.08 },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0 },
 };
 
-const colorMap: Record<string, string> = {
-  violet: 'from-violet-600 to-purple-600',
-  amber: 'from-yellow-500 to-amber-500',
-  green: 'from-green-500 to-emerald-500',
-  red: 'from-red-500 to-rose-500',
-  blue: 'from-blue-500 to-cyan-500',
-  emerald: 'from-emerald-500 to-teal-500',
-};
+const statPalette = {
+  violet: {
+    ring: 'ring-violet-500/20',
+    glow: 'shadow-[0_18px_40px_-20px_rgba(124,58,237,0.55)]',
+    chip: 'bg-violet-500/10 text-violet-700 dark:text-violet-300',
+    spark: ['#8b5cf6', '#6366f1'],
+  },
+  amber: {
+    ring: 'ring-amber-500/20',
+    glow: 'shadow-[0_18px_40px_-20px_rgba(245,158,11,0.55)]',
+    chip: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+    spark: ['#f59e0b', '#fbbf24'],
+  },
+  emerald: {
+    ring: 'ring-emerald-500/20',
+    glow: 'shadow-[0_18px_40px_-20px_rgba(16,185,129,0.55)]',
+    chip: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+    spark: ['#10b981', '#34d399'],
+  },
+  rose: {
+    ring: 'ring-rose-500/20',
+    glow: 'shadow-[0_18px_40px_-20px_rgba(244,63,94,0.55)]',
+    chip: 'bg-rose-500/10 text-rose-700 dark:text-rose-300',
+    spark: ['#f43f5e', '#fb7185'],
+  },
+} as const;
+
+type ColorKey = keyof typeof statPalette;
 
 export default function DashboardPage() {
   const router = useRouter();
   const { stats, weekly, byCity, activity, problems, urgent, loading, error } = useDashboard();
   const { user } = useCurrentUser();
+  const { t } = useTranslation();
 
   const displayName = user?.name?.split(' ')[0] ?? 'Utilisateur';
 
-  const statCards = [
+  const successRate = stats.totalDeliveries > 0
+    ? Math.round((stats.completedDeliveries / stats.totalDeliveries) * 100)
+    : 0;
+
+  const statCards: Array<{
+    title: string;
+    value: string;
+    change: string;
+    changeType: 'positive' | 'negative';
+    icon: typeof Package;
+    color: ColorKey;
+    ring: string;
+  }> = [
     {
-      title: 'Total des livraisons',
+      title: t('dashboard.stats.total'),
       value: stats.totalDeliveries.toLocaleString(),
       change: '+12.5%',
-      changeType: 'positive' as const,
+      changeType: 'positive',
       icon: Package,
       color: 'violet',
+      ring: 'before:bg-violet-500/40',
     },
     {
-      title: 'En attente',
+      title: t('dashboard.stats.pending'),
       value: stats.activeDeliveries.toString(),
       change: '+5.2%',
-      changeType: 'negative' as const,
+      changeType: 'negative',
       icon: Clock,
       color: 'amber',
+      ring: 'before:bg-amber-500/40',
     },
     {
-      title: 'Réussies',
+      title: t('dashboard.stats.completed'),
       value: stats.completedDeliveries.toLocaleString(),
       change: '+8.1%',
-      changeType: 'positive' as const,
+      changeType: 'positive',
       icon: CheckCircle2,
-      color: 'green',
+      color: 'emerald',
+      ring: 'before:bg-emerald-500/40',
     },
     {
-      title: 'Problématiques',
+      title: t('dashboard.stats.issues'),
       value: stats.failedDeliveries.toString(),
       change: '-3.4%',
-      changeType: 'positive' as const,
+      changeType: 'positive',
       icon: AlertTriangle,
-      color: 'red',
+      color: 'rose',
+      ring: 'before:bg-rose-500/40',
     },
   ];
 
@@ -98,6 +145,8 @@ export default function DashboardPage() {
   const issuesThisWeek = problems;
   const totalIssuesThisWeek = issuesThisWeek.reduce((sum, p) => sum + p.count, 0);
 
+  const radialData = [{ name: 'Succès', value: successRate, fill: '#10b981' }];
+
   return (
     <motion.div
       variants={containerVariants}
@@ -105,14 +154,38 @@ export default function DashboardPage() {
       animate="visible"
       className="space-y-6"
     >
-      <motion.div variants={itemVariants} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-col gap-5 sm:gap-4 lg:flex-row lg:items-end lg:justify-between"
+      >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Bonjour, {displayName} 👋
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-300/50 bg-gradient-to-r from-amber-100/80 to-yellow-100/80 px-3.5 py-1.5 text-xs font-semibold text-amber-800 shadow-md shadow-amber-500/10 ring-1 ring-amber-300/30 backdrop-blur-sm dark:border-amber-400/30 dark:from-amber-400/15 dark:to-yellow-400/10 dark:text-amber-200 dark:ring-amber-400/20">
+            <Sparkles className="h-3.5 w-3.5" />
+            Vue d&apos;ensemble · 2026
+          </div>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            {t('dashboard.greeting')}, <span className="text-gradient-brand">{displayName}</span>
           </h1>
-          <p className="text-muted-foreground">
-            Voici ce qui se passe avec votre logistique aujourd&apos;hui.
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            {t('dashboard.greetingSuffix')}
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-10 rounded-full border-border/60 bg-card/80 px-4 text-sm font-semibold shadow-md shadow-black/5 backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-lg hover:shadow-black/10 active:translate-y-0"
+          >
+            <Calendar className="mr-1.5 h-4 w-4" />
+            Cette semaine
+          </Button>
+          <Button
+            size="sm"
+            className="h-10 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 px-5 text-sm font-semibold text-white shadow-lg shadow-amber-500/30 ring-1 ring-amber-400/40 transition-all hover:-translate-y-0.5 hover:from-amber-600 hover:to-yellow-600 hover:shadow-xl hover:shadow-amber-500/40 active:translate-y-0 dark:from-amber-500 dark:to-yellow-500"
+          >
+            <TrendingUp className="mr-1.5 h-4 w-4" />
+            Exporter
+          </Button>
         </div>
       </motion.div>
 
@@ -121,59 +194,82 @@ export default function DashboardPage() {
           Erreur : {error}
         </div>
       )}
+
       <motion.div variants={itemVariants} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((stat) => (
-          <Card key={stat.title} className="relative overflow-hidden border-0 shadow-soft hover:shadow-lg transition-shadow">
-            <div className={`absolute inset-0 bg-gradient-to-br ${colorMap[stat.color]} opacity-5`} />
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {stat.title}
-              </CardTitle>
-              <div className={`rounded-full bg-gradient-to-br ${colorMap[stat.color]} p-2`}>
-                <stat.icon className="h-4 w-4 text-white" />
+        {statCards.map((stat) => {
+          const palette = statPalette[stat.color];
+          const Icon = stat.icon;
+          return (
+            <Card
+              key={stat.title}
+              className={`group relative overflow-hidden rounded-2xl border-border/50 bg-card/70 p-5 backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-border ${palette.glow}`}
+            >
+              <div className={`pointer-events-none absolute -left-12 -top-12 h-32 w-32 rounded-full ${stat.ring} blur-2xl`} />
+              <div className="relative flex flex-col gap-4">
+                <div className="flex items-start justify-between">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${palette.chip}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                    stat.changeType === 'positive'
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                      : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                  }`}>
+                    {stat.changeType === 'positive' ? (
+                      <ArrowUpRight className="h-3 w-3" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3" />
+                    )}
+                    {stat.change}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    {stat.title}
+                  </p>
+                  <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
+                    {loading ? '…' : stat.value}
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t('dashboard.stats.monthOverMonth')}
+                </p>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{loading ? '…' : stat.value}</div>
-              <div className="flex items-center gap-1 text-xs">
-                {stat.changeType === 'positive' ? (
-                  <ArrowUpRight className="h-3 w-3 text-green-600 dark:text-green-400" />
-                ) : (
-                  <ArrowDownRight className="h-3 w-3 text-red-600 dark:text-red-400" />
-                )}
-                <span className={stat.changeType === 'positive' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
-                  {stat.change}
-                </span>
-                <span className="text-muted-foreground">par rapport au mois dernier</span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </motion.div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <motion.div variants={itemVariants}>
-          <Card className="border-0 shadow-soft h-[400px]">
-            <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <motion.div variants={itemVariants} className="lg:col-span-2">
+          <Card className="overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
               <div>
-                <CardTitle className="text-lg font-semibold">Livraisons mensuelles effectuées</CardTitle>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Performance</p>
+                <CardTitle className="text-lg font-semibold">
+                  {t('dashboard.charts.monthlyDeliveries')}
+                </CardTitle>
               </div>
-              <Badge variant="secondary" className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+              <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300">
                 2026
               </Badge>
             </CardHeader>
             <CardContent className="pt-6">
-                  <div className="h-[260px] w-full min-w-0">
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="h-[280px] w-full min-w-0">
+                <ResponsiveContainer width="100%" aspect={2} minWidth={0}>
                   <AreaChart data={weekly} margin={{ left: -20, right: 8 }}>
                     <defs>
                       <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" style={{ stopColor: 'var(--primary)', stopOpacity: 0.3 }} />
-                        <stop offset="95%" style={{ stopColor: 'var(--primary)', stopOpacity: 0 }} />
+                        <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.45} />
+                        <stop offset="95%" stopColor="#7C3AED" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="strokeValue" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#F5C400" />
+                        <stop offset="100%" stopColor="#7C3AED" />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} />
-                    <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} vertical={false} />
+                    <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
                     <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
                     <Tooltip
                       contentStyle={{
@@ -187,8 +283,8 @@ export default function DashboardPage() {
                     <Area
                       type="monotone"
                       dataKey="deliveries"
-                      stroke="var(--primary)"
-                      strokeWidth={2}
+                      stroke="url(#strokeValue)"
+                      strokeWidth={2.5}
                       fillOpacity={1}
                       fill="url(#colorValue)"
                     />
@@ -199,23 +295,67 @@ export default function DashboardPage() {
           </Card>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
-        >
-          <Card className="border-0 shadow-soft h-[400px]">
-            <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg font-semibold">Livraisons par ville</CardTitle>
+        <motion.div variants={itemVariants}>
+          <Card className="h-full overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
+            <CardHeader className="border-b border-border/50 pb-4">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Indicateur</p>
+              <CardTitle className="text-lg font-semibold">Taux de réussite</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="h-[260px] w-full min-w-0">
+              <div className="flex h-[200px] items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
+                  <RadialBarChart
+                    innerRadius="68%"
+                    outerRadius="100%"
+                    barSize={14}
+                    data={radialData}
+                    startAngle={90}
+                    endAngle={-270}
+                  >
+                    <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                    <RadialBar background={{ fill: 'var(--muted)' }} dataKey="value" cornerRadius={10} fill="#10b981" />
+                  </RadialBarChart>
+                </ResponsiveContainer>
+                <div className="pointer-events-none absolute flex flex-col items-center">
+                  <span className="text-3xl font-semibold tracking-tight">{successRate}%</span>
+                  <span className="text-xs text-muted-foreground">livraisons réussies</span>
+                </div>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-emerald-500/10 p-3">
+                  <p className="text-xs text-muted-foreground">Réussies</p>
+                  <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">{stats.completedDeliveries}</p>
+                </div>
+                <div className="rounded-xl bg-rose-500/10 p-3">
+                  <p className="text-xs text-muted-foreground">Échouées</p>
+                  <p className="text-lg font-semibold text-rose-600 dark:text-rose-400">{stats.failedDeliveries}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="lg:col-span-2">
+          <Card className="overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
+            <CardHeader className="border-b border-border/50 pb-4">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Répartition</p>
+              <CardTitle className="text-lg font-semibold">{t('dashboard.charts.byCity')}</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="h-[280px] w-full min-w-0">
+                <ResponsiveContainer width="100%" aspect={2} minWidth={0}>
                   <BarChart data={byCity} margin={{ left: -20, right: 8 }}>
+                    <defs>
+                      <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#F5C400" />
+                        <stop offset="100%" stopColor="#F59E0B" />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} vertical={false} />
-                    <XAxis dataKey="city" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} />
+                    <XAxis dataKey="city" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
                     <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
                     <Tooltip
+                      cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
                       contentStyle={{
                         backgroundColor: 'var(--card)',
                         border: '1px solid var(--border)',
@@ -223,7 +363,7 @@ export default function DashboardPage() {
                         color: 'var(--foreground)',
                       }}
                     />
-                    <Bar dataKey="deliveries" fill="var(--primary)" radius={[8, 8, 0, 0]} maxBarSize={60} />
+                    <Bar dataKey="deliveries" fill="url(#barFill)" radius={[8, 8, 0, 0]} maxBarSize={60} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -232,106 +372,123 @@ export default function DashboardPage() {
         </motion.div>
 
         <motion.div variants={itemVariants}>
-          <Card className="border-0 shadow-soft h-[400px]">
-            <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
+          <Card className="h-full overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
               <div>
-                <CardTitle className="text-lg font-semibold">Livraisons urgentes</CardTitle>
-                <p className="text-sm text-muted-foreground">Nécessite une attention immédiate</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Activité</p>
+                <CardTitle className="text-lg font-semibold">Activité récente</CardTitle>
               </div>
-              <Button variant="ghost" size="sm" className="text-yellow-500 hover:text-yellow-700 dark:text-yellow-400 dark:hover:text-yellow-300" onClick={() => router.push('/logistics')}>
-                Voir tout
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="pt-4">
+              {recentActivity.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Aucune activité récente.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {recentActivity.map((item) => (
+                    <li key={item.id} className="flex items-start gap-3">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-amber-500" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{item.action}</p>
+                        <p className="text-xs text-muted-foreground">{item.driver ?? '—'} · {item.time}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="lg:col-span-2">
+          <Card className="overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Priorité</p>
+                <CardTitle className="text-lg font-semibold">{t('dashboard.charts.urgent')}</CardTitle>
+                <p className="text-sm text-muted-foreground">{t('dashboard.charts.urgentSubtitle')}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-full text-amber-600 hover:text-amber-700 dark:text-amber-400"
+                onClick={() => router.push('/logistics')}
+              >
+                {t('common.seeAll')}
               </Button>
             </CardHeader>
-            <CardContent className="pt-4 h-[calc(100%-80px)]">
-              <div className="space-y-4">
-                {urgentDeliveries.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Aucune livraison urgente.</p>
-                ) : (
-                  urgentDeliveries.map((delivery) => (
+            <CardContent className="pt-4">
+              {urgentDeliveries.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t('dashboard.urgentEmpty')}</p>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {urgentDeliveries.map((delivery) => (
                     <div
                       key={delivery.id}
-                      className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-xl bg-muted/50 p-3 sm:p-4 transition-colors hover:bg-muted"
+                      className="group relative overflow-hidden rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent p-4 transition-all hover:border-amber-500/40"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white dark:from-yellow-600 dark:to-amber-600">
-                          <Package className="h-5 w-5" />
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                            <Truck className="h-4.5 w-4.5" />
+                          </div>
+                          <div>
+                            <p className="font-mono text-sm font-semibold">{delivery.trackingId}</p>
+                            <p className="text-xs text-muted-foreground">{delivery.clientName}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold">{delivery.trackingId}</p>
-                          <p className="text-sm text-muted-foreground">{delivery.clientName}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
                         <Badge className={PRIORITIES[delivery.priority as keyof typeof PRIORITIES].color}>
                           {PRIORITIES[delivery.priority as keyof typeof PRIORITIES].label}
                         </Badge>
-                        <div className="text-right">
-                          <p className="text-sm font-medium">{delivery.city}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {delivery.scheduledDate.toLocaleDateString()}
-                          </p>
-                        </div>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {delivery.city}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {delivery.scheduledDate.toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
 
         <motion.div variants={itemVariants}>
-          <Card className="border-0 shadow-soft h-[400px]">
-            <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
+          <Card className="h-full overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
               <div>
-                <CardTitle className="text-lg font-semibold">Livraisons avec problèmes – Cette semaine</CardTitle>
-                <p className="text-sm text-muted-foreground">Livraisons problématiques nécessitant attention</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Incidents</p>
+                <CardTitle className="text-lg font-semibold">Problèmes</CardTitle>
               </div>
+              <span className="flex items-center gap-1.5 rounded-full bg-rose-500/10 px-2.5 py-1 text-xs font-medium text-rose-700 dark:text-rose-300">
+                <AlertTriangle className="h-3.5 w-3.5" />
+                {totalIssuesThisWeek}
+              </span>
             </CardHeader>
-            <CardContent className="pt-4 h-[calc(100%-80px)]">
-              <div className="h-full overflow-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2 font-medium text-muted-foreground">Nom de l'événement</th>
-                      <th className="text-left py-2 font-medium text-muted-foreground">Type de problème</th>
-                      <th className="text-center py-2 font-medium text-muted-foreground">Nombre</th>
-                      <th className="text-left py-2 font-medium text-muted-foreground">Statut</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {issuesThisWeek.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="py-3 text-center text-muted-foreground">Aucun problème signalé</td>
-                      </tr>
-                    ) : (
-                      issuesThisWeek.map((item) => (
-                        <tr key={item.id} className="border-b last:border-0">
-                          <td className="py-3 font-medium">{item.event}</td>
-                          <td className="py-3 text-muted-foreground">{item.problem}</td>
-                          <td className="py-3 text-center">
-                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-medium">
-                              {item.count}
-                            </span>
-                          </td>
-                          <td className="py-3">
-                            <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${item.statusColor}`}>
-                              {item.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t-2 bg-muted/30">
-                      <td className="py-3 font-semibold" colSpan={2}>Total des problèmes</td>
-                      <td className="py-3 text-center font-semibold text-red-600 dark:text-red-400">{totalIssuesThisWeek}</td>
-                      <td className="py-3"></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+            <CardContent className="pt-4">
+              {issuesThisWeek.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Aucun problème cette semaine.</p>
+              ) : (
+                <ul className="space-y-2.5">
+                  {issuesThisWeek.slice(0, 5).map((item) => (
+                    <li key={item.id} className="flex items-center justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{item.event}</p>
+                        <p className="truncate text-xs text-muted-foreground">{item.problem}</p>
+                      </div>
+                      <span className={`inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-xs font-semibold ${item.statusColor}`}>
+                        {item.count}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
         </motion.div>

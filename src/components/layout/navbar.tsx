@@ -6,6 +6,7 @@ import { useTheme } from '@/components/providers/theme-provider';
 import { cn } from '@/lib/utils';
 import { useUIStore, useNotificationStore } from '@/stores';
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
+import { useTranslation } from '@/lib/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu,
@@ -46,14 +47,16 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { NotificationDropdown } from '@/components/notifications';
+import { LanguageSwitcher } from '@/components/layout/language-switcher';
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme, signOut } = useTheme();
   const { toggleMobileSidebar } = useUIStore();
   const { user: fetchedUser, loading: userLoading } = useCurrentUser();
   const { markAllAsRead, notifications } = useNotificationStore();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Array<{ id: string; type: string; title: string; subtitle: string; path: string }>>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -61,12 +64,11 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
 
   const pageTitles: Record<string, string> = {
-    '/dashboard': 'Tableau de bord',
-    '/logistics': 'Logistique',
-    '/notifications': 'Notifications',
-    '/settings': 'Paramètres',
-    '/profile': 'Profil',
-    
+    '/dashboard': t('nav.dashboard'),
+    '/logistics': t('nav.logistics'),
+    '/notifications': t('nav.notifications'),
+    '/settings': t('nav.settings'),
+    '/profile': t('nav.profile'),
   };
 
   const notificationIcons = {
@@ -144,6 +146,11 @@ export function Navbar() {
     });
   };
 
+  const handleSignOut = () => {
+    signOut();
+    router.push('/');
+  };
+
   return (
     <>
       {/* Mobile Search Overlay */}
@@ -157,7 +164,7 @@ export function Navbar() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 autoFocus
-                placeholder="Rechercher..."
+                placeholder={t('common.search') + '...'}
                 className="h-10 w-full rounded-xl bg-muted/50 pl-10 pr-4 text-sm"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
@@ -194,25 +201,26 @@ export function Navbar() {
               </div>
             ) : searchQuery.length >= 2 ? (
               <div className="p-8 text-center text-sm text-muted-foreground">
-                Aucun résultat trouvé pour &quot;{searchQuery}&quot;
+                {t('navbar.noResults')} &quot;{searchQuery}&quot;
               </div>
             ) : (
               <div className="p-8 text-center text-sm text-muted-foreground">
-                Tapez pour rechercher...
+                {t('navbar.searchHint')}
               </div>
             )}
           </ScrollArea>
         </div>
       )}
 
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/50 bg-background/80 px-4 backdrop-blur-xl lg:px-6">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-2 border-b border-border/60 bg-background/90 px-3 shadow-sm backdrop-blur-xl sm:px-4 lg:px-6">
         {/* Left section */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden"
+          className="h-10 w-10 lg:hidden"
           onClick={toggleMobileSidebar}
+          aria-label="Ouvrir le menu"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -222,7 +230,7 @@ export function Navbar() {
           <span className="text-muted-foreground">LINXOS</span>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
             <span className="font-semibold">
-            {currentPage ? pageTitles[currentPage] : 'Tableau de bord'}
+            {currentPage ? pageTitles[currentPage] : t('nav.dashboard')}
           </span>
         </nav>
 
@@ -233,7 +241,7 @@ export function Navbar() {
             <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500 dark:bg-green-400" />
           </span>
           <span className="text-xs font-medium text-green-600 dark:text-green-400">
-            Live
+            {t('navbar.live')}
           </span>
         </div>
       </div>
@@ -247,7 +255,7 @@ export function Navbar() {
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="navbar-search"
-                  placeholder="Rechercher livraisons, chauffeurs, clients..."
+                  placeholder={t('navbar.search')}
                   className="h-10 w-full rounded-xl bg-muted/50 pl-10 pr-4 text-sm"
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
@@ -290,7 +298,7 @@ export function Navbar() {
                   </div>
                 ) : searchQuery.length >= 2 ? (
                   <div className="p-4 text-center text-sm text-muted-foreground">
-                    Aucun résultat trouvé pour &quot;{searchQuery}&quot;
+                    {t('navbar.noResults')} &quot;{searchQuery}&quot;
                   </div>
                 ) : null}
               </ScrollArea>
@@ -303,14 +311,18 @@ export function Navbar() {
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden"
+        className="h-10 w-10 lg:hidden"
         onClick={() => setIsSearchOpen(true)}
+        aria-label="Rechercher"
       >
         <Search className="h-5 w-5" />
       </Button>
 
       {/* Right section */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
+        {/* Language switcher */}
+        <LanguageSwitcher />
+
         {/* Theme toggle */}
         <Button
           variant="ghost"
@@ -389,17 +401,19 @@ export function Navbar() {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => router.push('/profile')}>
               <User className="mr-2 h-4 w-4" />
-              Profil
+              {t('nav.profile')}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push('/settings')}>
+              <Settings className="mr-2 h-4 w-4" />
+              {t('nav.settings')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem 
+            <DropdownMenuItem
               className="cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
-              onClick={() => {
-                router.push('/');
-              }}
+              onClick={handleSignOut}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Déconnexion
+              {t('sidebar.signOut')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

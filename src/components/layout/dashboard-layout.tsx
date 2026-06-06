@@ -18,7 +18,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         )}
       >
         <Navbar />
-        <main className="p-4 lg:p-6">{children}</main>
+        <main className="px-3 py-4 sm:px-4 sm:py-5 lg:p-6">{children}</main>
       </div>
     </div>
   );

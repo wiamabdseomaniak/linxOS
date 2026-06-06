@@ -54,6 +54,11 @@
   --color-success-foreground: #FFFFFF;
   --color-warning-foreground: #FFFFFF;
   --color-info-foreground: #FFFFFF;
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
 }
 
 :root {
@@ -92,6 +97,11 @@
   --info: 217 91% 60%;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.205 0 0);
+  --sidebar-accent: oklch(0.95 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
   --status-planifie: #3498db;
   --status-en-cours: #e74c3c;
   --status-livree: #2ecc71;
@@ -109,6 +119,11 @@
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
+  --sidebar: oklch(0.18 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.26 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
@@ -161,12 +176,24 @@
   }
   body {
     @apply antialiased bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    letter-spacing: -0.011em;
   }
   html {
     @apply scroll-smooth font-sans;
   }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+    letter-spacing: -0.02em;
+  }
+  h1 { @apply text-3xl font-semibold tracking-tight; }
+  h2 { @apply text-2xl font-semibold tracking-tight; }
+  h3 { @apply text-xl font-semibold tracking-tight; }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+  [dir="rtl"] {
+    font-family: var(--font-sans), "Tajawal", "Cairo", "Noto Sans Arabic", system-ui;
   }
 }
 
@@ -183,12 +210,28 @@
     @apply bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-purple-600 dark:from-violet-400 dark:to-purple-400;
   }
 
+  .text-gradient-brand {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 dark:from-amber-400 dark:via-yellow-400 dark:to-amber-500;
+  }
+
   .shadow-soft {
     box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
   }
 
   .shadow-glow {
     box-shadow: 0 0 20px -5px rgba(124, 58, 237, 0.3);
+  }
+
+  .shadow-brand {
+    box-shadow: 0 8px 24px -10px rgba(245, 196, 0, 0.45);
+  }
+
+  .surface-elevated {
+    @apply bg-card/80 backdrop-blur-sm border border-border/60;
+  }
+
+  .divider-soft {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-border to-transparent;
   }
 }
 

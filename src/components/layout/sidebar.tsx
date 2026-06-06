@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { SIDEBAR_MENU } from '@/lib/constants';
 import { useUIStore } from '@/stores';
+import { useTheme } from '@/components/providers/theme-provider';
+import { useTranslation } from '@/lib/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -45,7 +47,17 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { sidebarCollapsed, toggleSidebar, sidebarMobileOpen, toggleMobileSidebar } = useUIStore();
+  const { signOut } = useTheme();
+  const { t } = useTranslation();
+
+  const handleSignOut = () => {
+    if (typeof window === 'undefined' || window.confirm(t('sidebar.signOutConfirm'))) {
+      signOut();
+      router.push('/');
+    }
+  };
 
   return (
     <>
@@ -56,7 +68,7 @@ export function Sidebar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
             onClick={toggleMobileSidebar}
           />
         )}
@@ -70,15 +82,14 @@ export function Sidebar() {
         }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}
         className={cn(
-          'fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-border/50 bg-sidebar',
-          'dark:bg-gray-900/95 dark:backdrop-blur-xl',
+          'fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-2xl',
           'lg:translate-x-0',
           sidebarMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center justify-between border-b border-border/50 px-2">
-          <Link href="/dashboard" className="flex items-center pt-4">
+        <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
+          <Link href="/dashboard" className="flex items-center pt-4" onClick={() => window.innerWidth < 1024 && toggleMobileSidebar()}>
             <img
               src="/L__2_-removebg-preview.png"
               alt="LINXOS"
@@ -90,12 +101,20 @@ export function Sidebar() {
               className="hidden h-16 w-auto dark:block"
             />
           </Link>
-          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden text-sidebar-foreground hover:bg-sidebar-accent"
+            onClick={toggleMobileSidebar}
+            aria-label="Fermer le menu"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-3">
-          <ul className="space-y-1">
+        <nav className="flex-1 overflow-y-auto px-3 py-4">
+          <ul className="space-y-1.5">
             {SIDEBAR_MENU.map((item) => {
               const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
               const Icon = iconMap[item.icon];
@@ -105,13 +124,13 @@ export function Sidebar() {
                   href={item.path}
                   onClick={() => window.innerWidth < 1024 && toggleMobileSidebar()}
                   className={cn(
-                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                    'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-200',
                     isActive
-                      ? 'bg-gradient-to-r from-yellow-400 to-yellow-400 text-white shadow-lg shadow-yellow-400/25 dark:from-yellow-600 dark:to-yellow-600 dark:shadow-yellow-600/25'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                      ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg shadow-amber-500/30 dark:from-yellow-500 dark:to-amber-600'
+                      : 'text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-foreground active:scale-[0.98]'
                   )}
                 >
-                  {Icon && <Icon className={cn('h-5 w-5 flex-shrink-0', isActive && 'text-white dark:text-gray-900')} />}
+                  {Icon && <Icon className={cn('h-5 w-5 flex-shrink-0', isActive ? 'text-white' : 'text-sidebar-foreground/70')} />}
                   <AnimatePresence>
                     {!sidebarCollapsed && (
                       <motion.span
@@ -146,15 +165,15 @@ export function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-border/50 p-3">
+        <div className="border-t border-sidebar-border p-3">
           <div
             className={cn(
-              'flex items-center gap-3 rounded-xl bg-gradient-to-r from-violet-600/10 to-purple-600/10 p-3',
+              'flex items-center gap-3 rounded-xl bg-sidebar-accent p-3',
               sidebarCollapsed && 'justify-center'
             )}
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-white to-yellow-500 dark:from-gray-800 dark:to-yellow-600">
-              <span className="text-sm font-semibold text-white">AB</span>
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md">
+              <span className="text-sm font-semibold">AB</span>
             </div>
             <AnimatePresence>
               {!sidebarCollapsed && (
@@ -164,8 +183,8 @@ export function Sidebar() {
                   exit={{ opacity: 0, width: 0 }}
                   className="overflow-hidden"
                 >
-                  <p className="text-sm font-semibold">Ahmed Benali</p>
-                  <p className="text-xs text-muted-foreground">Responsable Logistique</p>
+                  <p className="text-sm font-semibold text-sidebar-foreground">Ahmed Benali</p>
+                  <p className="text-xs text-sidebar-foreground/70">Responsable Logistique</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -173,13 +192,9 @@ export function Sidebar() {
 
           <Button
             variant="ghost"
-            onClick={() => {
-              if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-                window.location.href = '/login';
-              }
-            }}
+            onClick={handleSignOut}
             className={cn(
-              'mt-2 w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-300',
+              'mt-2 w-full justify-start font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-500/15 dark:hover:text-red-300',
               sidebarCollapsed && 'justify-center px-2'
             )}
           >
@@ -192,7 +207,7 @@ export function Sidebar() {
                   exit={{ opacity: 0, width: 0 }}
                   className="ml-3 overflow-hidden whitespace-nowrap"
                 >
-                  Déconnexion
+                  {t('sidebar.signOut')}
                 </motion.span>
               )}
             </AnimatePresence>

@@ -20,6 +20,7 @@ export default function LoginPage() {
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [resetEmail, setResetEmail] = useState("")
   const [resetSent, setResetSent] = useState(false)
+  const [resetError, setResetError] = useState("")
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [showOtp, setShowOtp] = useState(false)
   const [otpEmail, setOtpEmail] = useState("")
@@ -320,6 +321,7 @@ export default function LoginPage() {
                   setShowForgotPassword(false)
                   setResetSent(false)
                   setResetEmail("")
+                  setResetError("")
                 }}
                 className="absolute right-4 top-4 text-slate-400 hover:text-slate-600"
               >
@@ -339,18 +341,25 @@ export default function LoginPage() {
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault()
+                    setResetError("")
                     try {
                       const { error: resetError } = await supabase.auth.resetPasswordForEmail(resetEmail, {
                         redirectTo: `${window.location.origin}/reset-password`,
                       })
                       if (resetError) {
-                        console.error("Reset password error:", resetError.message)
+                        const msg = resetError.message.toLowerCase()
+                        if (msg.includes("rate limit")) {
+                          setResetError("Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.")
+                        } else if (msg.includes("user not found") || msg.includes("invalid email")) {
+                          setResetError("Aucun compte n'est associé à cette adresse email.")
+                        } else {
+                          setResetError("Une erreur est survenue. Veuillez réessayer.")
+                        }
                       } else {
                         setResetSent(true)
                       }
-                    } catch (err) {
-                      console.error("Reset password error:", err)
-                      setResetSent(true)
+                    } catch {
+                      setResetError("Une erreur est survenue. Veuillez réessayer.")
                     }
                   }}
                   className="space-y-4"
@@ -371,6 +380,9 @@ export default function LoginPage() {
                       className="transition-all duration-200 focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50"
                       required
                     />
+                    {resetError && (
+                      <p className="text-xs text-red-500 dark:text-red-400">{resetError}</p>
+                    )}
                   </div>
                   <Button
                     type="submit"
@@ -385,6 +397,7 @@ export default function LoginPage() {
                     setShowForgotPassword(false)
                     setResetSent(false)
                     setResetEmail("")
+                    setResetError("")
                   }}
                   className="w-full bg-slate-200 text-slate-900 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-50 dark:hover:bg-slate-700"
                 >

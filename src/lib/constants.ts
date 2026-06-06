@@ -1,6 +1,21 @@
 export const APP_NAME = 'LINXOS';
 export const APP_DESCRIPTION = 'Plateforme de Logistique et Sponsoring';
 
+export const DESIGN_TOKENS = {
+  brand: {
+    primary: '#F5C400',
+    primaryHover: '#E6B800',
+    accent: '#7C3AED',
+    accentHover: '#6D28D9',
+  },
+  status: {
+    planifie: '#3B82F6',
+    enCours: '#F97316',
+    livree: '#22C55E',
+    echouee: '#EF4444',
+  },
+} as const;
+
 export const ROUTES = {
   AUTH: {
     LOGIN: '/login',

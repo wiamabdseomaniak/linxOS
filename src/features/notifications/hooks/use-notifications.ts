@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase, SUPABASE_TABLES, isSupabaseConfigured } from '@/lib/supabase';
 import {
   fetchNotifications,
@@ -48,22 +48,35 @@ export function useNotifications(): UseNotificationsResult {
   }, [refresh]);
 
   // Realtime subscription
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
 
-    const channel = supabase
-      .channel('notifications-changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: SUPABASE_TABLES.NOTIFICATION },
-        () => {
-          refresh();
-        },
-      )
-      .subscribe();
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+    }
+
+    channelRef.current = supabase.channel('notifications-changes');
+
+    try {
+      channelRef.current
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: SUPABASE_TABLES.NOTIFICATION },
+          () => { refresh(); },
+        )
+        .subscribe();
+    } catch {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
   }, [refresh]);
 

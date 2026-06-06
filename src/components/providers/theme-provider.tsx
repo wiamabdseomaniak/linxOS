@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -8,9 +8,24 @@ interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   resolvedTheme: 'light' | 'dark';
+  keepThemeOnSignOut: boolean;
+  setKeepThemeOnSignOut: (keep: boolean) => void;
+  signOut: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+const THEME_STORAGE_KEY = 'linxos-theme';
+const KEEP_THEME_STORAGE_KEY = 'linxos-keep-theme';
+const SESSION_THEME_KEY = 'linxos-theme-session';
+
+function applyResolvedTheme(resolved: 'light' | 'dark') {
+  if (resolved === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
 
 export function useTheme() {
   const context = useContext(ThemeContext);
@@ -25,30 +40,26 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>('system');
+  const [theme, setThemeState] = useState<Theme>('system');
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+  const [keepThemeOnSignOut, setKeepThemeOnSignOutState] = useState<boolean>(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem('linxos-theme') as Theme | null;
-    if (stored) {
-      setTheme(stored);
-    }
+    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
+    const storedKeep = localStorage.getItem(KEEP_THEME_STORAGE_KEY);
+    if (storedTheme) setThemeState(storedTheme);
+    if (storedKeep !== null) setKeepThemeOnSignOutState(storedKeep === 'true');
   }, []);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
+
     const updateResolvedTheme = () => {
-      const resolved = theme === 'system' 
+      const resolved = theme === 'system'
         ? (mediaQuery.matches ? 'dark' : 'light')
         : theme;
       setResolvedTheme(resolved);
-      
-      if (resolved === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      applyResolvedTheme(resolved);
     };
 
     updateResolvedTheme();
@@ -60,11 +71,31 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   }, [theme]);
 
   useEffect(() => {
-    localStorage.setItem('linxos-theme', theme);
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
   }, [theme]);
 
+  useEffect(() => {
+    localStorage.setItem(KEEP_THEME_STORAGE_KEY, String(keepThemeOnSignOut));
+  }, [keepThemeOnSignOut]);
+
+  const setTheme = useCallback((next: Theme) => setThemeState(next), []);
+  const setKeepThemeOnSignOut = useCallback((keep: boolean) => {
+    setKeepThemeOnSignOutState(keep);
+  }, []);
+
+  const signOut = useCallback(() => {
+    if (keepThemeOnSignOut) {
+      sessionStorage.setItem(SESSION_THEME_KEY, THEME_STORAGE_KEY);
+    } else {
+      sessionStorage.removeItem(SESSION_THEME_KEY);
+      localStorage.removeItem(THEME_STORAGE_KEY);
+    }
+  }, [keepThemeOnSignOut]);
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
+    <ThemeContext.Provider
+      value={{ theme, setTheme, resolvedTheme, keepThemeOnSignOut, setKeepThemeOnSignOut, signOut }}
+    >
       {children}
     </ThemeContext.Provider>
   );
