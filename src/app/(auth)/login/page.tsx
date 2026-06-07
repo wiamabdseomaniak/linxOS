@@ -131,7 +131,7 @@ export default function LoginPage() {
           <Card className="border border-white/10 bg-white/95 backdrop-blur-sm shadow-2xl dark:bg-slate-950/95">
             <CardHeader className="space-y-1 pb-2 pt-8">
               <CardTitle className="text-3xl font-bold text-center text-slate-900 dark:text-slate-50">
-                Bon retour
+                Bonjours
               </CardTitle>
               <CardDescription className="text-center text-slate-600 dark:text-slate-400">
                 Entrez vos identifiants pour accéder à votre compte

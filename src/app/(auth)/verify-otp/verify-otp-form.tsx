@@ -47,20 +47,14 @@ export default function VerifyOtpForm() {
     }
   }, [step]);
 
-  // Synchronise l'état de l'auth Supabase : redirige si déjà connecté.
+  // Redirige vers /dashboard si déjà connecté.
   useEffect(() => {
-    let mounted = true;
     supabase.auth.getSession().then(({ data }) => {
-      if (mounted && data.session) {
-        router.replace("/dashboard");
-      }
-    });
-    return () => {
-      mounted = false;
-    };
+      if (data.session) router.replace("/dashboard");
+    }).catch(() => {});
   }, [router]);
 
-  // Étape 1 : déclenche l'envoi du code OTP.
+  // Étape 1 : envoie le code OTP directement via Supabase.
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -78,27 +72,29 @@ export default function VerifyOtpForm() {
 
     setSending(true);
     try {
-      const res = await fetch("/api/auth/request-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmed.toLowerCase() }),
+      const { error: otpErr } = await supabase.auth.signInWithOtp({
+        email: trimmed.toLowerCase(),
+        options: { shouldCreateUser: true },
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError(data?.error ?? "Impossible d'envoyer le code.");
+      if (otpErr) {
+        if (/rate limit/i.test(otpErr.message)) {
+          setError("Trop de tentatives. Patientez quelques minutes avant de réessayer.");
+        } else {
+          setError("Impossible d'envoyer le code. Vérifiez l'email.");
+        }
         return;
       }
       setStep("code");
       setInfo("Un code à 6 chiffres a été envoyé à votre adresse.");
       setResendCooldown(RESEND_COOLDOWN);
     } catch {
-      setError("Erreur réseau. Réessayez.");
+      setError("Erreur réseau. Vérifiez votre connexion.");
     } finally {
       setSending(false);
     }
   };
 
-  // Étape 2 : vérifie le code saisi puis établit la session Supabase côté client.
+  // Étape 2 : vérifie le code et connecte l'utilisateur.
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -112,35 +108,47 @@ export default function VerifyOtpForm() {
 
     setVerifying(true);
     try {
-      const res = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), token: fullCode }),
+      const { error: verifyErr } = await supabase.auth.verifyOtp({
+        email: email.trim().toLowerCase(),
+        token: fullCode,
+        type: "email",
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data?.session) {
-        setError(data?.error ?? "Code invalide.");
+      if (verifyErr) {
+        setError("Code invalide. Vérifiez le code reçu par email.");
         setCode(["", "", "", "", "", ""]);
         otpRefs.current[0]?.focus();
         return;
       }
-
-      // Établit la session dans le client Supabase (cookies + localStorage).
-      const { error: setErr } = await supabase.auth.setSession({
-        access_token: data.session.access_token,
-        refresh_token: data.session.refresh_token,
-      });
-      if (setErr) {
-        setError("Impossible d'établir la session. Réessayez.");
-        return;
-      }
-
       sessionStorage.setItem("2fa_completed", "true");
       router.replace("/dashboard");
     } catch {
-      setError("Erreur réseau. Réessayez.");
+      setError("Erreur réseau. Vérifiez votre connexion.");
     } finally {
       setVerifying(false);
+    }
+  };
+
+  // Renvoie un nouveau code.
+  const handleResend = async () => {
+    if (resendCooldown > 0) return;
+    setError("");
+    setInfo("");
+    setSending(true);
+    try {
+      const { error: otpErr } = await supabase.auth.signInWithOtp({
+        email: email.trim().toLowerCase(),
+        options: { shouldCreateUser: true },
+      });
+      if (otpErr) {
+        setError("Impossible de renvoyer le code. Réessayez.");
+        return;
+      }
+      setInfo("Un nouveau code a été envoyé.");
+      setResendCooldown(RESEND_COOLDOWN);
+    } catch {
+      setError("Erreur réseau. Vérifiez votre connexion.");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -177,31 +185,6 @@ export default function VerifyOtpForm() {
     }
     if (e.key === "ArrowRight" && index < 5) {
       otpRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleResend = async () => {
-    if (resendCooldown > 0) return;
-    setError("");
-    setInfo("");
-    setSending(true);
-    try {
-      const res = await fetch("/api/auth/request-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError(data?.error ?? "Impossible de renvoyer le code.");
-        return;
-      }
-      setInfo("Un nouveau code a été envoyé.");
-      setResendCooldown(RESEND_COOLDOWN);
-    } catch {
-      setError("Erreur réseau. Réessayez.");
-    } finally {
-      setSending(false);
     }
   };
 
