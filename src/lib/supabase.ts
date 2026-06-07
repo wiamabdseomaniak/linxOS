@@ -1,7 +1,18 @@
+/**
+ * Client Supabase partagé pour le navigateur.
+ * Implémente un pattern singleton + Proxy pour éviter toute erreur au démarrage
+ * si les variables d'environnement ne sont pas configurées (mode démo).
+ */
+
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+// Cache local du client navigateur (une seule instance par session onglet).
 let browserClient: SupabaseClient | null = null;
 
+/**
+ * Récupère les variables d'environnement Supabase depuis `process.env`.
+ * Centralisé pour faciliter la lecture / le test.
+ */
 function getEnv() {
   return {
     url: process.env.NEXT_PUBLIC_SUPABASE_URL,

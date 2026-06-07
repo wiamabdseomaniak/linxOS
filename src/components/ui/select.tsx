@@ -1,3 +1,10 @@
+/**
+ * Composant Select (Base UI) — liste déroulante accessible au clavier.
+ * Exporte : Select, SelectGroup, SelectValue, SelectTrigger, SelectContent,
+ *           SelectLabel, SelectItem, SelectSeparator, SelectScrollUpButton, SelectScrollDownButton.
+ * Le trigger est rendu avec la primitive Trigger (chevron intégré via IconSelector).
+ */
+
 "use client"
 
 import * as React from "react"
@@ -6,8 +13,10 @@ import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { cn } from "@/lib/utils"
 import { IconSelector, IconCheck, IconChevronUp, IconChevronDown } from "@tabler/icons-react"
 
+// Re-export direct de la primitive Root.
 const Select = SelectPrimitive.Root
 
+// Groupe d'items (sert à isoler le scroll et afficher un label).
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
     <SelectPrimitive.Group
@@ -18,6 +27,7 @@ function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   )
 }
 
+// Conteneur qui affiche la valeur sélectionnée (à mettre dans le Trigger).
 function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
   return (
     <SelectPrimitive.Value
@@ -28,6 +38,7 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
   )
 }
 
+// Bouton qui ouvre la liste (chevron + valeur courante).
 function SelectTrigger({
   className,
   size = "default",
@@ -56,6 +67,7 @@ function SelectTrigger({
   )
 }
 
+// Contenu positionné (popup) : scrollable, animé selon le côté, taille alignée au trigger.
 function SelectContent({
   className,
   children,
@@ -95,6 +107,7 @@ function SelectContent({
   )
 }
 
+// Libellé d'un groupe d'items (affiché en en-tête du groupe).
 function SelectLabel({
   className,
   ...props
@@ -108,6 +121,7 @@ function SelectLabel({
   )
 }
 
+// Item sélectionnable. La coche (IconCheck) s'affiche pour l'item courant.
 function SelectItem({
   className,
   children,
@@ -136,6 +150,7 @@ function SelectItem({
   )
 }
 
+// Séparateur horizontal entre groupes d'items.
 function SelectSeparator({
   className,
   ...props
@@ -152,6 +167,7 @@ function SelectSeparator({
   )
 }
 
+// Bouton affiché en haut de la liste lorsqu'il y a plus d'items au-dessus (scroll infini).
 function SelectScrollUpButton({
   className,
   ...props
@@ -171,6 +187,7 @@ function SelectScrollUpButton({
   )
 }
 
+// Bouton affiché en bas de la liste lorsqu'il y a plus d'items en dessous.
 function SelectScrollDownButton({
   className,
   ...props

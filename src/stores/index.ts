@@ -1,7 +1,15 @@
+/**
+ * Stores Zustand centralisés de l'application.
+ * Regroupe quatre domaines : Auth, Livraison, Notification, UI.
+ * Les stores persistants (Auth, UI) s'appuient sur le middleware
+ * `persist` avec une clé localStorage dédiée.
+ */
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Utilisateur, Livraison, Notification, StatutLivraison, StatutPreparation } from '@/types';
 
+// État et actions du store d'authentification.
 interface AuthState {
   user: Utilisateur | null;
   isAuthenticated: boolean;
@@ -10,6 +18,7 @@ interface AuthState {
   updateUser: (user: Partial<Utilisateur>) => void;
 }
 
+// Persisté dans localStorage (clé "linxos-auth") pour survivre à un refresh.
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -26,6 +35,7 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
+// État et actions du store de livraisons (CRUD + filtres + sélections).
 interface LivraisonState {
   livraisons: Livraison[];
   selectedLivraison: Livraison | null;
@@ -45,6 +55,7 @@ interface LivraisonState {
   updateLivraisonStatus: (id: string, statut: StatutLivraison) => void;
 }
 
+// Non persistant : la source de vérité reste Supabase.
 export const useLivraisonStore = create<LivraisonState>((set) => ({
   livraisons: [],
   selectedLivraison: null,
@@ -84,6 +95,7 @@ export const useLivraisonStore = create<LivraisonState>((set) => ({
     })),
 }));
 
+// État et actions du store de notifications (liste locale + compteur de non-lus).
 interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
@@ -93,6 +105,7 @@ interface NotificationState {
   removeNotification: (id: string) => void;
 }
 
+// Non persistant : alimenté principalement par `useNotifications()` (Supabase).
 export const useNotificationStore = create<NotificationState>((set) => ({
   notifications: [],
   unreadCount: 0,
@@ -122,6 +135,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
     })),
 }));
 
+// État et actions du store UI (sidebar + thème).
 interface UIState {
   sidebarCollapsed: boolean;
   sidebarMobileOpen: boolean;
@@ -132,6 +146,7 @@ interface UIState {
   setTheme: (theme: UIState['theme']) => void;
 }
 
+// Persisté (clé "linxos-ui") pour conserver les préférences de l'utilisateur.
 export const useUIStore = create<UIState>()(
   persist(
     (set) => ({

@@ -1,3 +1,10 @@
+/**
+ * Composant Tabs (Base UI) — système d'onglets accessible au clavier.
+ * Expose : Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants.
+ * Orientation : `horizontal` (par défaut) ou `vertical`.
+ * Variant de liste : `default` (pilules) ou `line` (souligné).
+ */
+
 "use client"
 
 import { Tabs as TabsPrimitive } from "@base-ui/react/tabs"
@@ -5,6 +12,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+// Conteneur racine — expose l'orientation aux enfants via `data-orientation`.
 function Tabs({
   className,
   orientation = "horizontal",
@@ -23,6 +31,7 @@ function Tabs({
   )
 }
 
+// Variants CVA pour la liste d'onglets (`default` = pilules, `line` = souligné).
 const tabsListVariants = cva(
   "group/tabs-list inline-flex w-fit items-center justify-center rounded-full p-1 text-muted-foreground group-data-horizontal/tabs:h-9 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col group-data-vertical/tabs:rounded-2xl data-[variant=line]:rounded-none",
   {
@@ -38,6 +47,7 @@ const tabsListVariants = cva(
   }
 )
 
+// Conteneur des triggers — applique le variant (`default` ou `line`).
 function TabsList({
   className,
   variant = "default",
@@ -53,6 +63,8 @@ function TabsList({
   )
 }
 
+// Onglet cliquable — l'onglet actif a un fond `bg-background` (variant default)
+// ou un trait en bas / à droite (variant line) via pseudo-élément `::after`.
 function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
   return (
     <TabsPrimitive.Tab
@@ -69,6 +81,7 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
   )
 }
 
+// Panneau de contenu — visible uniquement pour l'onglet actif (géré par Base UI).
 function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
   return (
     <TabsPrimitive.Panel

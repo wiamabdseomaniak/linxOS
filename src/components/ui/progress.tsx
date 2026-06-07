@@ -1,9 +1,16 @@
+/**
+ * Composant Progress (Base UI) — barre de progression accessible.
+ * Expose : Progress, ProgressTrack, ProgressIndicator, ProgressLabel, ProgressValue.
+ * La valeur (`value` entre 0 et 100) est automatiquement annoncée aux lecteurs d'écran.
+ */
+
 "use client"
 
 import { Progress as ProgressPrimitive } from "@base-ui/react/progress"
 
 import { cn } from "@/lib/utils"
 
+// Racine : conteneur flex qui aligne label / value / track.
 function Progress({
   className,
   children,
@@ -25,6 +32,7 @@ function Progress({
   )
 }
 
+// Piste (fond gris) sur laquelle glisse l'indicateur.
 function ProgressTrack({ className, ...props }: ProgressPrimitive.Track.Props) {
   return (
     <ProgressPrimitive.Track
@@ -38,6 +46,7 @@ function ProgressTrack({ className, ...props }: ProgressPrimitive.Track.Props) {
   )
 }
 
+// Indicateur coloré qui se remplit proportionnellement à `value`.
 function ProgressIndicator({
   className,
   ...props
@@ -51,6 +60,7 @@ function ProgressIndicator({
   )
 }
 
+// Libellé textuel associé à la progression (ex : "Upload en cours").
 function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
   return (
     <ProgressPrimitive.Label
@@ -61,6 +71,7 @@ function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
   )
 }
 
+// Affichage textuel de la valeur (ex : "45 %"), aligné à droite (`ms-auto`).
 function ProgressValue({ className, ...props }: ProgressPrimitive.Value.Props) {
   return (
     <ProgressPrimitive.Value

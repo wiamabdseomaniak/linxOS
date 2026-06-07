@@ -1,3 +1,9 @@
+/**
+ * Composant ScrollArea (Base UI) — zone de défilement avec barres stylées.
+ * Expose : ScrollArea, ScrollBar.
+ * La barre (thumb) reste masquée hors survol (overridable via CSS).
+ */
+
 "use client"
 
 import * as React from "react"
@@ -5,6 +11,7 @@ import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area"
 
 import { cn } from "@/lib/utils"
 
+// Conteneur défilable + scrollbar stylée.
 function ScrollArea({
   className,
   children,
@@ -28,6 +35,7 @@ function ScrollArea({
   )
 }
 
+// Barre de défilement custom (verticale par défaut, peut être horizontale).
 function ScrollBar({
   className,
   orientation = "vertical",

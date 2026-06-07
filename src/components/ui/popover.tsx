@@ -1,3 +1,10 @@
+/**
+ * Composant Popover (Base UI) — contenu flottant attaché à un trigger.
+ * Expose : Popover, PopoverTrigger, PopoverContent, PopoverHeader,
+ *           PopoverTitle, PopoverDescription.
+ * Position configurable via `side` / `align` / `sideOffset` / `alignOffset`.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -5,10 +12,12 @@ import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 
 import { cn } from "@/lib/utils"
 
+// Racine du popover.
 function Popover({ ...props }: PopoverPrimitive.Root.Props) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />
 }
 
+// Élément qui ouvre le popover au clic/hover.
 function PopoverTrigger({ children, render, nativeButton, ...props }: PopoverPrimitive.Trigger.Props) {
   return (
     <PopoverPrimitive.Trigger
@@ -22,6 +31,7 @@ function PopoverTrigger({ children, render, nativeButton, ...props }: PopoverPri
   )
 }
 
+// Contenu positionné du popover (animé selon le côté).
 function PopoverContent({
   className,
   align = "center",
@@ -56,6 +66,7 @@ function PopoverContent({
   )
 }
 
+// En-tête du popover (titre + description).
 function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -66,6 +77,7 @@ function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Titre du popover (rendu via la primitive Title pour l'accessibilité).
 function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
   return (
     <PopoverPrimitive.Title
@@ -76,6 +88,7 @@ function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
   )
 }
 
+// Description du popover (texte secondaire, également exposé aux lecteurs d'écran).
 function PopoverDescription({
   className,
   ...props

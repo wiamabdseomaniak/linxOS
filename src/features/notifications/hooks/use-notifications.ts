@@ -1,3 +1,10 @@
+/**
+ * Hook Notifications.
+ * Charge la liste, expose les actions (marquer lu, tout marquer, supprimer)
+ * et s'abonne au canal temps réel Supabase pour rafraîchir automatiquement
+ * la liste à chaque modification côté serveur.
+ */
+
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
@@ -10,6 +17,7 @@ import {
 } from '@/features/notifications/api/supabase-notifications';
 import type { Notification } from '@/types';
 
+// Forme publique du hook : données + compteurs + actions.
 interface UseNotificationsResult {
   notifications: Notification[];
   unreadCount: number;
@@ -47,7 +55,7 @@ export function useNotifications(): UseNotificationsResult {
     refresh();
   }, [refresh]);
 
-  // Realtime subscription
+  // Référence mutable vers le canal Supabase Realtime (permet le cleanup au démontage).
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {

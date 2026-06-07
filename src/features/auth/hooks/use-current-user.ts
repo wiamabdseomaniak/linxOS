@@ -1,9 +1,15 @@
+/**
+ * Hook React pour gérer l'utilisateur courant (lecture + mise à jour du profil).
+ * Retourne `null` + `loading: true` tant que la session Supabase n'est pas résolue.
+ */
+
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { fetchCurrentProfile, updateCurrentProfile, type ProfileUpdate } from '@/features/auth/api/supabase-profile';
 import type { User } from '@/types';
 
+// Forme du résultat exposé aux consommateurs du hook.
 interface UseCurrentUserResult {
   user: User | null;
   loading: boolean;

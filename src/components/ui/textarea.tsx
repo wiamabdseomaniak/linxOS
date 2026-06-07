@@ -1,7 +1,15 @@
+/**
+ * Composant Textarea — zone de texte multi-ligne stylée.
+ * Hauteur minimale `min-h-16`, redimensionnement désactivé (`resize-none`).
+ * S'adapte automatiquement à la hauteur du contenu via `field-sizing-content`
+ * (expérimental, supporté par les navigateurs modernes).
+ */
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+// Wrapper autour du textarea HTML natif.
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (
     <textarea

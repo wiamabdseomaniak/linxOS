@@ -1,9 +1,16 @@
+/**
+ * API Profil — Supabase.
+ * Centralise les requêtes liées à la table `utilisateur` (lecture / mise à jour)
+ * et adapte les lignes brutes au modèle `User` consommé par l'UI.
+ */
+
 import { supabase, SUPABASE_TABLES } from '@/lib/supabase';
 import type { UtilisateurRow } from '@/types/supabase';
 import type { User } from '@/types';
 
 /**
- * Convert a Supabase utilisateur row to the app's User type.
+ * Convertit une ligne Supabase `utilisateur` en modèle `User` de l'application.
+ * Normalise les valeurs nulles et les dates ISO en objets `Date`.
  */
 function rowToUser(row: UtilisateurRow): User {
   return {
@@ -25,8 +32,8 @@ function rowToUser(row: UtilisateurRow): User {
 }
 
 /**
- * Fetch the current authenticated user profile from Supabase.
- * Returns null if no session or no profile.
+ * Récupère le profil de l'utilisateur courant à partir de la session Supabase.
+ * Renvoie `null` si pas de session active ou si aucun profil ne correspond.
  */
 export async function fetchCurrentProfile(): Promise<User | null> {
   try {
@@ -50,7 +57,8 @@ export async function fetchCurrentProfile(): Promise<User | null> {
 }
 
 /**
- * Fetch a profile by ID (used as a fallback when auth is not yet linked).
+ * Récupère un profil directement par son identifiant.
+ * Utilisé en repli tant que l'auth Supabase n'est pas relié à un compte.
  */
 export async function fetchProfileById(id: string): Promise<User | null> {
   try {
@@ -75,7 +83,8 @@ export interface ProfileUpdate {
 }
 
 /**
- * Update the current authenticated user's profile.
+ * Met à jour le profil de l'utilisateur authentifié.
+ * Convertit le `name` complet en `prenom` + `nom` puis applique le patch SQL.
  */
 export async function updateCurrentProfile(
   patch: ProfileUpdate,

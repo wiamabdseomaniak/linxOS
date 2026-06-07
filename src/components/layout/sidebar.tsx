@@ -1,3 +1,11 @@
+/**
+ * Sidebar principale de l'application.
+ * - Génère dynamiquement le menu à partir de `SIDEBAR_MENU`
+ * - Bascule entre les états étendu / réduit (desktop) et visible / caché (mobile)
+ * - Affiche un overlay sombre en mode mobile
+ * - Gère la déconnexion avec confirmation
+ */
+
 'use client';
 
 import Link from 'next/link';
@@ -6,7 +14,6 @@ import { cn } from '@/lib/utils';
 import { SIDEBAR_MENU } from '@/lib/constants';
 import { useUIStore } from '@/stores';
 import { useTheme } from '@/components/providers/theme-provider';
-import { useTranslation } from '@/lib/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -29,6 +36,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
+// Mapping nom d'icône (string dans `SIDEBAR_MENU`) → composant Lucide.
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard,
   Truck,
@@ -50,10 +58,10 @@ export function Sidebar() {
   const router = useRouter();
   const { sidebarCollapsed, toggleSidebar, sidebarMobileOpen, toggleMobileSidebar } = useUIStore();
   const { signOut } = useTheme();
-  const { t } = useTranslation();
 
+  // Déclenche la déconnexion après confirmation (sauf en SSR).
   const handleSignOut = () => {
-    if (typeof window === 'undefined' || window.confirm(t('sidebar.signOutConfirm'))) {
+    if (typeof window === 'undefined' || window.confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
       signOut();
       router.push('/');
     }
@@ -87,7 +95,7 @@ export function Sidebar() {
           sidebarMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        {/* Logo */}
+        {/* Logo + bouton fermeture (mobile) en haut de la sidebar. */}
         <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
           <Link href="/dashboard" className="flex items-center pt-4" onClick={() => window.innerWidth < 1024 && toggleMobileSidebar()}>
             <img
@@ -112,10 +120,13 @@ export function Sidebar() {
           </Button>
         </div>
 
-        {/* Navigation */}
+        {/* Liste de navigation générée depuis `SIDEBAR_MENU`.
+            L'item actif est mis en valeur via un dégradé jaune.
+            En mode réduit, le label est remplacé par un tooltip au survol. */}
         <nav className="flex-1 overflow-y-auto px-3 py-4">
           <ul className="space-y-1.5">
             {SIDEBAR_MENU.map((item) => {
+              // Actif si on est sur la route exacte OU sur une sous-route.
               const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
               const Icon = iconMap[item.icon];
 
@@ -164,7 +175,7 @@ export function Sidebar() {
           </ul>
         </nav>
 
-        {/* Footer */}
+        {/* Pied de sidebar : carte profil + bouton de déconnexion. */}
         <div className="border-t border-sidebar-border p-3">
           <div
             className={cn(
@@ -172,7 +183,7 @@ export function Sidebar() {
               sidebarCollapsed && 'justify-center'
             )}
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 text-white shadow-md">
               <span className="text-sm font-semibold">AB</span>
             </div>
             <AnimatePresence>
@@ -207,7 +218,7 @@ export function Sidebar() {
                   exit={{ opacity: 0, width: 0 }}
                   className="ml-3 overflow-hidden whitespace-nowrap"
                 >
-                  {t('sidebar.signOut')}
+                  
                 </motion.span>
               )}
             </AnimatePresence>

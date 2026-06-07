@@ -1,3 +1,9 @@
+/**
+ * Layout principal du tableau de bord.
+ * Combine la Sidebar (collapsible) et la Navbar, et adapte
+ * la largeur du contenu principal en fonction de l'état UI persisté.
+ */
+
 'use client';
 
 import { useUIStore } from '@/stores';

@@ -36,7 +36,6 @@ import {
 } from 'recharts';
 import { useDashboard } from '@/features/dashboard/hooks/use-dashboard';
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
-import { useTranslation } from '@/lib/i18n';
 import { PRIORITIES } from '@/lib/constants';
 
 const containerVariants = {
@@ -85,7 +84,6 @@ export default function DashboardPage() {
   const router = useRouter();
   const { stats, weekly, byCity, activity, problems, urgent, loading, error } = useDashboard();
   const { user } = useCurrentUser();
-  const { t } = useTranslation();
 
   const displayName = user?.name?.split(' ')[0] ?? 'Utilisateur';
 
@@ -103,7 +101,7 @@ export default function DashboardPage() {
     ring: string;
   }> = [
     {
-      title: t('dashboard.stats.total'),
+      title: 'Total des livraisons',
       value: stats.totalDeliveries.toLocaleString(),
       change: '+12.5%',
       changeType: 'positive',
@@ -112,7 +110,7 @@ export default function DashboardPage() {
       ring: 'before:bg-violet-500/40',
     },
     {
-      title: t('dashboard.stats.pending'),
+      title: 'En cours',
       value: stats.activeDeliveries.toString(),
       change: '+5.2%',
       changeType: 'negative',
@@ -121,7 +119,7 @@ export default function DashboardPage() {
       ring: 'before:bg-amber-500/40',
     },
     {
-      title: t('dashboard.stats.completed'),
+      title: 'Livrées',
       value: stats.completedDeliveries.toLocaleString(),
       change: '+8.1%',
       changeType: 'positive',
@@ -130,7 +128,7 @@ export default function DashboardPage() {
       ring: 'before:bg-emerald-500/40',
     },
     {
-      title: t('dashboard.stats.issues'),
+      title: 'Problèmes',
       value: stats.failedDeliveries.toString(),
       change: '-3.4%',
       changeType: 'positive',
@@ -160,33 +158,18 @@ export default function DashboardPage() {
       >
         <div>
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-300/50 bg-gradient-to-r from-amber-100/80 to-yellow-100/80 px-3.5 py-1.5 text-xs font-semibold text-amber-800 shadow-md shadow-amber-500/10 ring-1 ring-amber-300/30 backdrop-blur-sm dark:border-amber-400/30 dark:from-amber-400/15 dark:to-yellow-400/10 dark:text-amber-200 dark:ring-amber-400/20">
-            <Sparkles className="h-3.5 w-3.5" />
+            
             Vue d&apos;ensemble · 2026
           </div>
           <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            {t('dashboard.greeting')}, <span className="text-gradient-brand">{displayName}</span>
+            {'Bonjour'}, <span className="text-gradient-brand">{displayName}</span>
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            {t('dashboard.greetingSuffix')}
+            {"Voici un aperçu de l'activité de vos livraisons aujourd'hui."}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-10 rounded-full border-border/60 bg-card/80 px-4 text-sm font-semibold shadow-md shadow-black/5 backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-lg hover:shadow-black/10 active:translate-y-0"
-          >
-            <Calendar className="mr-1.5 h-4 w-4" />
-            Cette semaine
-          </Button>
-          <Button
-            size="sm"
-            className="h-10 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 px-5 text-sm font-semibold text-white shadow-lg shadow-amber-500/30 ring-1 ring-amber-400/40 transition-all hover:-translate-y-0.5 hover:from-amber-600 hover:to-yellow-600 hover:shadow-xl hover:shadow-amber-500/40 active:translate-y-0 dark:from-amber-500 dark:to-yellow-500"
-          >
-            <TrendingUp className="mr-1.5 h-4 w-4" />
-            Exporter
-          </Button>
-        </div>
+       
+          
       </motion.div>
 
       {error && (
@@ -232,7 +215,7 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {t('dashboard.stats.monthOverMonth')}
+                  {'Par rapport au mois dernier'}
                 </p>
               </div>
             </Card>
@@ -247,7 +230,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Performance</p>
                 <CardTitle className="text-lg font-semibold">
-                  {t('dashboard.charts.monthlyDeliveries')}
+                  {'Livraisons hebdomadaires'}
                 </CardTitle>
               </div>
               <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300">
@@ -256,16 +239,16 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="pt-6">
               <div className="h-[280px] w-full min-w-0">
-                <ResponsiveContainer width="100%" aspect={2} minWidth={0}>
+                <ResponsiveContainer width="100%" aspect={3.5} minWidth={0}>
                   <AreaChart data={weekly} margin={{ left: -20, right: 8 }}>
                     <defs>
                       <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.45} />
-                        <stop offset="95%" stopColor="#7C3AED" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#F5C400" stopOpacity={0.45} />
+                        <stop offset="95%" stopColor="#F5C400" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="strokeValue" x1="0" y1="0" x2="1" y2="0">
                         <stop offset="0%" stopColor="#F5C400" />
-                        <stop offset="100%" stopColor="#7C3AED" />
+                        <stop offset="100%" stopColor="#F5C400" />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} vertical={false} />
@@ -339,11 +322,11 @@ export default function DashboardPage() {
           <Card className="overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
             <CardHeader className="border-b border-border/50 pb-4">
               <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Répartition</p>
-              <CardTitle className="text-lg font-semibold">{t('dashboard.charts.byCity')}</CardTitle>
+              <CardTitle className="text-lg font-semibold">{'Livraisons par ville'}</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="h-[280px] w-full min-w-0">
-                <ResponsiveContainer width="100%" aspect={2} minWidth={0}>
+                <ResponsiveContainer width="100%" aspect={3.5} minWidth={0}>
                   <BarChart data={byCity} margin={{ left: -20, right: 8 }}>
                     <defs>
                       <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
@@ -405,8 +388,8 @@ export default function DashboardPage() {
             <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Priorité</p>
-                <CardTitle className="text-lg font-semibold">{t('dashboard.charts.urgent')}</CardTitle>
-                <p className="text-sm text-muted-foreground">{t('dashboard.charts.urgentSubtitle')}</p>
+                <CardTitle className="text-lg font-semibold">{'Livraisons urgentes'}</CardTitle>
+                <p className="text-sm text-muted-foreground">{'À traiter en priorité'}</p>
               </div>
               <Button
                 variant="ghost"
@@ -414,12 +397,12 @@ export default function DashboardPage() {
                 className="rounded-full text-amber-600 hover:text-amber-700 dark:text-amber-400"
                 onClick={() => router.push('/logistics')}
               >
-                {t('common.seeAll')}
+                {'Voir tout'}
               </Button>
             </CardHeader>
             <CardContent className="pt-4">
               {urgentDeliveries.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t('dashboard.urgentEmpty')}</p>
+                <p className="text-sm text-muted-foreground">{'Aucune livraison urgente pour le moment.'}</p>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
                   {urgentDeliveries.map((delivery) => (

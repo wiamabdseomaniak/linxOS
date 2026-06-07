@@ -1,5 +1,19 @@
+/**
+ * Route API : GET /api/dashboard
+ * Agrège plusieurs sections du tableau de bord :
+ * - Statistiques globales (totaux, par statut, clients actifs)
+ * - Livraisons mensuelles
+ * - Répartition par ville
+ * - Activité récente (8 dernières livraisons)
+ * - Problèmes signalés
+ * - Livraisons urgentes en transit
+ *
+ * Les requêtes Supabase sont exécutées en parallèle pour minimiser la latence.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 
+// Force un rendu dynamique (pas de cache statique) car les données changent à chaque appel.
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
@@ -11,7 +25,7 @@ export async function GET() {
 
   const supabase = createClient(url, anonKey);
 
-  // Stats
+  // 1. Statistiques agrégées : comptage par statut + clients uniques.
   const { data: stats } = await supabase
     .from('livraison')
     .select('statut_livraison, id_client');
@@ -22,7 +36,7 @@ export async function GET() {
   const echouees = stats?.filter(r => r.statut_livraison === 'echouee').length ?? 0;
   const clientsActifs = new Set(stats?.map(r => r.id_client).filter(Boolean)).size;
 
-  // Monthly
+  // 2. Livraisons mensuelles : histogramme sur 12 mois à partir de `date_prevue`.
   const { data: monthly } = await supabase.from('livraison').select('date_prevue');
   const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
   const counts = new Array(12).fill(0);
@@ -32,7 +46,7 @@ export async function GET() {
     }
   });
 
-  // By city
+  // 3. Répartition par ville (les valeurs nulles sont regroupées sous "Inconnue").
   const { data: cities } = await supabase.from('livraison').select('ville');
   const cityMap = new Map<string, number>();
   cities?.forEach(r => {
@@ -40,14 +54,14 @@ export async function GET() {
     cityMap.set(c, (cityMap.get(c) || 0) + 1);
   });
 
-  // Activity
+  // 4. Activité récente : 8 dernières livraisons + leur historique de tracking.
   const { data: activity } = await supabase
     .from('livraison')
     .select('*, tracking(*)')
     .order('date_prevue', { ascending: false })
     .limit(8);
 
-  // Urgent
+  // 5. Livraisons urgentes (en_cours, triées par date prévue, max 3) + jointure client.
   const { data: urgent } = await supabase
     .from('livraison')
     .select('*, client(*)')

@@ -1,3 +1,8 @@
+/**
+ * Composant Checkbox (Base UI) — case à cocher stylée.
+ * Affiche un check (Tabler IconCheck) lorsque cochée.
+ */
+
 "use client"
 
 import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox"
@@ -5,6 +10,7 @@ import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox"
 import { cn } from "@/lib/utils"
 import { IconCheck } from "@tabler/icons-react"
 
+// Racine du Checkbox — accepte toutes les props du primitif Base UI.
 function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
   return (
     <CheckboxPrimitive.Root

@@ -1,4 +1,9 @@
-// Page Livraisons effectuées — liste des événements livrés avec statuts, progression et détails
+/**
+ * Page "Événements livrés" — vue filtrée sur les livraisons terminées.
+ * Réutilise le hook `useLogistics` puis filtre localement sur `status === 'livree'`.
+ * Affiche statistiques, cartes livraisons, panneau de détails et dialogue d'ajout de note.
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -25,6 +30,7 @@ import { Textarea } from '@/components/ui/textarea';
 import type { LogisticsEvent } from '@/types/supabase';
 import { useLogistics } from '@/features/logistics/hooks/use-logistics';
 
+// Mapping statut livraison → étape de préparation dérivée.
 const DELIVERY_TO_PREP: Record<string, string> = {
   planifie: 'en_preparation',
   en_cours: 'prete',
@@ -88,19 +94,24 @@ export default function DeliveredPage() {
     openWhatsApp,
   } = useLogistics('livree', 'all');
 
+  // Filtre local supplémentaire : useLogistics peut renvoyer des statuts
+  // proches ; on garde uniquement les livraisons réellement terminées.
   const events = allEvents.filter(e => e.status === 'livree');
 
+  // Pré-remplit la note existante à l'ouverture du dialogue.
   const openNoteDialog = (event: LogisticsEvent) => {
     setSelectedEvent(event);
     setNoteText(event.notes || '');
     setNoteDialogOpen(true);
   };
 
+  // Agrégats affichés dans les 3 cartes-statistiques.
   const totalUnits = events.reduce((s, e) => s + e.quantity, 0);
   const uniqueCities = new Set(events.map(e => e.city)).size;
 
   return (
     <div className="space-y-6">
+      {/* En-tête : titre + badge compteur de livraisons livrées. */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -199,8 +210,10 @@ export default function DeliveredPage() {
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-yellow-400 border-t-transparent" />
               </div>
             ) : (
+            /* Grille de cartes livraison : badge statut + barre de progression + métadonnées. */
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {events.map((event) => {
+                // Statut préparation dérivé du statut livraison (cf. DELIVERY_TO_PREP).
                 const prepStatus = DELIVERY_TO_PREP[event.status] || event.statut_preparation;
                 const prepIdx = PREP_STEPS.indexOf(prepStatus);
                 const prepProgress = prepIdx >= 0 ? ((prepIdx + 1) / PREP_STEPS.length) * 100 : 0;
@@ -302,6 +315,7 @@ export default function DeliveredPage() {
             <SheetTitle>Détails de l'événement</SheetTitle>
           </SheetHeader>
           <div className="space-y-6 mt-6">
+            {/* Bloc récap : IDs, événement, club, adresse, date/heure, contact. */}
             <div className="rounded-lg bg-muted/50 dark:bg-muted/20 p-4 space-y-3">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
@@ -387,7 +401,7 @@ export default function DeliveredPage() {
               )}
             </div>
 
-            {/* Timeline */}
+            {/* Chronologie des étapes de préparation (points colorés, actif/inactif). */}
             <div className="rounded-lg border border-border p-4">
               <p className="text-sm font-medium mb-3">Chronologie de la préparation</p>
               <div className="space-y-3">
@@ -413,6 +427,7 @@ export default function DeliveredPage() {
 
             <div>
               <p className="text-sm font-medium mb-3">Actions rapides</p>
+              {/* Boutons WhatsApp (ouvre wa.me) + Ajouter une note (ouvre la modale). */}
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant="outline"
@@ -453,6 +468,7 @@ export default function DeliveredPage() {
               rows={4}
             />
             <div className="space-y-2">
+              {/* Zone de dépôt fichiers (input file caché déclenché par onClick du parent). */}
               <label className="text-sm text-muted-foreground">Joindre des fichiers</label>
               <div
                 className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-violet-400 transition-colors"

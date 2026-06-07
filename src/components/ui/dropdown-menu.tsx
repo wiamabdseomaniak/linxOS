@@ -1,3 +1,12 @@
+/**
+ * Composant DropdownMenu (Base UI) — menu contextuel accessible.
+ * Expose : DropdownMenu, DropdownMenuPortal, DropdownMenuTrigger,
+ *           DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel,
+ *           DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioGroup,
+ *           DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut,
+ *           DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -6,14 +15,17 @@ import { Menu as MenuPrimitive } from "@base-ui/react/menu"
 import { cn } from "@/lib/utils"
 import { IconChevronRight, IconCheck } from "@tabler/icons-react"
 
+// Racine du menu.
 function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {
   return <MenuPrimitive.Root data-slot="dropdown-menu" {...props} />
 }
 
+// Portal (rendu dans un nœud séparé du DOM pour éviter les débordements).
 function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
   return <MenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />
 }
 
+// Bouton / élément qui ouvre le menu au clic/hover.
 function DropdownMenuTrigger({ children, render, nativeButton, ...props }: MenuPrimitive.Trigger.Props) {
   return (
     <MenuPrimitive.Trigger
@@ -27,6 +39,7 @@ function DropdownMenuTrigger({ children, render, nativeButton, ...props }: MenuP
   )
 }
 
+// Contenu positionné du menu (animations + positionnement intelligent).
 function DropdownMenuContent({
   align = "start",
   alignOffset = 0,
@@ -58,10 +71,12 @@ function DropdownMenuContent({
   )
 }
 
+// Groupe logique d'items (utilisé avec DropdownMenuLabel).
 function DropdownMenuGroup({ ...props }: MenuPrimitive.Group.Props) {
   return <MenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />
 }
 
+// Libellé non-interactif pour introduire un groupe.
 function DropdownMenuLabel({
   className,
   inset,
@@ -82,6 +97,7 @@ function DropdownMenuLabel({
   )
 }
 
+// Item cliquable du menu. `variant="destructive"` met l'item en rouge.
 function DropdownMenuItem({
   className,
   inset,
@@ -105,10 +121,12 @@ function DropdownMenuItem({
   )
 }
 
+// Sous-menu imbriqué.
 function DropdownMenuSub({ ...props }: MenuPrimitive.SubmenuRoot.Props) {
   return <MenuPrimitive.SubmenuRoot data-slot="dropdown-menu-sub" {...props} />
 }
 
+// Trigger d'un sous-menu (ouvre le sous-menu au survol/clic).
 function DropdownMenuSubTrigger({
   className,
   inset,
@@ -133,6 +151,7 @@ function DropdownMenuSubTrigger({
   )
 }
 
+// Contenu d'un sous-menu (s'ouvre latéralement par rapport au trigger).
 function DropdownMenuSubContent({
   align = "start",
   alignOffset = -3,
@@ -154,6 +173,7 @@ function DropdownMenuSubContent({
   )
 }
 
+// Item à cocher (toggle on/off).
 function DropdownMenuCheckboxItem({
   className,
   children,
@@ -188,6 +208,7 @@ function DropdownMenuCheckboxItem({
   )
 }
 
+// Groupe d'items radio (sélection unique).
 function DropdownMenuRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
   return (
     <MenuPrimitive.RadioGroup
@@ -197,6 +218,7 @@ function DropdownMenuRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
   )
 }
 
+// Item radio : représente une option unique au sein d'un DropdownMenuRadioGroup.
 function DropdownMenuRadioItem({
   className,
   children,
@@ -229,6 +251,7 @@ function DropdownMenuRadioItem({
   )
 }
 
+// Séparateur horizontal entre groupes d'items.
 function DropdownMenuSeparator({
   className,
   ...props
@@ -242,6 +265,7 @@ function DropdownMenuSeparator({
   )
 }
 
+// Raccourci clavier affiché à droite d'un item (ex : ⌘K).
 function DropdownMenuShortcut({
   className,
   ...props

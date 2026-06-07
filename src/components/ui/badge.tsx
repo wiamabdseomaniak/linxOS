@@ -1,9 +1,15 @@
+/**
+ * Composant Badge — étiquette compacte avec variants (default, secondary, destructive, outline, ghost, link).
+ * Les variants sont définis via `cva` (class-variance-authority) et appliqués automatiquement.
+ */
+
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+// Définition des variants et de leurs classes Tailwind.
 const badgeVariants = cva(
   "group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-3xl border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-end]:pe-1.5 has-data-[icon=inline-start]:ps-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3!",
   {
@@ -27,6 +33,7 @@ const badgeVariants = cva(
   }
 )
 
+// Composant Badge — accepte n'importe quel `render` (polymorphisme via useRender).
 function Badge({
   className,
   variant = "default",

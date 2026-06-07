@@ -1,8 +1,14 @@
-// Page Logistique — gestion et suivi des livraisons avec filtres, vue Kanban et détails
+/**
+ * Page Logistique — gestion opérationnelle des livraisons.
+ * Permet de filtrer par statut / ville, de démarrer une tournée,
+ * de marquer comme livrée/échouée, d'ajouter des notes et d'ouvrir WhatsApp.
+ * Branchée sur le hook `useLogistics`.
+ */
+
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Package,
   MapPin,
@@ -14,12 +20,11 @@ import {
   FileText,
   X,
   AlertTriangle,
-  Filter,
-  Search,
-  Sparkles,
 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+
 import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
@@ -34,317 +39,381 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import type { StatutLivraison, LogisticsEvent } from '@/types/supabase';
 import { useLogistics } from '@/features/logistics/hooks/use-logistics';
-import { useTranslation } from '@/lib/i18n';
-import { cn } from '@/lib/utils';
-
-type StatusKey = StatutLivraison;
-
-const STATUS_COLUMNS: Array<{
-  key: StatusKey;
-  labelKey: string;
-  icon: typeof Package;
-  accent: { bar: string; ring: string; bg: string; text: string; chip: string; glow: string };
-}> = [
-  {
-    key: 'planifie',
-    labelKey: 'logistics.statuses.scheduled',
-    icon: Calendar,
-    accent: {
-      bar: 'bg-blue-500',
-      ring: 'ring-blue-500/20',
-      bg: 'from-blue-500/10 via-blue-500/5 to-transparent',
-      text: 'text-blue-700 dark:text-blue-300',
-      chip: 'bg-blue-500/10 text-blue-700 dark:text-blue-300',
-      glow: 'shadow-[0_18px_40px_-25px_rgba(59,130,246,0.6)]',
-    },
-  },
-  {
-    key: 'en_cours',
-    labelKey: 'logistics.statuses.inTransit',
-    icon: Truck,
-    accent: {
-      bar: 'bg-orange-500',
-      ring: 'ring-orange-500/20',
-      bg: 'from-orange-500/10 via-orange-500/5 to-transparent',
-      text: 'text-orange-700 dark:text-orange-300',
-      chip: 'bg-orange-500/10 text-orange-700 dark:text-orange-300',
-      glow: 'shadow-[0_18px_40px_-25px_rgba(249,115,22,0.6)]',
-    },
-  },
-  {
-    key: 'livree',
-    labelKey: 'logistics.statuses.delivered',
-    icon: CheckCircle2,
-    accent: {
-      bar: 'bg-emerald-500',
-      ring: 'ring-emerald-500/20',
-      bg: 'from-emerald-500/10 via-emerald-500/5 to-transparent',
-      text: 'text-emerald-700 dark:text-emerald-300',
-      chip: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-      glow: 'shadow-[0_18px_40px_-25px_rgba(16,185,129,0.6)]',
-    },
-  },
-  {
-    key: 'echouee',
-    labelKey: 'logistics.statuses.failed',
-    icon: AlertTriangle,
-    accent: {
-      bar: 'bg-rose-500',
-      ring: 'ring-rose-500/20',
-      bg: 'from-rose-500/10 via-rose-500/5 to-transparent',
-      text: 'text-rose-700 dark:text-rose-300',
-      chip: 'bg-rose-500/10 text-rose-700 dark:text-rose-300',
-      glow: 'shadow-[0_18px_40px_-25px_rgba(244,63,94,0.6)]',
-    },
-  },
-];
-
-const STATUS_BADGE: Record<StatusKey, string> = {
-  planifie: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 ring-1 ring-blue-500/20',
-  en_cours: 'bg-orange-500/10 text-orange-700 dark:text-orange-300 ring-1 ring-orange-500/20',
-  livree: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/20',
-  echouee: 'bg-rose-500/10 text-rose-700 dark:text-rose-300 ring-1 ring-rose-500/20',
-};
 
 export default function LogisticsPage() {
-  const { t } = useTranslation();
-  const [search, setSearch] = useState('');
-  const [cityFilter, setCityFilter] = useState('all');
+
+  // ── Filtres & onglets ──────────────────────────────────────────
+  // Ville sélectionnée pour le filtrage (par défaut: toutes les villes)
+  const [selectedCity, setSelectedCity] = useState('all');
+
+  // Statut actif pour le filtrage des cartes (par défaut: planifié)
+  const [activeStatus, setActiveStatus] = useState<StatutLivraison>('planifie');
+
+  // ── Dialogues & sheet de détails ──────────────────────────────
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<LogisticsEvent | null>(null);
+
+  // ── Composition d'une note (texte + pièces jointes) ───────────
   const [noteText, setNoteText] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
 
+  // Données + actions du module logistique (lecture, mutations, WhatsApp).
   const {
     events,
     loading,
     error,
     statusCounts,
+    filteredEvents,
     handleUpdateStatus,
     handleUpdateNote,
     openWhatsApp,
-  } = useLogistics('planifie', cityFilter);
-
-  const cities = Array.from(new Set(events.map((e) => e.city))).sort();
-  const totalCount = events.length;
-
-  const filteredByStatus = (status: StatusKey) =>
-    events.filter((e) => {
-      if (e.status !== status) return false;
-      if (search.trim().length === 0) return true;
-      const q = search.toLowerCase();
-      return (
-        e.title.toLowerCase().includes(q) ||
-        e.contactName.toLowerCase().includes(q) ||
-        e.city.toLowerCase().includes(q) ||
-        e.address.toLowerCase().includes(q) ||
-        e.id_livraison.toLowerCase().includes(q) ||
-        e.id_tracking.toLowerCase().includes(q)
-      );
-    });
+  } = useLogistics(activeStatus, selectedCity);
 
   return (
     <div className="space-y-6">
+      
+      {/* En-tête : titre + sous-titre (placeholder pour de futurs filtres). */}
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
+        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-amber-300/40 bg-amber-100/60 px-3 py-1 text-xs font-medium text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300">
-            <Sparkles className="h-3.5 w-3.5" />
-            Opérations
-          </div>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            {t('logistics.title')}
-          </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            {t('logistics.subtitle')}
+          <h1 className="text-3xl font-bold tracking-tight">Tableau de bord logistique</h1>
+          <p className="text-muted-foreground">
+            Aperçu en temps réel de vos opérations logistiques
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t('common.search') + '...'}
-              className="h-10 w-full min-w-[220px] rounded-full bg-card/80 pl-9 pr-4 backdrop-blur-sm lg:w-72"
-            />
-          </div>
-          <div className="relative">
-            <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <select
-              value={cityFilter}
-              onChange={(e) => setCityFilter(e.target.value)}
-              className="h-10 appearance-none rounded-full border border-border/50 bg-card/80 pl-9 pr-8 text-sm backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            >
-              <option value="all">Toutes les villes</option>
-              {cities.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+
+
       </motion.div>
 
       {error && (
-        <div className="rounded-xl border border-rose-300/40 bg-rose-50/80 p-4 text-sm text-rose-800 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
+        <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-red-800 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300 text-sm">
           Erreur : {error}
         </div>
       )}
 
-      <section className="overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-br from-card/80 via-card/60 to-card/40 shadow-soft backdrop-blur-sm">
-        <div className="flex flex-col gap-2 border-b border-border/40 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              {t('common.seeAll')}
-            </p>
-            <h2 className="text-xl font-semibold tracking-tight">
-              {t('logistics.operations')}
-            </h2>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="rounded-full bg-amber-500/10 px-2.5 py-1 font-medium text-amber-700 dark:text-amber-300">
-              {totalCount} {t('logistics.units')}
-            </span>
-          </div>
-        </div>
+      {/* 4 cartes statistiques : total / planifié / en transit / livré (% succès). */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 
-        <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4 xl:grid-cols-4">
-          {STATUS_COLUMNS.map((column, idx) => {
-            const count =
-              column.key === 'planifie'
-                ? statusCounts.scheduled
-                : column.key === 'en_cours'
-                ? statusCounts.in_transit
-                : column.key === 'livree'
-                ? statusCounts.delivered
-                : statusCounts.failed;
-            const items = filteredByStatus(column.key);
-            const percent = totalCount > 0 ? Math.round((count / totalCount) * 100) : 0;
-            return (
-              <motion.div
-                key={column.key}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className={cn(
-                  'group/column relative flex min-h-[420px] flex-col overflow-hidden rounded-2xl border border-border/50 bg-card/60',
-                  column.accent.glow
-                )}
-              >
-                <div className={cn('pointer-events-none absolute inset-0 bg-gradient-to-br opacity-70', column.accent.bg)} />
-                <div className={cn('absolute left-0 right-0 top-0 h-1', column.accent.bar)} />
+        {/* Carte 1 : total des événements (toutes périodes). */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex-1"
+        >
+          <Card className="border-0 shadow-soft hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Total des événements</p>
+                  <p className="text-3xl font-bold">{events.length}</p>
+                  <div className="flex items-center gap-1 text-xs text-violet-600">
+                    <Package className="h-3 w-3" />
+                    Tout temps confondu
+                  </div>
+                </div>
+                <div className="rounded-full bg-violet-100 p-2 dark:bg-violet-900/30">
+                  <Package className="h-5 w-5 text-violet-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-                <div className="relative flex items-center justify-between px-4 pt-5">
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className={cn(
-                        'flex h-9 w-9 items-center justify-center rounded-xl ring-1',
-                        column.accent.chip,
-                        column.accent.ring
+        {/* Carte 2 : livraisons planifiées (en attente de démarrage). */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="flex-1"
+        >
+          <Card className="border-0 shadow-soft hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Planifié</p>
+                  <p className="text-3xl font-bold">{statusCounts.scheduled}</p>
+                  <div className="flex items-center gap-1 text-xs text-blue-600">
+                    <Calendar className="h-3 w-3" />
+                    Livraison en attente
+                  </div>
+                </div>
+                <div className="rounded-full bg-blue-100 p-2 dark:bg-blue-900/30">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Carte 3 : livraisons en transit (tournée en cours). */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex-1"
+        >
+          <Card className="border-0 shadow-soft hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">En transit</p>
+                  <p className="text-3xl font-bold">{statusCounts.in_transit}</p>
+                  <div className="flex items-center gap-1 text-xs text-red-600">
+                    <Truck className="h-3 w-3" />
+                    En cours d'acheminement
+                  </div>
+                </div>
+                <div className="rounded-full bg-red-100 p-2 dark:bg-red-900/30">
+                  <Truck className="h-5 w-5 text-red-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Carte 4 : livraisons terminées (% de succès sur le total). */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="flex-1"
+        >
+          <Card className="border-0 shadow-soft hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Terminé</p>
+                  <p className="text-3xl font-bold">{statusCounts.delivered}</p>
+                  <div className="flex items-center gap-1 text-xs text-green-600">
+                    <CheckCircle2 className="h-3 w-3" />
+                    {Math.round((statusCounts.delivered / events.length) * 100)}% de succès
+                  </div>
+                </div>
+                <div className="rounded-full bg-green-100 p-2 dark:bg-green-900/30">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      {/* Onglets de filtrage par statut (un seul actif à la fois). */}
+      <Card className="border-0 shadow-soft">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+            <button
+              onClick={() => setActiveStatus('planifie')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'planifie' ? 'bg-[#f5c400] dark:bg-[#e6b800] text-black dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border'}`}
+            >
+              <Calendar className="h-4 w-4" />
+              Planifié ({statusCounts.scheduled})
+            </button>
+
+            <button
+              onClick={() => setActiveStatus('en_cours')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'en_cours' ? 'bg-[#f5c400] dark:bg-[#e6b800] text-black dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border'}`}
+            >
+              <Truck className="h-4 w-4" />
+              En transit ({statusCounts.in_transit})
+            </button>
+
+            <button
+              onClick={() => setActiveStatus('livree')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'livree' ? 'bg-[#f5c400] dark:bg-[#e6b800] text-black dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border'}`}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Livré ({statusCounts.delivered})
+            </button>
+
+            <button
+              onClick={() => setActiveStatus('echouee')}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all ${activeStatus === 'echouee' ? 'bg-[#f5c400] dark:bg-[#e6b800] text-black dark:text-gray-900' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border'}`}
+            >
+              <AlertTriangle className="h-4 w-4" />
+              Échoué ({statusCounts.failed})
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Grille des livraisons filtrées (1 col. mobile → 4 col. ≥ xl). */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+      >
+        <Card className="border-0 shadow-soft">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">Opérations de livraison</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-yellow-400 border-t-transparent" />
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {filteredEvents.map((event) => (
+                  <div
+                    key={event.id}
+                    className="group rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm transition-all duration-200 hover:shadow-md"
+                  >
+                    {/* Badge statut : couleur de fond + libellé FR selon `event.status`. */}
+                    <div className="mb-3 flex items-center justify-between">
+                      {event.status === 'planifie' && (
+                        <span className="rounded-full px-3 py-1 text-xs font-medium text-white bg-[var(--status-planifie)]">
+                          Planifié
+                        </span>
                       )}
-                    >
-                      <column.icon className="h-4 w-4" />
-                    </span>
-                    <div>
-                      <p className="text-xs uppercase tracking-wider text-muted-foreground">Statut</p>
-                      <h3 className={cn('text-sm font-semibold', column.accent.text)}>
-                        {t(column.labelKey)}
-                      </h3>
+                      {event.status === 'en_cours' && (
+                        <span className="rounded-full px-3 py-1 text-xs font-medium text-white bg-[var(--status-en-cours)]">
+                          En transit
+                        </span>
+                      )}
+                      {event.status === 'livree' && (
+                        <span className="rounded-full px-3 py-1 text-xs font-medium text-white bg-[var(--status-livree)]">
+                          Livrée
+                        </span>
+                      )}
+                      {event.status === 'echouee' && (
+                        <span className="rounded-full px-3 py-1 text-xs font-medium text-white bg-[var(--status-echouee)]">
+                          Échouée
+                        </span>
+                      )}
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <span className={cn('text-2xl font-semibold tracking-tight', column.accent.text)}>
-                      {count}
-                    </span>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      {percent}%
+
+                    {/* Titre de l'événement + nom du contact principal. */}
+                    <h3 className="mb-3 text-base font-bold leading-tight text-gray-900 dark:text-gray-100">
+                      {event.title}
+                    </h3>
+                    <p className="mb-2 text-sm text-gray-700 dark:text-gray-300">
+                      {event.contactName}
                     </p>
-                  </div>
-                </div>
 
-                <div className="relative h-1.5 mx-4 mt-3 overflow-hidden rounded-full bg-muted/50">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${percent}%` }}
-                    transition={{ duration: 0.8, ease: 'easeOut', delay: idx * 0.05 }}
-                    className={cn('h-full rounded-full', column.accent.bar)}
-                  />
-                </div>
+                    {/* Adresse (line-clamp 2 lignes max) + badge ville. */}
+                    <div className="mb-3 flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                      <span className="line-clamp-2">
+                        {event.address}
+                      </span>
+                    </div>
+                    <div className="mb-3 flex items-center gap-2 text-sm">
+                      <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
+                        {event.city}
+                      </span>
+                    </div>
 
-                <ScrollArea className="relative mt-3 flex-1 px-3 pb-3">
-                  {loading ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-current border-t-transparent opacity-60" />
+                    {/* Date / heure planifiées + quantité à livrer. */}
+                    <div className="mb-3 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        <span>{event.date}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        <span>{event.time}</span>
+                      </div>
                     </div>
-                  ) : items.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center gap-1 py-12 text-center text-xs text-muted-foreground">
-                      <Package className="h-5 w-5 opacity-40" />
-                      {t('logistics.empty')}
+                    <div className="mb-4">
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {event.quantity} unités
+                      </span>
                     </div>
-                  ) : (
-                    <ul className="space-y-2.5">
-                      <AnimatePresence>
-                        {items.map((event) => (
-                          <motion.li
-                            key={event.id}
-                            layout
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ duration: 0.2 }}
+
+                    {/* Boutons d'action contextuels selon le statut de la livraison. */}
+                    <div className="flex items-center gap-2 border-t border-gray-100 dark:border-gray-700 pt-3 flex-wrap">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedEvent(event);
+                          setDetailsDialogOpen(true);
+                        }}
+                        className="text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30"
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        Détails
+                      </Button>
+
+                      {/* Planifié : bouton "Démarrer la tournée" → passe en en_cours. */}
+                      {event.status === 'planifie' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 rounded-lg border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 hover:border-blue-200"
+                          onClick={() => handleUpdateStatus(event.id, 'en_cours')}
+                        >
+                          Démarrer la tournée
+                        </Button>
+                      )}
+
+                      {/* En transit : actions finales (livrée / échouée). */}
+                      {event.status === 'en_cours' && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 rounded-lg border-green-200 dark:border-green-800 text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 hover:text-green-600 hover:border-green-300"
+                            onClick={() => handleUpdateStatus(event.id, 'livree')}
                           >
-                            <DeliveryCard
-                              event={event}
-                              accent={column.accent}
-                              onOpenDetails={() => {
-                                setSelectedEvent(event);
-                                setDetailsDialogOpen(true);
-                              }}
-                              onStart={() => handleUpdateStatus(event.id, 'en_cours')}
-                              onDelivered={() => handleUpdateStatus(event.id, 'livree')}
-                              onFailed={() => handleUpdateStatus(event.id, 'echouee')}
-                              t={t}
-                            />
-                          </motion.li>
-                        ))}
-                      </AnimatePresence>
-                    </ul>
-                  )}
-                </ScrollArea>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
+                            Livrée
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-lg border-red-200 dark:border-red-800 text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 hover:border-red-300"
+                            onClick={() => handleUpdateStatus(event.id, 'echouee')}
+                          >
+                            Échouée
+                          </Button>
+                        </>
+                      )}
 
+                      {/* Terminée : libellé statique (aucune action). */}
+                      {(event.status === 'livree' || event.status === 'echouee') && (
+                        <span className="flex flex-1 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {event.status === 'livree' ? 'Terminé' : 'Échouée'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Dialog d'ajout de note : zone de texte + drop zone fichiers + actions. */}
       <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('logistics.note.addTitle')}</DialogTitle>
+            <DialogTitle>Ajouter une note</DialogTitle>
             <DialogDescription>
-              {t('logistics.note.addSubtitle')} : {selectedEvent?.title}
+              Ajouter une note pour : {selectedEvent?.title}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <Textarea
-              placeholder={t('logistics.note.placeholder')}
+              placeholder="Saisissez votre note..."
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
               rows={4}
             />
+
+            {/* Drop zone de fichiers : déclenche un <input type=file> caché. */}
             <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">{t('logistics.note.attach')}</label>
+              <label className="text-sm text-muted-foreground">Joindre des fichiers</label>
               <div
-                className="cursor-pointer rounded-xl border-2 border-dashed border-border p-6 text-center transition-colors hover:border-amber-500/60"
+                className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-violet-400 transition-colors"
                 onClick={() => document.getElementById('file-input')?.click()}
               >
                 <input
@@ -354,28 +423,34 @@ export default function LogisticsPage() {
                   className="hidden"
                   onChange={(e) => {
                     const files = Array.from(e.target.files || []);
-                    setAttachedFiles((prev) => [...prev, ...files]);
+                    setAttachedFiles(prev => [...prev, ...files]);
                   }}
                 />
                 <div className="flex flex-col items-center gap-2">
                   <FileText className="h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">{t('logistics.note.attachHint')}</p>
-                  <p className="text-xs text-muted-foreground">{t('logistics.note.attachTypes')}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Cliquez pour télécharger ou glissez-déposez
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    PDF, PNG, JPG jusqu'à 10 Mo
+                  </p>
                 </div>
               </div>
+
+              {/* Liste des pièces jointes avec retrait individuel. */}
               {attachedFiles.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2 mt-2">
                   {attachedFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
+                    <div key={index} className="flex items-center justify-between bg-muted/50 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-amber-500" />
-                        <span className="truncate text-sm">{file.name}</span>
+                        <FileText className="h-4 w-4 text-violet-600" />
+                        <span className="text-sm truncate">{file.name}</span>
                         <span className="text-xs text-muted-foreground">({(file.size / 1024).toFixed(1)} KB)</span>
                       </div>
                       <button
                         type="button"
-                        onClick={() => setAttachedFiles((prev) => prev.filter((_, i) => i !== index))}
-                        className="text-muted-foreground transition-colors hover:text-rose-500"
+                        onClick={() => setAttachedFiles(prev => prev.filter((_, i) => i !== index))}
+                        className="text-muted-foreground hover:text-red-500"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -384,16 +459,15 @@ export default function LogisticsPage() {
                 </div>
               )}
             </div>
+
+            {/* Actions du dialog : annuler (vide tout) / enregistrer (PATCH note). */}
             <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setNoteDialogOpen(false);
-                  setNoteText('');
-                  setAttachedFiles([]);
-                }}
-              >
-                {t('common.cancel')}
+              <Button variant="outline" onClick={() => {
+                setNoteDialogOpen(false);
+                setNoteText('');
+                setAttachedFiles([]);
+              }}>
+                Annuler
               </Button>
               <Button
                 onClick={async () => {
@@ -403,246 +477,159 @@ export default function LogisticsPage() {
                   setNoteText('');
                   setAttachedFiles([]);
                 }}
-                className="bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-400"
+                className="bg-yellow-400 hover:bg-yellow-500"
                 disabled={!noteText.trim() && attachedFiles.length === 0}
               >
-                {t('logistics.note.save')}
+                Enregistrer
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
+      {/* Sheet de détails : carte info + actions rapides + timeline statut. */}
       <Sheet open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
         <SheetContent className="sm:max-w-lg overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>{t('logistics.details.title')}</SheetTitle>
+            <SheetTitle>Détails de l'événement</SheetTitle>
           </SheetHeader>
-          <div className="mt-6 space-y-6">
-            <div className="rounded-xl bg-muted/40 p-4 ring-1 ring-border/50">
+          <div className="space-y-6 mt-6">
+
+            {/* Bloc info principal : IDs, événement, club, adresse, date, contact, statut. */}
+            <div className="rounded-lg bg-muted/50 p-4 space-y-3">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">{t('logistics.details.deliveryId')}</p>
-                  <p className="mt-0.5 font-mono text-sm font-medium text-amber-600 dark:text-amber-400">{selectedEvent?.id_livraison}</p>
+                  <p className="text-sm text-muted-foreground">ID de livraison</p>
+                  <p className="font-mono font-medium text-violet-600">{selectedEvent?.id_livraison}</p>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">{t('logistics.details.trackingId')}</p>
-                  <p className="mt-0.5 font-mono text-sm font-medium text-violet-600 dark:text-violet-400">{selectedEvent?.id_tracking}</p>
+                  <p className="text-sm text-muted-foreground">ID de suivi</p>
+                  <p className="font-mono font-medium text-purple-600">{selectedEvent?.id_tracking}</p>
                 </div>
               </div>
-              <div className="mt-3 space-y-3">
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">{t('logistics.details.event')}</p>
-                  <p className="mt-0.5 font-semibold">{selectedEvent?.title}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">{t('logistics.details.club')}</p>
-                  <p className="mt-0.5 font-medium text-amber-600 dark:text-amber-400">{selectedEvent?.club}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">{t('logistics.details.address')}</p>
-                  <p className="mt-0.5 text-sm">{selectedEvent?.address}, {selectedEvent?.city}</p>
-                </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">{t('logistics.details.date')}</p>
-                    <p className="mt-0.5 font-medium text-sm">{selectedEvent?.date}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">{t('logistics.details.time')}</p>
-                    <p className="mt-0.5 font-medium text-sm">{selectedEvent?.time}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">{t('logistics.details.quantity')}</p>
-                    <p className="mt-0.5 font-medium text-sm">{selectedEvent?.quantity} {t('logistics.units')}</p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">{t('logistics.details.contact')}</p>
-                  <p className="mt-0.5 font-medium text-sm">{selectedEvent?.contactName}</p>
-                  <p className="text-xs text-muted-foreground">{selectedEvent?.contactPhone}</p>
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">{t('logistics.details.status')}</p>
-                  <span
-                    className={cn(
-                      'mt-0.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium',
-                      STATUS_BADGE[selectedEvent?.status ?? 'planifie']
-                    )}
-                  >
-                    {selectedEvent?.status === 'planifie' && t('logistics.statuses.scheduled')}
-                    {selectedEvent?.status === 'en_cours' && t('logistics.statuses.inTransit')}
-                    {selectedEvent?.status === 'livree' && t('logistics.statuses.delivered')}
-                    {selectedEvent?.status === 'echouee' && t('logistics.statuses.failed')}
-                  </span>
-                </div>
-                {selectedEvent?.notes && (
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">{t('logistics.details.notes')}</p>
-                    <p className="mt-1 rounded-lg border border-amber-300/40 bg-amber-50 p-2 text-sm dark:border-amber-500/30 dark:bg-amber-500/10">
-                      {selectedEvent.notes}
-                    </p>
-                  </div>
-                )}
+
+              <div>
+                <p className="text-sm text-muted-foreground">Événement</p>
+                <p className="font-semibold">{selectedEvent?.title}</p>
               </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground">Club</p>
+                <p className="font-medium text-violet-600">{selectedEvent?.club}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground">Adresse</p>
+                <p className="text-sm">{selectedEvent?.address}, {selectedEvent?.city}</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="text-sm text-muted-foreground">Date</p>
+                  <p className="font-medium">{selectedEvent?.date}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Heure</p>
+                  <p className="font-medium">{selectedEvent?.time}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Quantité</p>
+                  <p className="font-medium">{selectedEvent?.quantity} unités</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground">Contact</p>
+                <p className="font-medium">{selectedEvent?.contactName}</p>
+                <p className="text-sm text-muted-foreground">{selectedEvent?.contactPhone}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground">Statut</p>
+                <Badge className={
+                  selectedEvent?.status === 'planifie' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                  selectedEvent?.status === 'en_cours' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                  selectedEvent?.status === 'livree' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                }>
+                  {selectedEvent?.status === 'planifie' && 'Planifié'}
+                  {selectedEvent?.status === 'en_cours' && 'En transit'}
+                  {selectedEvent?.status === 'livree' && 'Livrée'}
+                  {selectedEvent?.status === 'echouee' && 'Échouée'}
+                </Badge>
+              </div>
+
+              {selectedEvent?.notes && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Notes</p>
+                  <p className="text-sm bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded-lg border border-yellow-200 dark:border-yellow-800">{selectedEvent.notes}</p>
+                </div>
+              )}
             </div>
 
+            {/* Actions rapides : WhatsApp + ouverture du dialog de note. */}
             <div>
-              <p className="mb-3 text-sm font-semibold">Actions rapides</p>
+              <p className="text-sm font-medium mb-3">Actions rapides</p>
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => selectedEvent && openWhatsApp(selectedEvent.contactPhone)}
-                  className="rounded-full"
                 >
                   <MessageCircle className="mr-2 h-4 w-4" />
-                  {t('logistics.quick.whatsapp')}
+                  WhatsApp
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setNoteDialogOpen(true)}
-                  className="rounded-full"
                 >
                   <FileText className="mr-2 h-4 w-4" />
-                  {t('logistics.quick.addNote')}
+                  Ajouter une note
                 </Button>
               </div>
             </div>
 
-            <div className="rounded-xl border border-border/50 p-4">
-              <p className="mb-3 text-sm font-semibold">{t('logistics.timeline.title')}</p>
-              <div className="space-y-3">
-                <TimelineStep
-                  active={selectedEvent?.status === 'planifie' || selectedEvent?.status === 'en_cours' || selectedEvent?.status === 'livree' || selectedEvent?.status === 'echouee'}
-                  failed={false}
-                  title={t('logistics.timeline.scheduled')}
-                  desc={t('logistics.timeline.scheduledDesc')}
-                />
-                <TimelineStep
-                  active={selectedEvent?.status === 'en_cours' || selectedEvent?.status === 'livree'}
-                  failed={false}
-                  title={t('logistics.timeline.inTransit')}
-                  desc={t('logistics.timeline.inTransitDesc')}
-                />
-                <TimelineStep
-                  active={selectedEvent?.status === 'livree' || selectedEvent?.status === 'echouee'}
-                  failed={selectedEvent?.status === 'echouee'}
-                  title={selectedEvent?.status === 'echouee' ? t('logistics.timeline.failed') : t('logistics.timeline.delivered')}
-                  desc={selectedEvent?.status === 'echouee' ? t('logistics.timeline.failedDesc') : t('logistics.timeline.deliveredDesc')}
-                  last
-                />
+            {/* Timeline 3 étapes : chaque point s'allume quand le statut courant l'a atteinte. */}
+            <div className="rounded-lg border border-border p-4">
+              <p className="text-sm font-medium mb-3">Chronologie du statut</p>
+              <div className="space-y-4">
+                <div className="flex gap-3">
+                  <div className="flex flex-col items-center">
+                    <div className={`w-3 h-3 rounded-full ${selectedEvent?.status === 'livree' || selectedEvent?.status === 'en_cours' || selectedEvent?.status === 'planifie' ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <div className="w-px h-4 bg-border" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Planifié</p>
+                    <p className="text-xs text-muted-foreground">Événement planifié pour livraison</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="flex flex-col items-center">
+                    <div className={`w-3 h-3 rounded-full ${selectedEvent?.status === 'livree' || selectedEvent?.status === 'en_cours' ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <div className="w-px h-4 bg-border" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">En transit</p>
+                    <p className="text-xs text-muted-foreground">Colis en cours d'acheminement</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="flex flex-col items-center">
+                    <div className={`w-3 h-3 rounded-full ${selectedEvent?.status === 'livree' ? 'bg-green-500' : selectedEvent?.status === 'echouee' ? 'bg-red-500' : 'bg-gray-300'}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{selectedEvent?.status === 'echouee' ? 'Échouée' : 'Livrée'}</p>
+                    <p className="text-xs text-muted-foreground">{selectedEvent?.status === 'echouee' ? 'La livraison n\'a pas pu être effectuée' : 'Livrée avec succès'}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </SheetContent>
       </Sheet>
-    </div>
-  );
-}
-
-interface DeliveryCardProps {
-  event: LogisticsEvent;
-  accent: { text: string; chip: string };
-  onOpenDetails: () => void;
-  onStart: () => void;
-  onDelivered: () => void;
-  onFailed: () => void;
-  t: (path: string) => string;
-}
-
-function DeliveryCard({ event, accent, onOpenDetails, onStart, onDelivered, onFailed, t }: DeliveryCardProps) {
-  return (
-    <div className="group relative overflow-hidden rounded-xl border border-border/50 bg-card/90 p-3.5 transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-md">
-      <div className="flex items-start justify-between gap-2">
-        <p className="line-clamp-2 text-sm font-semibold leading-snug">{event.title}</p>
-        <button
-          onClick={onOpenDetails}
-          className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-amber-500/10 hover:text-amber-600"
-          aria-label={t('logistics.actions.details')}
-        >
-          <FileText className="h-3.5 w-3.5" />
-        </button>
-      </div>
-      <p className="mt-0.5 text-xs text-muted-foreground">{event.contactName}</p>
-      <div className="mt-2 flex items-start gap-1.5 text-xs text-muted-foreground">
-        <MapPin className="mt-0.5 h-3 w-3 flex-shrink-0" />
-        <span className="line-clamp-1">{event.address}</span>
-      </div>
-      <div className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <Calendar className="h-3 w-3" />
-          {event.date}
-        </span>
-        <span className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          {event.time}
-        </span>
-      </div>
-      <div className="mt-3 flex items-center justify-between border-t border-border/40 pt-2.5">
-        <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-semibold', accent.chip)}>
-          {event.quantity} {t('logistics.units')}
-        </span>
-        <div className="flex items-center gap-1">
-          {event.status === 'planifie' && (
-            <Button size="xs" variant="outline" onClick={onStart} className="h-7 rounded-full px-2.5 text-xs">
-              {t('logistics.actions.startRoute')}
-            </Button>
-          )}
-          {event.status === 'en_cours' && (
-            <>
-              <Button
-                size="xs"
-                variant="outline"
-                onClick={onDelivered}
-                className="h-7 rounded-full border-emerald-500/30 px-2.5 text-xs text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300"
-              >
-                {t('logistics.actions.delivered')}
-              </Button>
-              <Button
-                size="xs"
-                variant="outline"
-                onClick={onFailed}
-                className="h-7 rounded-full border-rose-500/30 px-2.5 text-xs text-rose-700 hover:bg-rose-500/10 dark:text-rose-300"
-              >
-                {t('logistics.actions.failed')}
-              </Button>
-            </>
-          )}
-          {(event.status === 'livree' || event.status === 'echouee') && (
-            <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium', accent.chip)}>
-              {event.status === 'livree' ? t('logistics.actions.completed') : t('logistics.actions.failed')}
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface TimelineStepProps {
-  active: boolean;
-  failed: boolean;
-  title: string;
-  desc: string;
-  last?: boolean;
-}
-
-function TimelineStep({ active, failed, title, desc, last }: TimelineStepProps) {
-  const color = failed ? 'bg-rose-500' : active ? 'bg-emerald-500' : 'bg-muted-foreground/30';
-  return (
-    <div className="flex gap-3">
-      <div className="flex flex-col items-center">
-        <div className={cn('h-2.5 w-2.5 rounded-full ring-4', color, active || failed ? 'ring-current/10' : 'ring-transparent')} />
-        {!last && <div className="w-px flex-1 bg-border" />}
-      </div>
-      <div className="pb-1">
-        <p className={cn('text-sm font-medium', active || failed ? 'text-foreground' : 'text-muted-foreground')}>
-          {title}
-        </p>
-        <p className="text-xs text-muted-foreground">{desc}</p>
-      </div>
     </div>
   );
 }

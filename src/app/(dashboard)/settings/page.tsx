@@ -1,4 +1,10 @@
-// Page Paramètres — configuration du profil, notifications, thème et langue
+/**
+ * Page Paramètres — configuration globale du compte.
+ * Onglets : Profil, Mot de passe, Notifications, Apparence, Sécurité.
+ * Gère le thème (light/dark/system), les préférences
+ * de notifications et la déconnexion.
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -22,7 +28,6 @@ import {
   Smartphone,
   MapPin,
   AlertCircle,
-  Globe,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,19 +38,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useTheme } from '@/components/providers/theme-provider';
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
-import { useTranslation, ACTIVE_LANGUAGES } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
+// Données mockées pour l'aperçu des sessions actives (à remplacer par un appel API).
 const sessions = [
   { device: 'Chrome on MacOS', location: 'Casablanca, Maroc', lastActive: 'il y a 2 minutes', current: true },
   { device: 'Safari on iPhone', location: 'Rabat, Maroc', lastActive: 'il y a 1 heure', current: false },
@@ -56,7 +54,6 @@ export default function SettingsPage() {
   const router = useRouter();
   const { theme, setTheme, signOut, keepThemeOnSignOut, setKeepThemeOnSignOut } = useTheme();
   const { user: fetchedUser } = useCurrentUser();
-  const { t, language, setLanguage } = useTranslation();
   const [activeTab, setActiveTab] = useState('profile');
 
   const [showPassword, setShowPassword] = useState(false);
@@ -82,13 +79,14 @@ export default function SettingsPage() {
   });
 
   const tabs = [
-    { id: 'profile', label: t('settings.tabs.profile'), icon: User },
-    { id: 'password', label: t('settings.tabs.password'), icon: Lock },
-    { id: 'notifications', label: t('settings.tabs.notifications'), icon: Bell },
-    { id: 'appearance', label: t('settings.tabs.appearance'), icon: Palette },
-    { id: 'security', label: t('settings.tabs.security'), icon: Shield },
+    { id: 'profile', label: 'Profil', icon: User },
+    { id: 'password', label: 'Mot de passe', icon: Lock },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'appearance', label: 'Apparence', icon: Palette },
+    { id: 'security', label: 'Sécurité', icon: Shield },
   ];
 
+  // Valide le formulaire de changement de mot de passe (longueur + correspondance).
   const validatePasswordForm = () => {
     const errors: typeof passwordErrors = {};
     if (!passwordValues.current) {
@@ -108,6 +106,7 @@ export default function SettingsPage() {
     return Object.keys(errors).length === 0;
   };
 
+  // Soumet le nouveau mot de passe à Supabase et affiche un message de succès temporaire.
   const handleUpdatePassword = async () => {
     if (!validatePasswordForm()) return;
     setIsSavingPassword(true);
@@ -134,14 +133,17 @@ export default function SettingsPage() {
     }
   };
 
+  // Révoque une session (UI uniquement — à brancher sur une API dédiée).
   const handleRevokeSession = (device: string) => {
     setActiveSessions(activeSessions.filter((s) => s.device !== device));
   };
 
+  // Placeholder : ouvre la modale de gestion détaillée des appareils.
   const handleManageDevices = () => {
     alert('Gestion des appareils bientôt disponible !');
   };
 
+  // Déconnecte l'utilisateur (via le ThemeProvider) puis redirige.
   const handleSignOut = () => {
     signOut();
     router.push('/');
@@ -155,14 +157,14 @@ export default function SettingsPage() {
         className="flex flex-col gap-2"
       >
         <div className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-300/40 bg-amber-100/60 px-3 py-1 text-xs font-medium text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300">
-          <Palette className="h-3.5 w-3.5" />
-          {t('common.appName')}
+         
+          {'LINXOS'}
         </div>
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          {t('settings.title')}
+          {'Paramètres'}
         </h1>
         <p className="text-sm text-muted-foreground">
-          {t('settings.subtitle')}
+          {'Gérez votre compte, votre sécurité et vos préférences.'}
         </p>
       </motion.div>
 
@@ -197,9 +199,9 @@ export default function SettingsPage() {
             <TabsContent value="profile">
               <Card className="overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl">{t('settings.profile.title')}</CardTitle>
+                  <CardTitle className="text-xl">{'Profil'}</CardTitle>
                   <CardDescription>
-                    {t('settings.profile.subtitle')}
+                    {'Vos informations personnelles et votre photo de profil.'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -223,10 +225,7 @@ export default function SettingsPage() {
                       <h3 className="text-lg font-semibold">{fetchedUser?.name ?? ''}</h3>
                       <p className="text-sm text-muted-foreground">{fetchedUser?.email ?? ''}</p>
                       <Badge className="mt-2 bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
-                        {fetchedUser?.role === 'manager' ? 'Manager Logistique' :
-                         fetchedUser?.role === 'logistique' ? 'Responsable Logistique' :
-                         fetchedUser?.role === 'driver' ? 'Chauffeur' :
-                         fetchedUser?.role === 'client' ? 'Client' : 'Responsable Logistique'}
+                        {fetchedUser?.role === 'manager' ? 'Manager Logistique' : ''}
                       </Badge>
                     </div>
                   </div>
@@ -238,20 +237,20 @@ export default function SettingsPage() {
             <TabsContent value="password">
               <Card className="overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl">{t('settings.password.title')}</CardTitle>
+                  <CardTitle className="text-xl">{'Mot de passe'}</CardTitle>
                   <CardDescription>
-                    {t('settings.password.subtitle')}
+                    {'Modifiez votre mot de passe pour sécuriser votre compte.'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="currentPassword">{t('settings.password.current')}</Label>
+                    <Label htmlFor="currentPassword">{'Mot de passe actuel'}</Label>
                     <div className="relative">
                       <Input
                         id="currentPassword"
                         type={showPassword ? 'text' : 'password'}
                         className={cn('rounded-xl pr-10', passwordErrors.current && 'border-rose-500')}
-                        placeholder={t('settings.password.currentPlaceholder')}
+                        placeholder={'Entrez votre mot de passe actuel'}
                         value={passwordValues.current}
                         onChange={(e) => {
                           setPasswordValues({ ...passwordValues, current: e.target.value });
@@ -275,12 +274,12 @@ export default function SettingsPage() {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="newPassword">{t('settings.password.new')}</Label>
+                    <Label htmlFor="newPassword">{'Nouveau mot de passe'}</Label>
                     <Input
                       id="newPassword"
                       type="password"
                       className={cn('rounded-xl', passwordErrors.new && 'border-rose-500')}
-                      placeholder={t('settings.password.newPlaceholder')}
+                      placeholder={'Au moins 6 caractères'}
                       value={passwordValues.new}
                       onChange={(e) => {
                         setPasswordValues({ ...passwordValues, new: e.target.value });
@@ -295,12 +294,12 @@ export default function SettingsPage() {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">{t('settings.password.confirm')}</Label>
+                    <Label htmlFor="confirmPassword">{'Confirmer le mot de passe'}</Label>
                     <Input
                       id="confirmPassword"
                       type="password"
                       className={cn('rounded-xl', passwordErrors.confirm && 'border-rose-500')}
-                      placeholder={t('settings.password.confirmPlaceholder')}
+                      placeholder={'Confirmez le nouveau mot de passe'}
                       value={passwordValues.confirm}
                       onChange={(e) => {
                         setPasswordValues({ ...passwordValues, confirm: e.target.value });
@@ -328,15 +327,15 @@ export default function SettingsPage() {
                     {isSavingPassword ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t('settings.password.updating')}
+                        {'Mise à jour...'}
                       </>
                     ) : passwordUpdated ? (
                       <>
                         <Check className="mr-2 h-4 w-4" />
-                        {t('settings.password.updated')}
+                        {'Mot de passe mis à jour'}
                       </>
                     ) : (
-                      t('settings.password.update')
+                      'Mettre à jour'
                     )}
                   </Button>
                 </CardContent>
@@ -346,17 +345,17 @@ export default function SettingsPage() {
             <TabsContent value="notifications">
               <Card className="overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl">{t('settings.notifications.title')}</CardTitle>
+                  <CardTitle className="text-xl">{'Notifications'}</CardTitle>
                   <CardDescription>
-                    {t('settings.notifications.subtitle')}
+                    {'Choisissez comment vous souhaitez être notifié.'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { key: 'email', label: t('settings.notifications.email'), desc: t('settings.notifications.emailDesc') },
-                    { key: 'push', label: t('settings.notifications.push'), desc: t('settings.notifications.pushDesc') },
-                    { key: 'sms', label: t('settings.notifications.sms'), desc: t('settings.notifications.smsDesc') },
-                    { key: 'whatsapp', label: t('settings.notifications.whatsapp'), desc: t('settings.notifications.whatsappDesc') },
+                    { key: 'email', label: 'Email', desc: 'Recevez les alertes par email.' },
+                    { key: 'push', label: 'Notifications push', desc: 'Notifications en temps réel sur cet appareil.' },
+                    { key: 'sms', label: 'SMS', desc: 'Recevez les alertes importantes par SMS.' },
+                    { key: 'whatsapp', label: 'WhatsApp', desc: 'Recevez les alertes sur WhatsApp.' },
                   ].map((item) => (
                     <div key={item.key} className="flex items-center justify-between gap-4 rounded-xl border border-border/40 p-3">
                       <div className="flex items-center gap-3">
@@ -383,19 +382,19 @@ export default function SettingsPage() {
             <TabsContent value="appearance">
               <Card className="overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl">{t('settings.appearance.title')}</CardTitle>
+                  <CardTitle className="text-xl">{'Apparence'}</CardTitle>
                   <CardDescription>
-                    {t('settings.appearance.subtitle')}
+                    {"Personnalisez l'apparence de l'application."}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label>{t('settings.appearance.theme')}</Label>
+                    <Label>{'Thème'}</Label>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       {[
-                        { value: 'light' as const, label: t('settings.appearance.light'), icon: Sun },
-                        { value: 'dark' as const, label: t('settings.appearance.dark'), icon: Moon },
-                        { value: 'system' as const, label: t('settings.appearance.system'), icon: Monitor },
+                        { value: 'light' as const, label: 'Clair', icon: Sun },
+                        { value: 'dark' as const, label: 'Sombre', icon: Moon },
+                        { value: 'system' as const, label: 'Système', icon: Monitor },
                       ].map((option) => (
                         <button
                           key={option.value}
@@ -414,59 +413,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <Separator />
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label className="flex items-center gap-2">
-                        <Globe className="h-4 w-4" />
-                        {t('settings.appearance.language')}
-                      </Label>
-                      <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                        {ACTIVE_LANGUAGES.length} actives
-                      </span>
-                    </div>
-                    <Select value={language} onValueChange={(value) => setLanguage(value || 'fr')}>
-                      <SelectTrigger className="rounded-xl">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ACTIVE_LANGUAGES.map((lang) => (
-                          <SelectItem key={lang.code} value={lang.code}>
-                            <span className="flex items-center gap-2">
-                              <span className="flex h-5 w-7 items-center justify-center rounded bg-amber-500/10 text-[10px] font-bold text-amber-700">
-                                {lang.flag}
-                              </span>
-                              <span>{lang.nativeLabel}</span>
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      {t('settings.appearance.languageHint')}
-                    </p>
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center justify-between gap-4 rounded-xl border border-border/40 p-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-300">
-                        <LogOut className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">{t('settings.appearance.logoutTheme')}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {t('settings.appearance.logoutThemeDesc')}
-                        </p>
-                      </div>
-                    </div>
-                    <Switch
-                      checked={keepThemeOnSignOut}
-                      onCheckedChange={(checked) => setKeepThemeOnSignOut(checked)}
-                    />
-                  </div>
+                 
                 </CardContent>
               </Card>
             </TabsContent>
@@ -474,9 +421,9 @@ export default function SettingsPage() {
             <TabsContent value="security">
               <Card className="overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl">{t('settings.security.title')}</CardTitle>
+                  <CardTitle className="text-xl">{'Sécurité'}</CardTitle>
                   <CardDescription>
-                    {t('settings.security.subtitle')}
+                    {'Gérez les appareils connectés et la sécurité de votre compte.'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -486,15 +433,13 @@ export default function SettingsPage() {
                         <Smartphone className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold">{t('settings.security.activeDevices')}</p>
+                        <p className="text-sm font-semibold">{'Appareils actifs'}</p>
                         <p className="text-xs text-muted-foreground">
-                          {t('settings.security.activeDevicesDesc')}
+                          {'Liste des appareils actuellement connectés à votre compte.'}
                         </p>
                       </div>
                     </div>
-                    <Button variant="outline" className="rounded-full" onClick={handleManageDevices}>
-                      {t('settings.security.manage')}
-                    </Button>
+                    
                   </div>
 
                   <Separator />
@@ -518,7 +463,7 @@ export default function SettingsPage() {
                               <p className="text-sm font-medium">{session.device}</p>
                               {session.current && (
                                 <Badge className="bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
-                                  {t('settings.security.current')}
+                                  {'Actuelle'}
                                 </Badge>
                               )}
                             </div>
@@ -541,7 +486,7 @@ export default function SettingsPage() {
                             onClick={() => handleRevokeSession(session.device)}
                           >
                             <LogOut className="mr-2 h-4 w-4" />
-                            {t('settings.security.revoke')}
+                            {'Révoquer'}
                           </Button>
                         )}
                       </div>
@@ -556,9 +501,9 @@ export default function SettingsPage() {
                         <LogOut className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold">{t('settings.security.signOut')}</p>
+                        <p className="text-sm font-semibold">{'Se déconnecter'}</p>
                         <p className="text-xs text-muted-foreground">
-                          {t('settings.security.signOutDesc')}
+                          {'Déconnectez-vous de cette session sur cet appareil.'}
                         </p>
                       </div>
                     </div>
@@ -568,7 +513,7 @@ export default function SettingsPage() {
                       onClick={handleSignOut}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      {t('settings.security.signOut')}
+                      {'Se déconnecter'}
                     </Button>
                   </div>
                 </CardContent>

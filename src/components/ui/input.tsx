@@ -1,8 +1,15 @@
+/**
+ * Composant Input — champ de saisie basé sur Base UI.
+ * États : default / focus-visible (ring) / disabled / aria-invalid (rouge).
+ * Hauteur fixe (`h-9`), coins arrondis `rounded-3xl`, fond `bg-input/50`.
+ */
+
 import * as React from "react"
 import { Input as InputPrimitive } from "@base-ui/react/input"
 
 import { cn } from "@/lib/utils"
 
+// Wrapper autour de l'Input natif HTML via le primitif Base UI.
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <InputPrimitive

@@ -1,3 +1,10 @@
+/**
+ * Composant Sheet (tiroir) — Dialog Base UI spécialisé pour un panneau latéral.
+ * Côté : top | right | bottom | left. Inclut overlay, animations et bouton de fermeture.
+ * Expose : Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter,
+ *          SheetTitle, SheetDescription.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -7,22 +14,27 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { IconX } from "@tabler/icons-react"
 
+// Racine du sheet.
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }
 
+// Trigger qui ouvre le sheet au clic.
 function SheetTrigger({ ...props }: SheetPrimitive.Trigger.Props) {
   return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />
 }
 
+// Bouton qui ferme le sheet.
 function SheetClose({ ...props }: SheetPrimitive.Close.Props) {
   return <SheetPrimitive.Close data-slot="sheet-close" {...props} />
 }
 
+// Portal — rend le sheet hors du flux parent (évite les `overflow: hidden`).
 function SheetPortal({ ...props }: SheetPrimitive.Portal.Props) {
   return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />
 }
 
+// Fond noir semi-transparent + léger flou (si supporté par le navigateur).
 function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
   return (
     <SheetPrimitive.Backdrop
@@ -36,6 +48,7 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
   )
 }
 
+// Conteneur du sheet (côté configurable, transitions directionnelles).
 function SheetContent({
   className,
   children,
@@ -80,6 +93,7 @@ function SheetContent({
   )
 }
 
+// En-tête du sheet (titre + description).
 function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -90,6 +104,7 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Pied du sheet (boutons d'action, poussé en bas via `mt-auto`).
 function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -100,6 +115,7 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Titre du sheet (police heading).
 function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
   return (
     <SheetPrimitive.Title
@@ -113,6 +129,7 @@ function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
   )
 }
 
+// Description secondaire sous le titre.
 function SheetDescription({
   className,
   ...props

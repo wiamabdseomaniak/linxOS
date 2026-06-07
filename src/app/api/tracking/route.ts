@@ -1,3 +1,9 @@
+/**
+ * Route API publique : GET /api/tracking
+ * Recherche une livraison par requête texte (ID, nom d'événement ou organisateur).
+ * Endpoint consommé par la page publique `/track` (sans authentification).
+ */
+
 import { createClient } from '@supabase/supabase-js';
 import type { LivraisonRow } from '@/types/supabase';
 
@@ -19,7 +25,10 @@ export async function GET(request: Request) {
 
   const supabase = createClient(url, anonKey);
 
-  // Try exact id_livraison match
+  // Stratégie de recherche en cascade : on essaie d'abord la correspondance exacte
+  // sur l'ID, puis sur le nom d'événement (LIKE), puis sur l'organisateur.
+
+  // 1. Match exact sur id_livraison.
   const { data: exact } = await supabase
     .from('livraison')
     .select('*, client:client(*)')
@@ -28,7 +37,7 @@ export async function GET(request: Request) {
 
   if (exact) return Response.json({ data: exact });
 
-  // Try event name match
+  // 2. Recherche partielle sur le nom d'événement.
   const { data: eventMatch } = await supabase
     .from('livraison')
     .select('*, client:client(*)')
@@ -39,7 +48,7 @@ export async function GET(request: Request) {
 
   if (eventMatch) return Response.json({ data: eventMatch });
 
-  // Try organisateur match
+  // 3. Recherche partielle sur l'organisateur.
   const { data: orgMatch } = await supabase
     .from('livraison')
     .select('*, client:client(*)')
@@ -50,5 +59,6 @@ export async function GET(request: Request) {
 
   if (orgMatch) return Response.json({ data: orgMatch });
 
+  // Aucune correspondance : la page publique affichera un message "non trouvé".
   return Response.json({ data: null });
 }

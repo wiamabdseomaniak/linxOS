@@ -1,3 +1,11 @@
+/**
+ * Route API : GET /api/logistics
+ * Liste les livraisons avec filtres optionnels :
+ *  - `statut_livraison` : 'planifie' | 'en_cours' | 'livree' | 'echouee' | 'all'
+ *  - `ville`            : nom de ville ou 'all'
+ * Inclut la jointure `client` pour exposer le destinataire.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +23,7 @@ export async function GET(request: Request) {
 
   const supabase = createClient(url, anonKey);
 
+  // Filtres optionnels : la valeur 'all' (ou absente) signifie "pas de filtre".
   let query = supabase
     .from('livraison')
     .select('*, client:client(*)')

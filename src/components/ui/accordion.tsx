@@ -1,8 +1,15 @@
+/**
+ * Composant Accordion (Base UI) — sections dépliables/répliables.
+ * Expose 4 sous-composants : Accordion, AccordionItem, AccordionTrigger, AccordionContent.
+ * Les classes Tailwind sont gérées via `cn()` pour permettre l'override.
+ */
+
 import { Accordion as AccordionPrimitive } from "@base-ui/react/accordion"
 
 import { cn } from "@/lib/utils"
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react"
 
+// Conteneur racine de l'accordion.
 function Accordion({ className, ...props }: AccordionPrimitive.Root.Props) {
   return (
     <AccordionPrimitive.Root
@@ -16,6 +23,7 @@ function Accordion({ className, ...props }: AccordionPrimitive.Root.Props) {
   )
 }
 
+// Section individuelle (entête + contenu) de l'accordion.
 function AccordionItem({ className, ...props }: AccordionPrimitive.Item.Props) {
   return (
     <AccordionPrimitive.Item
@@ -26,6 +34,7 @@ function AccordionItem({ className, ...props }: AccordionPrimitive.Item.Props) {
   )
 }
 
+// Bouton qui ouvre/ferme un AccordionItem.
 function AccordionTrigger({
   className,
   children,
@@ -49,6 +58,7 @@ function AccordionTrigger({
   )
 }
 
+// Contenu révélable d'un AccordionItem.
 function AccordionContent({
   className,
   children,

@@ -1,7 +1,14 @@
+/**
+ * Composant Card — conteneur visuel de base.
+ * Sous-composants : CardHeader, CardTitle, CardDescription, CardAction, CardContent, CardFooter.
+ * Taille globale contrôlable via la prop `size` (`default` | `sm`).
+ */
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+// Conteneur racine de la carte.
 function Card({
   className,
   size = "default",
@@ -20,6 +27,7 @@ function Card({
   )
 }
 
+// En-tête de la carte (titre + description + éventuelle action).
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -33,6 +41,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Titre principal de la carte.
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -43,6 +52,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Sous-titre / description secondaire sous le titre.
 function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -53,6 +63,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Zone d'action (ex : bouton en haut à droite) à l'intérieur de CardHeader.
 function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -66,6 +77,7 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Contenu principal de la carte (paddings horizontaux appliqués).
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -76,6 +88,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Pied de carte (typiquement boutons d'action).
 function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

@@ -1,3 +1,9 @@
+/**
+ * Hook principal du tableau de bord.
+ * Charge en parallèle toutes les sections (stats, weekly, byCity, byStatus,
+ * activity, problems, urgent) et expose un état consolidé + un `refresh()`.
+ */
+
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -22,6 +28,7 @@ import type {
   ProblemReport,
 } from '@/types/supabase';
 
+// Valeur initiale "neutre" pour éviter les `undefined` dans les vues avant chargement.
 const EMPTY_STATS: DashboardStats = {
   totalDeliveries: 0,
   activeDeliveries: 0,
@@ -31,6 +38,7 @@ const EMPTY_STATS: DashboardStats = {
   activeClients: 0,
 };
 
+// Forme de retour publique du hook.
 interface UseDashboardResult {
   stats: DashboardStats;
   weekly: WeeklyPerformance[];

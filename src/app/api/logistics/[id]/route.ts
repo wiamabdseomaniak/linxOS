@@ -1,3 +1,9 @@
+/**
+ * Route API : PATCH /api/logistics/[id]
+ * Met à jour partiellement une livraison (statut et/ou note de problème).
+ * Body JSON attendu : `{ statut_livraison?: string, description_probleme?: string }`.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +24,7 @@ export async function PATCH(
 
   const supabase = createClient(url, anonKey);
 
+  // Patch partiel : on n'envoie à Supabase que les champs effectivement fournis.
   const updateData: Record<string, unknown> = {};
   if (statut_livraison) updateData.statut_livraison = statut_livraison;
   if (description_probleme !== undefined) updateData.description_probleme = description_probleme;

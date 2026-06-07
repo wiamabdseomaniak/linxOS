@@ -1,5 +1,15 @@
+/**
+ * API Tracking public.
+ * Permet à un utilisateur externe de retrouver une livraison via un identifiant
+ * (numéro de suivi, ID, etc.) pour afficher sa progression.
+ */
+
 import type { LivraisonRow, LogisticsEvent, StatutLivraison } from '@/types/supabase';
 
+/**
+ * Convertit une ligne Supabase (avec jointure `client`) en `LogisticsEvent` :
+ * formate les dates en FR et applique des valeurs par défaut pour les colonnes nulles.
+ */
 function rowToEvent(row: LivraisonRow): LogisticsEvent {
   const dateObj = row.date_prevue ? new Date(row.date_prevue) : null;
   const client = row.client ?? null;
@@ -26,6 +36,10 @@ function rowToEvent(row: LivraisonRow): LogisticsEvent {
   };
 }
 
+/**
+ * Recherche une livraison par requête texte (ID de suivi, etc.).
+ * Renvoie `null` si aucune correspondance ou si la requête est vide.
+ */
 export async function trackByQuery(query: string): Promise<LogisticsEvent | null> {
   try {
     const trimmed = query.trim();

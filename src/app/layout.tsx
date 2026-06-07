@@ -1,3 +1,9 @@
+/**
+ * Layout racine de l'application Next.js (App Router).
+ * Monte les providers globaux (thème, react-query, toasts, etc.)
+ * et applique la police Inter ainsi que les métadonnées SEO par défaut.
+ */
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -6,8 +12,10 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
+// Police principale Inter (Google Fonts), exposée en variable CSS `--font-sans`.
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
+// Métadonnées globales (titre, description, favicon SVG inline).
 export const metadata: Metadata = {
   title: "LINXOS - Plateforme de Logistique et Sponsoring",
   description: "Plateforme de gestion logistique et de livraison de niveau entreprise pour les entreprises modernes",
@@ -21,6 +29,10 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Layout racine : enveloppe toutes les pages avec les providers de thème,
+ * tooltips et providers applicatifs (react-query, etc.).
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

@@ -1,9 +1,16 @@
+/**
+ * Composant Switch (Base UI) — interrupteur on/off.
+ * Tailles : `default` ou `sm`. Le thumb se translate automatiquement (RTL inclus).
+ * Le pseudo-élément `::after` agrandit la zone cliquable (3px de chaque côté).
+ */
+
 "use client"
 
 import { Switch as SwitchPrimitive } from "@base-ui/react/switch"
 
 import { cn } from "@/lib/utils"
 
+// Interrupteur — actif = couleur primary, inactif = gris (`bg-input/90`).
 function Switch({
   className,
   size = "default",

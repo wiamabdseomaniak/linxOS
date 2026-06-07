@@ -1,9 +1,16 @@
+/**
+ * Composant Label — étiquette de formulaire accessible.
+ * Se grise automatiquement lorsque le contrôle associé est désactivé
+ * (via `peer-disabled` ou `group-data-[disabled=true]`).
+ */
+
 "use client"
 
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+// Étiquette HTML associée à un champ (utiliser `htmlFor` pour lier l'input).
 function Label({ className, ...props }: React.ComponentProps<"label">) {
   return (
     <label

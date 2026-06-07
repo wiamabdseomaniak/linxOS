@@ -1,9 +1,15 @@
+/**
+ * Composant Separator (Base UI) — ligne de séparation horizontale ou verticale.
+ * Rôle ARIA `separator` exposé automatiquement aux lecteurs d'écran.
+ */
+
 "use client"
 
 import { Separator as SeparatorPrimitive } from "@base-ui/react/separator"
 
 import { cn } from "@/lib/utils"
 
+// Séparateur : 1px de haut (horizontal) ou de large (vertical), couleur `bg-border`.
 function Separator({
   className,
   orientation = "horizontal",

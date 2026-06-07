@@ -1,3 +1,10 @@
+/**
+ * Route API de debug : GET /api/debug/data
+ * Endpoint utilitaire pour inspecter rapidement la connexion Supabase
+ * et la forme des données brutes (10 premières lignes + agrégats simples).
+ * À ne pas exposer en production.
+ */
+
 import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
@@ -12,6 +19,8 @@ export async function GET() {
 
   const supabase = createClient(url, anonKey);
 
+  // Récupère 10 lignes brutes + un échantillon plus large pour calculer
+  // la distribution par statut et le nombre de clients uniques.
   const { data: livraisons, error: err1 } = await supabase
     .from('livraison')
     .select('*')
@@ -26,6 +35,7 @@ export async function GET() {
     return Response.json({ error: err1.message }, { status: 500 });
   }
 
+  // Agrégats simples : comptage par statut + set d'IDs client uniques.
   const statusDistribution: Record<string, number> = {};
   const clients = new Set<string>();
   stats?.forEach(r => {

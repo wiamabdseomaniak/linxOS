@@ -1,3 +1,8 @@
+/**
+ * Petits onglets de filtre (Toutes / Non lues) affichés
+ * en haut du dropdown de notifications avec un badge de compteur.
+ */
+
 'use client';
 
 import { cn } from '@/lib/utils';

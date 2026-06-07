@@ -1,7 +1,14 @@
+/**
+ * Données mockées et configuration visuelle des notifications.
+ * Utilisé par les composants UI (dropdown, item) tant que
+ * la connexion temps réel Supabase n'est pas active.
+ */
+
 import { Notification } from './types';
 
 const now = new Date();
 
+// Liste de notifications mockées (timestamps relatifs à `now`).
 export const mockNotifications: Notification[] = [
   {
     id: 'notif-001',
@@ -102,6 +109,7 @@ export const mockNotifications: Notification[] = [
   },
 ];
 
+// Mapping type → { icône (nom Lucide), couleur texte, couleur de fond }.
 export const notificationTypeConfig: Record<string, { icon: string; color: string; bgColor: string }> = {
   delivery: { icon: 'Package', color: 'text-violet-600', bgColor: 'bg-violet-100 dark:bg-violet-900/30' },
   event: { icon: 'Calendar', color: 'text-blue-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' },

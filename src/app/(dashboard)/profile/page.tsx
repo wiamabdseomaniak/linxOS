@@ -1,4 +1,9 @@
-// Page Profil — affichage et modification des informations personnelles de l'utilisateur
+/**
+ * Page Profil — informations personnelles, avatar, réalisations.
+ * Permet d'éditer nom, téléphone et adresse via une boîte de dialogue,
+ * avec mise à jour optimiste puis appel Supabase.
+ */
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -64,6 +69,7 @@ export default function ProfilePage() {
       name: '',
       email: '',
       role: 'manager',
+      address: 'Casablanca, Maroc',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -71,6 +77,8 @@ export default function ProfilePage() {
 
   });
 
+  // Synchronise l'état local `user` avec le profil récupéré depuis Supabase
+  // (cast des dates string → Date pour matcher le type `User`).
   useEffect(() => {
     if (fetchedUser) {
       setUser({
@@ -81,6 +89,7 @@ export default function ProfilePage() {
     }
   }, [fetchedUser]);
 
+  // État local du formulaire d'édition, initialisé avec les valeurs courantes.
   const [formData, setFormData] = useState({
     name: user.name,
     email: user.email,
@@ -89,10 +98,9 @@ export default function ProfilePage() {
     department: user.department,
   });
 
- 
 
 
-
+  // Liste statique des badges affichés (à remplacer par une vraie source de données).
   const achievements = [
     { name: 'Meilleur performeur', icon: Award, description: 'Plus de 1000 livraisons effectuées', unlocked: true },
     { name: 'Étoile de la vitesse', icon: TrendingUp, description: 'Plus de 30 livraisons en un jour', unlocked: true },
@@ -102,10 +110,12 @@ export default function ProfilePage() {
 
   
 
+  // Ouvre le sélecteur de fichier natif pour changer l'avatar.
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
 
+  // Lit l'image sélectionnée en base64 pour l'afficher immédiatement.
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -117,6 +127,7 @@ export default function ProfilePage() {
     }
   };
 
+  // Pré-remplit le formulaire d'édition avec les valeurs courantes.
   const handleOpenEditDialog = () => {
     setFormData({
       name: user.name,
@@ -128,6 +139,7 @@ export default function ProfilePage() {
     setEditDialogOpen(true);
   };
 
+  // Sauvegarde le profil : appel Supabase + mise à jour de l'état local.
   const handleSaveProfile = async () => {
     setIsSaving(true);
     const success = await updateProfile({
@@ -151,6 +163,7 @@ export default function ProfilePage() {
     setIsSaving(false);
   };
 
+  // Renvoie le mois et l'année d'adhésion au format "October 2024".
   const formatMemberSince = (date: Date) => {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'long',
@@ -158,6 +171,7 @@ export default function ProfilePage() {
     });
   };
 
+  // Statistiques de performance affichées dans la page.
   const stats = [
     { label: 'Total des livraisons', value: '156', color: 'blue', icon: Package },
     { label: 'Taux de ponctualité', value: '98%', color: 'green', icon: Clock },
@@ -165,6 +179,7 @@ export default function ProfilePage() {
     { label: 'Taux de réussite', value: '99%', color: 'yellow', icon: TrendingUp },
   ];
 
+  // Affiche un spinner pendant le premier chargement du profil.
   if (userLoading && !user.id) {
     return (
       <div className="flex items-center justify-center p-16">
@@ -175,6 +190,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
+      {/* Input fichier caché déclenché par le bouton caméra sur l'avatar. */}
       <input
         type="file"
         ref={fileInputRef}
@@ -183,7 +199,7 @@ export default function ProfilePage() {
         className="hidden"
       />
 
-      {/* Header */}
+      {/* En-tête : avatar (avec bouton caméra superposé) + nom + badges + bouton Modifier. */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -193,6 +209,7 @@ export default function ProfilePage() {
           <div className="relative">
             <Avatar className="h-32 w-32 border-4 border-white shadow-2xl">
               <AvatarImage src={avatarPreview || user.avatar} alt={user.name} />
+              {/* Initiales calculées à partir du nom complet (fallback si pas d'image). */}
               <AvatarFallback className="text-4xl bg-gradient-to-br from-yellow-500 to-yellow-500 text-white dark:from-yellow-600 dark:to-yellow-600">
                 {user.name.split(' ').map((n) => n[0]).join('')}
               </AvatarFallback>
@@ -230,10 +247,8 @@ export default function ProfilePage() {
         </Button>
       </motion.div>
 
-      
-
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Profile Info */}
+        {/* Carte informations personnelles (2 colonnes) + carte réalisations (1 colonne). */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -245,6 +260,7 @@ export default function ProfilePage() {
               <CardTitle className="text-lg font-semibold text-white">Informations personnelles</CardTitle>
             </div>
             <CardContent className="p-6">
+              {/* Grille 2 colonnes : Nom, Rôle, Email, Téléphone, Adresse (sur 2 col). */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="group relative overflow-hidden rounded-2xl border border-border/50 p-5 transition-all hover:border-yellow-200 hover:shadow-md dark:hover:border-yellow-800">
                   <div className="absolute top-0 right-0 h-16 w-16 translate-x-8 translate-y-(-50%) rotate-12 bg-gradient-to-br from-yellow-100 to-amber-100 opacity-50 transition-transform group-hover:scale-110 dark:from-yellow-900/30 dark:to-amber-900/30" />
@@ -301,7 +317,7 @@ export default function ProfilePage() {
           </Card>
         </motion.div>
 
-        {/* Achievements */}
+        {/* Carte Réalisations : badges débloqués (jaune) ou verrouillés (grisés). */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -355,7 +371,7 @@ export default function ProfilePage() {
     
 
       
-      {/* Edit Profile Dialog */}
+      {/* Modale d'édition : nom / email / téléphone / adresse + boutons Annuler/Enregistrer. */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>

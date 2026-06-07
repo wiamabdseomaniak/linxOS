@@ -1,9 +1,15 @@
+/**
+ * Providers applicatifs globaux.
+ * Centralise React Query et le système de toasts (sonner)
+ * pour qu'ils soient disponibles dans toute l'arborescence.
+ */
+
 'use client';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Toaster } from 'sonner';
-import { I18nProvider } from '@/lib/i18n';
+
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -20,10 +26,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        {children}
-        <Toaster position="top-right" richColors />
-      </I18nProvider>
+      <Toaster richColors position="top-right" />
+      {children}
     </QueryClientProvider>
   );
 }

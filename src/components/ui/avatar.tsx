@@ -1,3 +1,9 @@
+/**
+ * Ensemble Avatar (Base UI) — image de profil avec fallback et badges.
+ * Expose : Avatar, AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGroupCount.
+ * Le fallback s'affiche automatiquement tant que l'image n'est pas chargée.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -5,6 +11,7 @@ import { Avatar as AvatarPrimitive } from "@base-ui/react/avatar"
 
 import { cn } from "@/lib/utils"
 
+// Conteneur racine — supporte 3 tailles (`default`, `sm`, `lg`) via data-attribute.
 function Avatar({
   className,
   size = "default",
@@ -25,6 +32,7 @@ function Avatar({
   )
 }
 
+// Image elle-même (cadrée, object-cover).
 function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
   return (
     <AvatarPrimitive.Image
@@ -38,6 +46,7 @@ function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
   )
 }
 
+// Élément affiché en attendant / en cas d'échec de chargement de l'image.
 function AvatarFallback({
   className,
   ...props
@@ -54,6 +63,7 @@ function AvatarFallback({
   )
 }
 
+// Petit badge positionné en bas à droite (typiquement statut en ligne).
 function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
@@ -70,6 +80,7 @@ function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
   )
 }
 
+// Conteneur pour afficher plusieurs avatars qui se chevauchent.
 function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -83,6 +94,7 @@ function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Pastille " +N " à afficher à la fin d'un AvatarGroup.
 function AvatarGroupCount({
   className,
   ...props

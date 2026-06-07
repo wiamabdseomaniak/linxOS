@@ -1,3 +1,9 @@
+/**
+ * Hook principal du module Logistique.
+ * Combine chargement, mutation (statut, notes), filtrage par statut,
+ * comptage par catégorie et ouverture WhatsApp.
+ */
+
 'use client';
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
@@ -9,6 +15,7 @@ import {
 import type { LogisticsEvent, StatutLivraison } from '@/types/supabase';
 import type { StatusCounts } from '@/features/logistics/constants';
 
+// État interne du hook.
 export interface LogisticsState {
   events: LogisticsEvent[];
   loading: boolean;
@@ -18,6 +25,7 @@ export interface LogisticsState {
   filteredEvents: LogisticsEvent[];
 }
 
+// Actions exposées aux composants (chargement, mises à jour, WhatsApp).
 export interface LogisticsActions {
   loadEvents: () => Promise<void>;
   handleUpdateStatus: (eventId: string, newStatus: StatutLivraison) => Promise<void>;
@@ -38,6 +46,10 @@ export function useLogistics(
     filteredEvents: [],
   });
 
+  /**
+   * Recharge la liste des livraisons depuis l'API pour la ville sélectionnée.
+   * Met à jour `connected` en fonction du succès/échec pour informer l'UI.
+   */
   const loadEvents = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
@@ -53,6 +65,10 @@ export function useLogistics(
 
   useEffect(() => { loadEvents(); }, [loadEvents]);
 
+  /**
+   * Met à jour le statut d'une livraison : applique d'abord l'optimistic update,
+   * puis rollback (recharge complète) en cas d'erreur.
+   */
   const handleUpdateStatus = useCallback(async (eventId: string, newStatus: StatutLivraison) => {
     try {
       const result = await updateEventStatus(eventId, newStatus);
@@ -67,6 +83,10 @@ export function useLogistics(
     }
   }, [loadEvents]);
 
+  /**
+   * Met à jour la note d'une livraison (avec éventuelle liste de pièces jointes
+   * concaténée en suffixe texte) — optimistic update + rollback en cas d'erreur.
+   */
   const handleUpdateNote = useCallback(async (
     eventId: string,
     note: string,
@@ -91,11 +111,16 @@ export function useLogistics(
     }
   }, [loadEvents]);
 
+  /**
+   * Ouvre WhatsApp Web vers le contact fourni.
+   * Convertit le format local marocain (+212 / 0X) en identifiant international.
+   */
   const openWhatsApp = useCallback((phone: string) => {
     const clean = phone.replace(/\s/g, '').replace('+212', '212');
     window.open(`https://wa.me/${clean}`, '_blank');
   }, []);
 
+  // Agrégat mémoïsé des compteurs par statut, recalculé uniquement quand `events` change.
   const statusCounts: StatusCounts = useMemo(() => ({
     all: state.events.length,
     scheduled: state.events.filter(e => e.status === 'planifie').length,
@@ -104,6 +129,7 @@ export function useLogistics(
     failed: state.events.filter(e => e.status === 'echouee').length,
   }), [state.events]);
 
+  // Sous-ensemble d'événements correspondant à l'onglet actif (statut sélectionné).
   const filteredEvents = useMemo(
     () => state.events.filter(e => e.status === activeStatus),
     [state.events, activeStatus],

@@ -1,4 +1,10 @@
-// Page de réinitialisation de mot de passe — mise à jour du mot de passe via token
+/**
+ * Page de réinitialisation de mot de passe.
+ * Atteinte via le lien envoyé par email (`/reset-password?token=...`).
+ * Vérifie d'abord la validité de la session, puis propose un formulaire
+ * de saisie + confirmation avant d'appeler `supabase.auth.updateUser`.
+ */
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -22,10 +28,12 @@ export default function ResetPasswordPage() {
   const [confirmError, setConfirmError] = useState("")
   const [isValidSession, setIsValidSession] = useState<boolean | null>(null)
 
+  // Vérifie la session Supabase au montage pour savoir si le token de réinit est valide.
   useEffect(() => {
     checkSession()
   }, [])
 
+  // Tente de récupérer la session active et bascule l'UI en conséquence.
   const checkSession = async () => {
     try {
       const { data: { session }, error } = await supabase.auth.getSession()
@@ -39,6 +47,7 @@ export default function ResetPasswordPage() {
     }
   }
 
+  // Validation locale du mot de passe (champ requis + longueur minimale).
   const validatePassword = (password: string) => {
     if (!password) {
       return "Le mot de passe est requis"
@@ -49,6 +58,7 @@ export default function ResetPasswordPage() {
     return ""
   }
 
+  // Validation complète du formulaire (mot de passe + confirmation).
   const validateForm = () => {
     let isValid = true
 
@@ -69,6 +79,7 @@ export default function ResetPasswordPage() {
     return isValid
   }
 
+  // Soumet le nouveau mot de passe à Supabase et met à jour l'UI selon le résultat.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setPasswordError("")
@@ -102,6 +113,7 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="relative flex min-h-screen overflow-hidden">
+      {/* Panneau gauche décoratif (caché en mobile). */}
       <div
         className="hidden lg:flex lg:w-1/2 relative items-center justify-center"
         style={{
@@ -133,11 +145,15 @@ export default function ResetPasswordPage() {
             </CardHeader>
 
             <CardContent className="pt-4">
+              {/* La page gère 5 états mutuellement exclusifs :
+                  chargement initial → session invalide → succès → erreur → formulaire. */}
               {isValidSession === null ? (
+                // 1. Vérification de session en cours : spinner.
                 <div className="flex items-center justify-center py-8">
                   <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-yellow-500" />
                 </div>
               ) : isValidSession === false ? (
+                // 2. Token de réinitialisation invalide/expiré.
                 <div className="space-y-4 text-center">
                   <div className="flex justify-center">
                     <XCircle className="h-16 w-16 text-red-500" />
@@ -153,6 +169,7 @@ export default function ResetPasswordPage() {
                   </Button>
                 </div>
               ) : isSuccess ? (
+                // 3. Mot de passe changé avec succès.
                 <div className="space-y-4 text-center">
                   <div className="flex justify-center">
                     <CheckCircle className="h-16 w-16 text-green-500" />
@@ -169,6 +186,7 @@ export default function ResetPasswordPage() {
                   </Button>
                 </div>
               ) : isError ? (
+                // 4. Erreur lors de la mise à jour (réessai possible).
                 <div className="space-y-4 text-center">
                   <div className="flex justify-center">
                     <XCircle className="h-16 w-16 text-red-500" />
@@ -185,6 +203,7 @@ export default function ResetPasswordPage() {
                   </Button>
                 </div>
               ) : (
+                // 5. Formulaire de saisie + confirmation.
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
                     <Label

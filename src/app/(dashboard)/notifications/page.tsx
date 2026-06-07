@@ -1,4 +1,10 @@
-// Page Notifications — historique des notifications avec filtres, marquage lecture/suppression
+/**
+ * Page Notifications — historique complet.
+ * Filtre lues / non lues, trie par date, permet de marquer comme lu
+ * ou de supprimer. Branchée sur le hook `useNotifications`
+ * (avec abonnement temps réel Supabase).
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -35,6 +41,7 @@ import {
 import { useNotifications } from '@/features/notifications/hooks/use-notifications';
 import { cn } from '@/lib/utils';
 
+// Mapping type de notification → icône Lucide.
 const notificationIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   success: CheckCircle2,
   error: AlertCircle,
@@ -67,6 +74,7 @@ export default function NotificationsPage() {
     return true;
   });
 
+  // Formate une date en durée relative FR ("il y a 5 min", "il y a 2 h", etc.).
   const formatTime = (date: Date) => {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
@@ -82,7 +90,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* En-tête : titre + compteur de non-lues + bouton "tout marquer comme lu". */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -109,7 +117,7 @@ export default function NotificationsPage() {
         </div>
       </motion.div>
 
-      {/* Filters */}
+      {/* Barre de filtres : onglets Non lues / Lues + tri par date. */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -158,6 +166,7 @@ export default function NotificationsPage() {
             </CardContent>
           </Card>
         ) : (
+          // Chaque carte de notification : icône colorée, titre (avec pastille non-lue), message, actions.
           filteredNotifications.map((notification, index) => {
             const Icon = notificationIcons[notification.type];
             return (
@@ -170,6 +179,7 @@ export default function NotificationsPage() {
                 <Card
                   className={cn(
                     'border-0 shadow-soft transition-all hover:shadow-md',
+                    // Fond dégradé violet pour mettre en valeur les non-lues.
                     !notification.lue && 'bg-gradient-to-r from-violet-50/50 to-purple-50/50 dark:from-violet-950/10 dark:to-purple-950/10'
                   )}
                 >
@@ -184,6 +194,7 @@ export default function NotificationsPage() {
                             <h4 className={cn('font-semibold', !notification.lue && 'text-violet-600')}>
                               {notification.titre}
                             </h4>
+                            {/* Pastille violette pour les notifications non lues. */}
                             {!notification.lue && (
                               <span className="h-2 w-2 rounded-full bg-violet-600" />
                             )}
@@ -204,6 +215,7 @@ export default function NotificationsPage() {
                           </a>
                         )}
                       </div>
+                      {/* Actions : marquer comme lu (si non lue) + supprimer. */}
                       <div className="flex items-center gap-1">
                         {!notification.lue && (
                           <Button

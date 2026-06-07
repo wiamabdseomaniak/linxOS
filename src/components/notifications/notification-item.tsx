@@ -1,3 +1,9 @@
+/**
+ * Item de notification — rendu individuel dans le dropdown.
+ * Affiche icône (ou avatar), titre, message, durée relative, et un point jaune
+ * pour les notifications non lues.
+ */
+
 'use client';
 
 import { motion } from 'framer-motion';
@@ -18,6 +24,7 @@ import {
   Users,
 } from 'lucide-react';
 
+// Résout un nom d'icône (string) en composant Lucide.
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Package,
   Calendar,
@@ -42,6 +49,7 @@ export function NotificationItem({ notification, onClick, index }: NotificationI
   const config = notificationTypeConfig[notification.type] || notificationTypeConfig.system;
   const IconComponent = iconMap[config.icon] || Info;
 
+  // Renvoie une durée relative compacte ("5m", "3h", "2d") ou une date courte au-delà de 7 jours.
   const formatRelativeTime = (date: Date): string => {
     const now = new Date();
     const diff = now.getTime() - date.getTime();

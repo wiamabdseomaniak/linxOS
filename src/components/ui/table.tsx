@@ -1,9 +1,17 @@
+/**
+ * Composant Table — tableau stylé (base-ui style).
+ * Expose : Table, TableHeader, TableBody, TableFooter,
+ *           TableRow, TableHead, TableCell, TableCaption.
+ * Wrap automatiquement dans un conteneur `overflow-x-auto` (scroll horizontal mobile).
+ */
+
 "use client"
 
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+// Wrapper <table> + conteneur scrollable.
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
@@ -19,6 +27,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   )
 }
 
+// En-tête du tableau (`<thead>`).
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
@@ -29,6 +38,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   )
 }
 
+// Corps du tableau (`<tbody>`) — la dernière ligne n'a pas de bordure basse.
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
   return (
     <tbody
@@ -39,6 +49,7 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
   )
 }
 
+// Pied de tableau (`<tfoot>`) — fond `bg-muted/50`, texte en medium.
 function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   return (
     <tfoot
@@ -52,6 +63,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
+// Ligne de tableau — survol = `bg-muted/50`, sélectionné = `bg-muted`.
 function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   return (
     <tr
@@ -65,6 +77,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   )
 }
 
+// Cellule d'en-tête (`<th>`) — `text-start`, police medium, pas de wrap.
 function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
@@ -78,6 +91,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   )
 }
 
+// Cellule de données (`<td>`).
 function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   return (
     <td
@@ -91,6 +105,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   )
 }
 
+// Légende du tableau (`<caption>`), affichée en dessous par défaut (`caption-bottom`).
 function TableCaption({
   className,
   ...props

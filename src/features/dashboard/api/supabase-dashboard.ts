@@ -1,3 +1,9 @@
+/**
+ * API Agrégats du tableau de bord.
+ * Récupère via `/api/dashboard` les statistiques, performances et répartitions
+ * et les expose via des fonctions spécialisées.
+ */
+
 import type {
   DashboardStats,
   WeeklyPerformance,
@@ -28,25 +34,33 @@ async function fetchDashboardAll(): Promise<DashboardApiResponse> {
   return data;
 }
 
+// Vide le cache — utile après une mutation (statut changé, livraison créée, etc.).
 export function clearDashboardCache() {
   cachedDashboard = null;
 }
 
+// Renvoie les compteurs globaux (totaux, actives, terminées, échouées, revenus, clients).
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   const data = await fetchDashboardAll();
   return data.stats;
 }
 
+// Renvoie la performance journalière sur la semaine en cours.
 export async function fetchWeeklyPerformance(): Promise<WeeklyPerformance[]> {
   const data = await fetchDashboardAll();
   return data.weekly;
 }
 
+// Renvoie la répartition des livraisons par ville.
 export async function fetchDeliveriesByCity(): Promise<CityData[]> {
   const data = await fetchDashboardAll();
   return data.byCity;
 }
 
+/**
+ * Calcule la répartition par statut à partir des compteurs.
+ * Déduit le nombre "planifié" par soustraction pour rester cohérent avec les autres sections.
+ */
 export async function fetchStatusDistribution(): Promise<StatusDistribution[]> {
   const data = await fetchDashboardAll();
   const colorMap: Record<string, string> = {

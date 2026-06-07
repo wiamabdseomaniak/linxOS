@@ -1,3 +1,12 @@
+/**
+ * Dropdown de notifications affichée dans la Navbar.
+ * Combine le hook `useNotifications` (Supabase Realtime) avec :
+ *  - filtrage local (toutes / non lues)
+ *  - tri par date décroissante
+ *  - fermeture automatique (clic extérieur, Échap)
+ *  - redirection vers l'`actionUrl` lors d'un clic
+ */
+
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -24,6 +33,7 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
 
   const { notifications, unreadCount, markAsRead, markAllAsRead, loading } = useNotifications();
 
+  // Adapte une `Notification` du store vers le format `DropdownNotification` consommé par l'UI.
   const toDropdownNotif = (n: StoreNotification): DropdownNotification => ({
     id: n.id_notification,
     type: n.type === 'error' ? 'error' : n.type === 'success' ? 'success' : n.type === 'warning' ? 'warning' : 'info',
@@ -34,6 +44,7 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
     timestamp: new Date(n.createdAt || n.dateNotification),
   });
 
+  // Filtre + trie la liste selon le filtre actif, mémoïsé pour la perf.
   const filteredNotifications = useCallback(() => {
     let filtered = [...notifications].map(toDropdownNotif);
 
@@ -48,6 +59,7 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
     );
   }, [notifications, filter]);
 
+  // Marque comme lue puis navigue vers l'URL d'action (si présente).
   const handleNotificationClick = (notification: DropdownNotification) => {
     markAsRead(notification.id);
     if (notification.actionUrl) {
@@ -56,6 +68,7 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
     }
   };
 
+  // Redirige vers la page complète des notifications.
   const handleViewAll = () => {
     router.push('/notifications');
     setIsOpen(false);
@@ -121,7 +134,7 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
+            {/* Backdrop invisible : ferme le dropdown au clic extérieur. */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -130,16 +143,16 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
               onClick={() => setIsOpen(false)}
             />
 
-            {/* Dropdown */}
+            {/* Contenu du dropdown (animé en spring) positionné sous le trigger. */}
             <motion.div
               ref={dropdownRef}
               initial={{ opacity: 0, y: 8, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 4, scale: 0.98 }}
-              transition={{ 
-                type: 'spring', 
-                stiffness: 400, 
-                damping: 30 
+              transition={{
+                type: 'spring',
+                stiffness: 400,
+                damping: 30
               }}
               className={cn(
                 'absolute right-0 top-full z-50 mt-2 w-[370px]',
@@ -148,7 +161,7 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
               )}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
+              {/* En-tête : titre + pastille de non-lues + bouton "Voir tout" → /notifications. */}
               <div className="flex items-center justify-between border-b border-border/30 px-3 py-3">
                 <div className="flex items-center gap-2">
                   <span className="text-[13px] font-semibold text-foreground">Notifications</span>
@@ -167,7 +180,7 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
                 </button>
               </div>
 
-              {/* Filter Tabs */}
+              {/* Onglets Toutes / Non lues. */}
               <div className="flex items-center border-b border-border/30 px-3 py-2">
                 <FilterTabs
                   activeTab={filter}
@@ -177,7 +190,7 @@ export function NotificationDropdown({ trigger }: NotificationDropdownProps) {
                 />
               </div>
 
-              {/* Notification List */}
+              {/* Liste des notifications (chargement → vide → items animés). */}
               <div className="max-h-[420px] overflow-y-auto">
                 {loading ? (
                   <div className="flex items-center justify-center py-12">

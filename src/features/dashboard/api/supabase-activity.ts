@@ -1,9 +1,18 @@
+/**
+ * API Activité du tableau de bord.
+ * Regroupe les appels à l'endpoint `/api/dashboard` pour les sections
+ * "activité récente", "problèmes" et "livraisons urgentes".
+ *
+ * Une mémoïsation simple évite de re-frapper l'API tant que `clearActivityCache` n'est pas appelé.
+ */
+
 import type {
   ActivityItem,
   ProblemReport,
 } from '@/types/supabase';
 import type { DeliveryPriority } from '@/types/supabase';
 
+// Forme applicative d'une livraison urgente utilisée par les composants UI.
 export interface UrgentDelivery {
   id: string;
   trackingId: string;
@@ -19,8 +28,13 @@ interface DashboardApiResponse {
   urgent: { id: string; trackingId: string; clientName: string; city: string; priority: string; scheduledDate: string }[];
 }
 
+// Cache mémoire partagé par les fonctions de ce module.
 let cachedDashboard: DashboardApiResponse | null = null;
 
+/**
+ * Appelle `/api/dashboard` une seule fois par cycle de vie du module
+ * puis sert le cache aux consommateurs.
+ */
 async function fetchDashboardActivity(): Promise<DashboardApiResponse> {
   if (cachedDashboard) return cachedDashboard;
   const res = await fetch('/api/dashboard');
@@ -33,6 +47,7 @@ async function fetchDashboardActivity(): Promise<DashboardApiResponse> {
   return cachedDashboard;
 }
 
+// Vide le cache (à appeler après une mutation côté serveur, par exemple).
 export function clearActivityCache() {
   cachedDashboard = null;
 }

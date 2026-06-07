@@ -1,3 +1,10 @@
+/**
+ * Composant Dialog (Radix UI) — modale accessible (overlay, focus trap, Échap, etc.).
+ * Sous-composants : Dialog, DialogTrigger, DialogPortal, DialogClose,
+ *                   DialogOverlay, DialogContent, DialogHeader, DialogFooter,
+ *                   DialogTitle, DialogDescription.
+ */
+
 'use client';
 
 import * as React from 'react';
@@ -5,11 +12,13 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Re-exports directs des primitives Radix pour composer facilement.
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
 const DialogPortal = DialogPrimitive.Portal;
 const DialogClose = DialogPrimitive.Close;
 
+// Overlay sombre couvrant l'écran derrière la modale.
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -25,6 +34,7 @@ const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
+// Conteneur principal de la modale (animé, centré, avec bouton de fermeture).
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
@@ -49,6 +59,7 @@ const DialogContent = React.forwardRef<
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
+// En-tête de la modale (titre + description, alignés à gauche sur desktop).
 const DialogHeader = ({
   className,
   ...props
@@ -63,6 +74,7 @@ const DialogHeader = ({
 );
 DialogHeader.displayName = 'DialogHeader';
 
+// Pied de modale (boutons d'action, justifiés à droite sur desktop).
 const DialogFooter = ({
   className,
   ...props
@@ -77,6 +89,7 @@ const DialogFooter = ({
 );
 DialogFooter.displayName = 'DialogFooter';
 
+// Titre de la modale (rendu via `DialogPrimitive.Title` pour l'accessibilité).
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
@@ -92,6 +105,7 @@ const DialogTitle = React.forwardRef<
 ));
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
+// Description de la modale (texte secondaire, également exposé aux lecteurs d'écran).
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>

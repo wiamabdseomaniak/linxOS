@@ -1,3 +1,9 @@
+/**
+ * Page publique de suivi — accessible sans authentification.
+ * Permet à un destinataire de retrouver une livraison via son ID de suivi
+ * et d'afficher un mini-timeline + les informations de contact.
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -12,6 +18,7 @@ import { trackByQuery } from '@/features/tracking/api/supabase-tracking';
 import { cn } from '@/lib/utils';
 import type { LogisticsEvent } from '@/types/supabase';
 
+// Étapes du mini-timeline affiché à l'utilisateur final.
 const steps = [
   { id: 'planifie', label: 'Planifié', icon: Calendar },
   { id: 'en_cours', label: 'En transit', icon: Truck },
@@ -23,6 +30,7 @@ export default function TrackPage() {
   const [foundEvent, setFoundEvent] = useState<LogisticsEvent | null>(null);
   const [searching, setSearching] = useState(false);
 
+  // Déclenche la recherche via l'API et met à jour l'état local.
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setSearching(true);
@@ -34,11 +42,13 @@ export default function TrackPage() {
     }
   };
 
+  // Renvoie l'index de l'étape courante dans le mini-timeline.
   const getCurrentStepIndex = (status: string) => {
     if (status === 'echouee') return -1;
     return steps.findIndex((s) => s.id === status);
   };
 
+  // Libellé FR associé à un statut de livraison.
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'planifie': return 'Planifié';
@@ -50,7 +60,9 @@ export default function TrackPage() {
   };
 
   return (
+    // Conteneur plein écran avec un dégradé jaune/indigo (clair) ou gris (sombre).
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-yellow-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* En-tête minimaliste : lien de retour vers la page de connexion. */}
       <header className="border-b bg-white/80 backdrop-blur-xl dark:bg-gray-900/80">
         <div className="mx-auto max-w-6xl px-4 py-4">
           <Link href="/login" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
@@ -61,6 +73,8 @@ export default function TrackPage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-12">
+        {/* Bloc d'accroche : logo (variante claire + sombre) + titre + sous-titre.
+            Animation Framer Motion : léger fondu descendant à l'apparition. */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -82,6 +96,9 @@ export default function TrackPage() {
           </p>
         </motion.div>
 
+        {/* Carte de recherche : champ texte + bouton "Suivre".
+            La recherche se déclenche au clic ou via la touche Entrée.
+            Le bouton est désactivé tant que le champ est vide ou pendant le chargement. */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -93,7 +110,7 @@ export default function TrackPage() {
                 <div className="relative flex-1">
                   <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="LNX-2026-001 or LIV-2026-001"
+                    placeholder="ID de livraison or ID de suivi"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -114,6 +131,8 @@ export default function TrackPage() {
         </motion.div>
 
         {foundEvent ? (
+          // Carte de résultat : entête jaune avec ID de suivi + statut + quantité,
+          // puis mini-timeline, alerte éventuelle et grille de détails.
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -134,6 +153,11 @@ export default function TrackPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-6">
+                {/* Mini-timeline 3 étapes (Planifié → En transit → Livré).
+                    - `isActive` : l'étape est atteinte (jaune plein).
+                    - `isCurrent` : l'étape exacte en cours (mise en avant + ombre).
+                    - Le trait horizontal entre deux étapes passe en jaune dès qu'on
+                      a franchi la première des deux (`currentIndex > index`). */}
                 <div className="mb-8">
                   <div className="relative flex justify-between">
                     {steps.map((step, index) => {
@@ -172,6 +196,7 @@ export default function TrackPage() {
                   </div>
                 </div>
 
+                {/* Bandeau d'alerte rouge affiché uniquement en cas de livraison échouée. */}
                 {foundEvent.status === 'echouee' && (
                   <div className="mb-6 rounded-xl bg-red-50 p-4 text-red-700 dark:bg-red-900/30 dark:text-red-300">
                     <div className="flex items-center gap-2">
@@ -182,6 +207,8 @@ export default function TrackPage() {
                   </div>
                 )}
 
+                {/* Grille 2 colonnes : détails de l'événement (gauche) + destinataire (droite).
+                    Sur mobile (`md:grid-cols-2`), les colonnes s'empilent. */}
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Détails de l'événement</h3>
@@ -222,6 +249,7 @@ export default function TrackPage() {
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Destinataire</h3>
                     <div className="space-y-3">
+                      {/* Avatar placeholder jaune : initiales calculées à partir du nom complet. */}
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500 to-yellow-500 text-white font-semibold">
                           {foundEvent.contactName.split(' ').map((n) => n[0]).join('')}
@@ -236,11 +264,13 @@ export default function TrackPage() {
                       </div>
                     </div>
 
+                    {/* ID de livraison interne (différent de l'ID de suivi affiché dans l'entête). */}
                     <div className="mt-4 space-y-2">
                       <p className="text-sm text-muted-foreground">ID de livraison</p>
                       <p className="font-mono font-medium text-violet-600">{foundEvent.id_livraison}</p>
                     </div>
 
+                    {/* Bloc notes affiché uniquement si le champ est rempli. */}
                     {foundEvent.notes && (
                       <div className="mt-4">
                         <p className="text-sm text-muted-foreground">Notes</p>
@@ -254,6 +284,7 @@ export default function TrackPage() {
               </CardContent>
             </Card>
           </motion.div>
+        // État vide : recherche lancée mais aucun résultat — message d'erreur centré.
         ) : searchQuery && !foundEvent ? (
           <motion.div
             initial={{ opacity: 0 }}
@@ -275,6 +306,7 @@ export default function TrackPage() {
         ) : null}
       </main>
 
+      {/* Pied de page : copyright statique. */}
       <footer className="mt-16 border-t bg-white/80 backdrop-blur-xl dark:bg-gray-900/80">
         <div className="mx-auto max-w-6xl px-4 py-8 text-center text-sm text-muted-foreground">
           <p>&copy; 2026 LINXOS. Tous droits réservés.</p>

@@ -1,9 +1,17 @@
+/**
+ * Composant Tooltip (Base UI) — info-bulle accessible.
+ * Expose : TooltipProvider, Tooltip, TooltipTrigger, TooltipContent.
+ * `TooltipProvider` doit englober tous les tooltips de l'app (idéalement une seule fois,
+ * à la racine) pour partager le délai et éviter les problèmes de hover croisés.
+ */
+
 "use client"
 
 import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip"
 
 import { cn } from "@/lib/utils"
 
+// Fournit le contexte (délai, groupement) pour tous les tooltips enfants.
 function TooltipProvider({
   delay = 0,
   ...props
@@ -17,14 +25,17 @@ function TooltipProvider({
   )
 }
 
+// Racine du tooltip.
 function Tooltip({ ...props }: TooltipPrimitive.Root.Props) {
   return <TooltipPrimitive.Root data-slot="tooltip" {...props} />
 }
 
+// Élément qui affiche le tooltip au survol/focus.
 function TooltipTrigger({ ...props }: TooltipPrimitive.Trigger.Props) {
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
 }
 
+// Contenu positionné + flèche (Arrow) qui pointe vers le trigger.
 function TooltipContent({
   className,
   side = "top",

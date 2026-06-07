@@ -1,5 +1,15 @@
+/**
+ * API Logistique — appels aux routes `/api/logistics`.
+ * Gère la lecture paginée/filtrée et la mise à jour (statut, notes)
+ * des livraisons. Les lignes brutes Supabase sont converties en `LogisticsEvent`.
+ */
+
 import type { LivraisonRow, LogisticsEvent, StatutLivraison } from '@/types/supabase';
 
+/**
+ * Convertit une ligne Supabase `livraison` (avec jointure `client` optionnelle)
+ * en modèle `LogisticsEvent` consommé par l'UI (dates localisées FR, défauts, etc.).
+ */
 function rowToEvent(row: Partial<LivraisonRow>): LogisticsEvent {
   const dateObj = row.date_prevue ? new Date(row.date_prevue) : null;
   const client = (row as Record<string, unknown>).client as { nom_complet?: string; telephone?: string } | null ?? null;
@@ -26,11 +36,16 @@ function rowToEvent(row: Partial<LivraisonRow>): LogisticsEvent {
   };
 }
 
+// Filtres disponibles pour la requête `/api/logistics` (les valeurs "all" sont ignorées).
 export interface LogisticsFilter {
   statut_livraison?: string;
   ville?: string;
 }
 
+/**
+ * Récupère la liste des livraisons en appliquant les filtres `statut_livraison` et `ville`.
+ * Renvoie un tableau vide en cas d'absence de données.
+ */
 export async function fetchLogisticsEvents(
   filter?: LogisticsFilter
 ): Promise<LogisticsEvent[]> {
@@ -53,11 +68,16 @@ export async function fetchLogisticsEvents(
   return (data as LivraisonRow[]).map(rowToEvent);
 }
 
+// Réponse générique des endpoints PATCH : succès booléen + message d'erreur éventuel.
 export interface StatusUpdateResult {
   success: boolean;
   error?: string;
 }
 
+/**
+ * Met à jour le statut de livraison (`statut_livraison`) côté serveur.
+ * Utilise l'endpoint PATCH `/api/logistics/:id`.
+ */
 export async function updateEventStatus(
   eventId: string,
   newStatus: StatutLivraison
@@ -75,6 +95,10 @@ export async function updateEventStatus(
   }
 }
 
+/**
+ * Met à jour la description du problème (`description_probleme`) sur une livraison.
+ * Endpoint PATCH `/api/logistics/:id`.
+ */
 export async function updateEventNotes(
   eventId: string,
   notes: string
