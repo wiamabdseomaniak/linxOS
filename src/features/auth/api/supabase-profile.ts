@@ -21,7 +21,7 @@ function rowToUser(row: UtilisateurRow): User {
     role: 'manager',
     avatar: '',
     department: '',
-    address: '',
+    address: row.adresse ?? '',
     createdAt: row.created_at ? new Date(row.created_at) : new Date(),
     updatedAt: row.updated_at ? new Date(row.updated_at) : new Date(),
     totalDeliveries: 0,
@@ -104,6 +104,7 @@ export async function updateCurrentProfile(
       updatePayload.nom = parts.slice(1).join(' ') ?? '';
     }
     if (patch.phone) updatePayload.tele = patch.phone;
+    if (patch.address) updatePayload.adresse = patch.address;
 
     const { data, error } = await supabase
       .from(SUPABASE_TABLES.UTILISATEUR)

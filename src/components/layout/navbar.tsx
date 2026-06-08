@@ -386,7 +386,7 @@ export function Navbar() {
         <DropdownMenu>
           <DropdownMenuTrigger className="focus:outline-none">
             <div className="cursor-pointer rounded-full transition-all hover:opacity-80">
-              <Avatar className="h-10 w-10 border-2 border-yellow-500 hover:border-yellow-600 dark:border-yellow-400 dark:hover:border-yellow-300">
+              <Avatar className="h-9 w-9">
                 <AvatarImage src={fetchedUser?.avatar ?? ""} alt={fetchedUser?.name ?? ""} />
                 <AvatarFallback className="bg-gradient-to-br from-yellow-500 to-orange-500 text-white dark:from-yellow-600 dark:to-orange-600 font-semibold">
                   {(fetchedUser?.name ?? '').split(' ').map((n) => n[0]).join('')}

@@ -31,13 +31,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import { useNotifications } from '@/features/notifications/hooks/use-notifications';
 import { cn } from '@/lib/utils';
 
@@ -132,15 +126,7 @@ export default function NotificationsPage() {
                   <TabsTrigger value="read">Lues</TabsTrigger>
                 </TabsList>
               </Tabs>
-              <Select defaultValue="newest">
-                <SelectTrigger className="w-full rounded-xl sm:w-[180px]">
-                  <SelectValue placeholder="Trier par" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Plus récentes d'abord</SelectItem>
-                  <SelectItem value="oldest">Plus anciennes d'abord</SelectItem>
-                </SelectContent>
-              </Select>
+
             </div>
           </CardContent>
         </Card>

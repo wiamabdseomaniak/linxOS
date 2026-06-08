@@ -13,6 +13,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { SIDEBAR_MENU } from '@/lib/constants';
 import { useUIStore } from '@/stores';
+import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
 import { useTheme } from '@/components/providers/theme-provider';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -57,7 +58,12 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { sidebarCollapsed, toggleSidebar, sidebarMobileOpen, toggleMobileSidebar } = useUIStore();
+  const { user } = useCurrentUser();
   const { signOut } = useTheme();
+
+  const initials = user?.name
+    ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : '??';
 
   // Déclenche la déconnexion après confirmation (sauf en SSR).
   const handleSignOut = () => {
@@ -184,7 +190,7 @@ export function Sidebar() {
             )}
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 text-white shadow-md">
-              <span className="text-sm font-semibold">AB</span>
+              <span className="text-sm font-semibold">{initials}</span>
             </div>
             <AnimatePresence>
               {!sidebarCollapsed && (
@@ -194,8 +200,8 @@ export function Sidebar() {
                   exit={{ opacity: 0, width: 0 }}
                   className="overflow-hidden"
                 >
-                  <p className="text-sm font-semibold text-sidebar-foreground">Ahmed Benali</p>
-                  <p className="text-xs text-sidebar-foreground/70">Responsable Logistique</p>
+                  <p className="text-sm font-semibold text-sidebar-foreground">{user?.name || 'Utilisateur'}</p>
+                  <p className="text-xs text-sidebar-foreground/70">{user?.role === 'manager' ? 'Responsable Logistique' : user?.role ?? '—'}</p>
                 </motion.div>
               )}
             </AnimatePresence>
