@@ -10,6 +10,7 @@ import type {
   CityData,
   StatusDistribution,
 } from '@/types/supabase';
+import { supabase } from '@/lib/supabase';
 
 interface DashboardApiResponse {
   stats: DashboardStats;
@@ -49,6 +50,33 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 export async function fetchWeeklyPerformance(): Promise<WeeklyPerformance[]> {
   const data = await fetchDashboardAll();
   return data.weekly;
+}
+
+const MONTH_NAMES = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+/**
+ * Récupère les livraisons mensuelles directement depuis Supabase
+ * sans passer par le cache du dashboard.
+ */
+export async function fetchMonthlyDeliveries(): Promise<WeeklyPerformance[]> {
+  if (!supabase.from) return [];
+
+  const { data } = await supabase
+    .from('livraison')
+    .select('date_prevue');
+
+  const counts = new Array(12).fill(0);
+  data?.forEach(r => {
+    if (r.date_prevue) {
+      counts[new Date(r.date_prevue).getUTCMonth()]++;
+    }
+  });
+
+  return MONTH_NAMES.map((month, i) => ({
+    day: month,
+    livrées: counts[i],
+    revenue: 0,
+  }));
 }
 
 // Renvoie la répartition des livraisons par ville.

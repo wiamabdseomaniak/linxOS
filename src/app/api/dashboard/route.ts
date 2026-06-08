@@ -78,13 +78,12 @@ export async function GET() {
       totalRevenue: 0,
       activeClients: clientsActifs,
     },
-    weekly: monthNames.map((month, i) => ({ day: month, deliveries: counts[i], revenue: 0 })),
-    byCity: Array.from(cityMap.entries()).map(([city, deliveries]) => ({ city, deliveries, revenue: 0 })),
+    weekly: monthNames.map((month, i) => ({ day: month, livrées: counts[i], revenue: 0 })),
+    byCity: Array.from(cityMap.entries()).map(([city, livrées]) => ({ city, livrées, revenue: 0 })),
     activity: (activity ?? []).map(r => ({
       id: r.id_livraison,
       action: r.nom_evenement,
       driver: r.organisateur,
-      time: r.date_prevue ? new Date(r.date_prevue).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '',
       status: r.statut_livraison ?? '',
     })),
     problems: (activity ?? []).filter(r => r.description_probleme).map(r => ({

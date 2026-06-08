@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Search, Package, Truck, CheckCircle2, MapPin, Clock, Phone, AlertCircle, ArrowLeft, Calendar } from 'lucide-react';
+import { Search, Package, Truck, CheckCircle2, MapPin, Phone, AlertCircle, ArrowLeft, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -233,7 +233,7 @@ export default function TrackPage() {
                         <Calendar className="mt-1 h-4 w-4 text-yellow-500 dark:text-yellow-400" />
                         <div>
                           <p className="text-sm text-muted-foreground">Date de l'événement</p>
-                          <p className="font-medium">{foundEvent.date} at {foundEvent.time}</p>
+                          <p className="font-medium">{foundEvent.date}</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">

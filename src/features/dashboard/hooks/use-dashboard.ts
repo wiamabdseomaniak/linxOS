@@ -10,6 +10,7 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   fetchDashboardStats,
   fetchWeeklyPerformance,
+  fetchMonthlyDeliveries,
   fetchDeliveriesByCity,
   fetchStatusDistribution,
 } from '@/features/dashboard/api/supabase-dashboard';
@@ -73,7 +74,7 @@ export function useDashboard(): UseDashboardResult {
     try {
       const [s, w, c, st, a, p, u] = await Promise.all([
         fetchDashboardStats(),
-        fetchWeeklyPerformance(),
+        fetchMonthlyDeliveries(),
         fetchDeliveriesByCity(),
         fetchStatusDistribution(),
         fetchActivityTimeline(8),

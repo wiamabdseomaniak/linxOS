@@ -98,7 +98,6 @@ export interface LivraisonEvent {
   ville: string;
   date_prevue: string;
   date_formatted: string;
-  time_formatted: string;
   quantite: number;
   client_nom: string;
   client_telephone: string;
@@ -252,13 +251,13 @@ export interface DashboardStats {
 
 export interface WeeklyPerformance {
   day: string;
-  deliveries: number;
+  livrées: number;
   revenue: number;
 }
 
 export interface CityData {
   city: string;
-  deliveries: number;
+  livrées: number;
   revenue: number;
 }
 
@@ -272,7 +271,6 @@ export interface ActivityItem {
   id: string;
   action: string;
   driver: string | null;
-  time: string;
   status: string;
 }
 

@@ -23,7 +23,7 @@ export interface UrgentDelivery {
 }
 
 interface DashboardApiResponse {
-  activity: { id: string; action: string; driver: string | null; time: string; status: string }[];
+  activity: { id: string; action: string; driver: string | null; status: string }[];
   problems: { id: string; event: string; problem: string; count: number; status: string; statusColor: string }[];
   urgent: { id: string; trackingId: string; clientName: string; city: string; priority: string; scheduledDate: string }[];
 }
@@ -58,7 +58,6 @@ export async function fetchActivityTimeline(limit = 8): Promise<ActivityItem[]> 
     id: a.id,
     action: a.action,
     driver: a.driver,
-    time: a.time,
     status: a.status,
   }));
 }

@@ -223,13 +223,11 @@ export default function DeliveredPage() {
                     key={event.id}
                     className="group rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm transition-all duration-200 hover:shadow-md"
                   >
-                    {/* Status Badges */}
+                    {/* Status Badge */}
                     <div className="mb-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className={`rounded-full px-3 py-1 text-xs font-medium ${PREP_COLORS[prepStatus] || 'bg-gray-100 text-gray-700 dark:text-gray-300'}`}>
-                          {PREP_LABELS[prepStatus] || prepStatus}
-                        </span>
-                      </div>
+                      <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                        Terminée
+                      </span>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -241,18 +239,6 @@ export default function DeliveredPage() {
                       >
                         <FileText className="h-4 w-4" />
                       </Button>
-                    </div>
-
-                    {/* Preparation Progress */}
-                    <div className="mb-3">
-                      <Progress value={prepProgress}>
-                        <ProgressTrack className="h-1.5">
-                          <ProgressIndicator
-                            className="rounded-full"
-                            style={{ backgroundColor: STATUS_COLORS[prepStatus] || 'var(--muted-foreground)' }}
-                          />
-                        </ProgressTrack>
-                      </Progress>
                     </div>
 
                     {/* Event Title */}

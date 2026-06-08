@@ -1,18 +1,14 @@
 /**
  * Client Supabase partagé pour le navigateur.
- * Implémente un pattern singleton + Proxy pour éviter toute erreur au démarrage
- * si les variables d'environnement ne sont pas configurées (mode démo).
+ * Utilise `createBrowserClient` de @supabase/ssr pour une compatibilité
+ * optimale avec Next.js App Router (gestion des cookies, PKCE, etc.).
  */
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-// Cache local du client navigateur (une seule instance par session onglet).
 let browserClient: SupabaseClient | null = null;
 
-/**
- * Récupère les variables d'environnement Supabase depuis `process.env`.
- * Centralisé pour faciliter la lecture / le test.
- */
 function getEnv() {
   return {
     url: process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -25,28 +21,21 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(url && anonKey);
 }
 
-/**
- * Returns a singleton Supabase client for browser usage.
- * If env vars are not set, returns null so consumers can fall back
- * to empty/zero data instead of crashing the app.
- */
 export function getSupabase(): SupabaseClient | null {
-  if (typeof window === 'undefined') return null;
   if (browserClient) return browserClient;
 
   const { url, anonKey } = getEnv();
   if (!url || !anonKey) {
     if (process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
       console.warn(
         '[Supabase] NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY is missing. ' +
-          'Falling back to empty data. Set them in .env.local to enable Supabase.',
+          'Set them in .env.local to enable Supabase.',
       );
     }
     return null;
   }
 
-  browserClient = createClient(url, anonKey, {
+  browserClient = createBrowserClient(url, anonKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
@@ -58,8 +47,7 @@ export function getSupabase(): SupabaseClient | null {
 
 /**
  * Proxy that lazy-resolves the Supabase client.
- * All Supabase calls in the codebase use this `supabase` export so that
- * missing env vars never throw at import time.
+ * All consumers use this export so that missing env vars never throw at import time.
  */
 export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
   get(_target, prop) {

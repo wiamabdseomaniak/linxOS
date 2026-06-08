@@ -162,10 +162,10 @@ export default function DashboardPage() {
             Vue d&apos;ensemble · 2026
           </div>
           <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            {'Bonjour'}, <span className="text-gradient-brand">{displayName}</span>
+            {'Bonjour'} <span className="text-gradient-brand">{displayName}</span>
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            {"Voici un aperçu de l'activité de vos livraisons aujourd'hui."}
+            {"Aperçu de l'activité de vos livraisons aujourd'hui."}
           </p>
         </div>
        
@@ -193,18 +193,7 @@ export default function DashboardPage() {
                   <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${palette.chip}`}>
                     <Icon className="h-5 w-5" />
                   </div>
-                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                    stat.changeType === 'positive'
-                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                      : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                  }`}>
-                    {stat.changeType === 'positive' ? (
-                      <ArrowUpRight className="h-3 w-3" />
-                    ) : (
-                      <ArrowDownRight className="h-3 w-3" />
-                    )}
-                    {stat.change}
-                  </span>
+                 
                 </div>
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -213,10 +202,29 @@ export default function DashboardPage() {
                   <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
                     {loading ? '…' : stat.value}
                   </p>
-                </div>
+                
                 <p className="text-xs text-muted-foreground">
                   {'Par rapport au mois dernier'}
                 </p>
+              <div className="flex items-center justify-end">
+  {stat.title !== 'En cours' && (
+  <span
+    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+      stat.changeType === 'positive'
+        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+        : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+    }`}
+  >
+    {stat.changeType === 'positive' ? (
+      <ArrowUpRight className="h-3 w-3" />
+    ) : (
+      <ArrowDownRight className="h-3 w-3" />
+    )}
+    {stat.change}
+  </span>
+)}
+</div>
+  </div>
               </div>
             </Card>
           );
@@ -228,9 +236,9 @@ export default function DashboardPage() {
           <Card className="overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
             <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
               <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Performance</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Suivi des performances</p>
                 <CardTitle className="text-lg font-semibold">
-                  {'Livraisons hebdomadaires'}
+                  {'Livraisons mensuelles'}
                 </CardTitle>
               </div>
               <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300">
@@ -265,7 +273,7 @@ export default function DashboardPage() {
                     />
                     <Area
                       type="monotone"
-                      dataKey="deliveries"
+                      dataKey="livrées"
                       stroke="url(#strokeValue)"
                       strokeWidth={2.5}
                       fillOpacity={1}
@@ -346,7 +354,7 @@ export default function DashboardPage() {
                         color: 'var(--foreground)',
                       }}
                     />
-                    <Bar dataKey="deliveries" fill="url(#barFill)" radius={[8, 8, 0, 0]} maxBarSize={60} />
+                    <Bar dataKey="livrées" fill="url(#barFill)" radius={[8, 8, 0, 0]} maxBarSize={60} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -373,7 +381,7 @@ export default function DashboardPage() {
                       <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-amber-500" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">{item.action}</p>
-                        <p className="text-xs text-muted-foreground">{item.driver ?? '—'} · {item.time}</p>
+                        <p className="text-xs text-muted-foreground">{item.driver ?? '—'}</p>
                       </div>
                     </li>
                   ))}

@@ -12,7 +12,6 @@ import { motion } from 'framer-motion';
 import {
   Package,
   MapPin,
-  Clock,
   Calendar,
   Truck,
   CheckCircle2,
@@ -311,15 +310,11 @@ export default function LogisticsPage() {
                       </span>
                     </div>
 
-                    {/* Date / heure planifiées + quantité à livrer. */}
+                    {/* Date planifiée + quantité à livrer. */}
                     <div className="mb-3 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         <span>{event.date}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{event.time}</span>
                       </div>
                     </div>
                     <div className="mb-4">
@@ -527,10 +522,6 @@ export default function LogisticsPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Date</p>
                   <p className="font-medium">{selectedEvent?.date}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Heure</p>
-                  <p className="font-medium">{selectedEvent?.time}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Quantité</p>

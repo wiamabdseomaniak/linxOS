@@ -20,7 +20,7 @@ export default function VerifyOtpForm() {
 
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);
+  const [code, setCode] = useState<string[]>(["", "", "", "", "", "", "", ""]);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [sending, setSending] = useState(false);
@@ -101,8 +101,8 @@ export default function VerifyOtpForm() {
     setInfo("");
 
     const fullCode = code.join("");
-    if (fullCode.length !== 6) {
-      setError("Veuillez entrer le code à 6 chiffres");
+    if (fullCode.length !== 8) {
+      setError("Veuillez entrer le code à 8 chiffres");
       return;
     }
 
@@ -156,26 +156,25 @@ export default function VerifyOtpForm() {
   const handleCodeChange = (index: number, value: string) => {
     const cleaned = value.replace(/\D/g, "");
     if (cleaned.length > 1) {
-      const digits = cleaned.slice(0, 6).split("");
-      const next = ["", "", "", "", "", ""];
+      const digits = cleaned.slice(0, 8).split("");
+      const next = ["", "", "", "", "", "", "", ""];
       digits.forEach((d, i) => {
         next[i] = d;
       });
       setCode(next);
-      const lastFilled = Math.min(digits.length, 6) - 1;
-      otpRefs.current[Math.min(lastFilled + 1, 5)]?.focus();
+      const lastFilled = Math.min(digits.length, 8) - 1;
+      otpRefs.current[Math.min(lastFilled + 1, 7)]?.focus();
       return;
     }
     if (!/^\d?$/.test(cleaned)) return;
     const next = [...code];
     next[index] = cleaned;
     setCode(next);
-    if (cleaned && index < 5) {
+      if (cleaned && index < 7) {
       otpRefs.current[index + 1]?.focus();
     }
   };
 
-  // Backspace sur case vide → recule le focus.
   const handleCodeKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === "Backspace" && !code[index] && index > 0) {
       otpRefs.current[index - 1]?.focus();
@@ -183,7 +182,7 @@ export default function VerifyOtpForm() {
     if (e.key === "ArrowLeft" && index > 0) {
       otpRefs.current[index - 1]?.focus();
     }
-    if (e.key === "ArrowRight" && index < 5) {
+    if (e.key === "ArrowRight" && index < 7) {
       otpRefs.current[index + 1]?.focus();
     }
   };
@@ -291,7 +290,7 @@ export default function VerifyOtpForm() {
                         }}
                         type="text"
                         inputMode="numeric"
-                        maxLength={6}
+                        maxLength={8}
                         value={digit}
                         onChange={(e) => handleCodeChange(index, e.target.value)}
                         onKeyDown={(e) => handleCodeKeyDown(index, e)}
@@ -316,7 +315,7 @@ export default function VerifyOtpForm() {
 
                   <Button
                     type="submit"
-                    disabled={verifying || code.join("").length !== 6}
+                    disabled={verifying || code.join("").length !== 8}
                     className="w-full bg-yellow-500 text-slate-900 hover:bg-yellow-400 active:bg-yellow-600 transition-all duration-200 hover:shadow-lg hover:shadow-yellow-500/25 dark:bg-yellow-600 dark:text-white dark:hover:bg-yellow-500 disabled:opacity-50"
                   >
                     {verifying ? (
