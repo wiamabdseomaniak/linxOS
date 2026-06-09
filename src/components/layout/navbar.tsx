@@ -69,6 +69,7 @@ export function Navbar() {
   const pageTitles: Record<string, string> = {
     '/dashboard': 'Tableau de bord',
     '/logistics': 'Logistique',
+    '/delivered': 'Livrées',
     '/notifications': 'Notifications',
     '/settings': 'Paramètres',
     '/profile': 'Profil',
