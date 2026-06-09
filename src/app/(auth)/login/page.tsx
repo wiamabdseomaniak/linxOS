@@ -13,7 +13,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowRight, Eye, EyeOff, X, KeyRound } from "lucide-react"
+import { ArrowRight, Eye, EyeOff, KeyRound, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -51,27 +51,18 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  // Soumission du formulaire principal : authentification par mot de passe.
+  // Soumission du formulaire principal : envoi d'un code OTP par email.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (validateForm()) {
       setIsLoading(true)
       try {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+        await supabase.auth.signInWithOtp({
+          email: email.trim().toLowerCase(),
         });
 
-        if (signInError) {
-          setErrors({ email: signInError.message })
-        } else {
-          sessionStorage.setItem('2fa_completed', 'true');
-          router.push('/dashboard');
-        }
-      } catch (error) {
-        console.error("Login error:", error)
-        setErrors({ email: 'Une erreur est survenue. Veuillez réessayer.' })
+        router.push(`/verify-otp?email=${encodeURIComponent(email.trim())}&sent=true`);
       } finally {
         setIsLoading(false)
       }
@@ -212,7 +203,6 @@ export default function LoginPage() {
                 </Button>
 
                 <div className="flex items-center justify-center gap-4">
-                  {/* Ouvre la modale "Mot de passe oublié". */}
                   <button
                     type="button"
                     onClick={() => setShowForgotPassword(true)}
@@ -221,7 +211,6 @@ export default function LoginPage() {
                     Mot de passe oublié ?
                   </button>
                   <span className="text-xs text-slate-300 dark:text-slate-600">|</span>
-                  {/* Redirige vers la page dédiée /verify-otp (pré-remplissage via query param). */}
                   <button
                     type="button"
                     onClick={() => {
@@ -331,9 +320,7 @@ export default function LoginPage() {
                       })
                       if (resetError) {
                         const msg = resetError.message.toLowerCase()
-                        if (msg.includes("rate limit")) {
-                          setResetError("Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.")
-                        } else if (msg.includes("user not found") || msg.includes("invalid email")) {
+                        if (msg.includes("user not found") || msg.includes("invalid email")) {
                           setResetError("Aucun compte n'est associé à cette adresse email.")
                         } else {
                           setResetError("Une erreur est survenue. Veuillez réessayer.")
@@ -367,7 +354,7 @@ export default function LoginPage() {
                       <p className="text-xs text-red-500 dark:text-red-400">{resetError}</p>
                     )}
                   </div>
-                  <Button
+                <Button
                     type="submit"
                     className="w-full bg-yellow-500 text-slate-900 hover:bg-yellow-400 active:bg-yellow-600 transition-all duration-200"
                   >
@@ -392,7 +379,6 @@ export default function LoginPage() {
         </div>
       )}
 
-      {/* Modale OTP retirée : la connexion par code se fait désormais sur la page dédiée /verify-otp. */}
     </div>
   );
 }

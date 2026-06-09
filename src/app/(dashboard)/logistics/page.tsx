@@ -259,11 +259,11 @@ export default function LogisticsPage() {
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-yellow-400 border-t-transparent" />
               </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr">
                 {filteredEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="group rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm transition-all duration-200 hover:shadow-md"
+                    className="group flex flex-col rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm transition-all duration-200 hover:shadow-md"
                   >
                     {/* Badge statut : couleur de fond + libellé FR selon `event.status`. */}
                     <div className="mb-3 flex items-center justify-between">
@@ -324,7 +324,7 @@ export default function LogisticsPage() {
                     </div>
 
                     {/* Boutons d'action contextuels selon le statut de la livraison. */}
-                    <div className="flex items-center gap-2 border-t border-gray-100 dark:border-gray-700 pt-3 flex-wrap">
+                    <div className="mt-auto -mx-5 -mb-5 flex items-center gap-2 border-t border-gray-100 dark:border-gray-700 bg-muted/30 px-5 py-3 flex-wrap rounded-b-xl">
                       <Button
                         variant="ghost"
                         size="sm"

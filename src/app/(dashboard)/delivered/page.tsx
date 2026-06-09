@@ -8,7 +8,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Calendar, Clock, Package, CheckCircle2, MessageCircle, FileText, X, AlertTriangle } from 'lucide-react';
+import { MapPin, Calendar, Package, CheckCircle2, MessageCircle, FileText, X, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -210,18 +210,12 @@ export default function DeliveredPage() {
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-yellow-400 border-t-transparent" />
               </div>
             ) : (
-            /* Grille de cartes livraison : badge statut + barre de progression + métadonnées. */
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
               {events.map((event) => {
-                // Statut préparation dérivé du statut livraison (cf. DELIVERY_TO_PREP).
-                const prepStatus = DELIVERY_TO_PREP[event.status] || event.statut_preparation;
-                const prepIdx = PREP_STEPS.indexOf(prepStatus);
-                const prepProgress = prepIdx >= 0 ? ((prepIdx + 1) / PREP_STEPS.length) * 100 : 0;
-
                 return (
                   <div
                     key={event.id}
-                    className="group rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm transition-all duration-200 hover:shadow-md"
+                    className="group flex flex-col rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-sm transition-all duration-200 hover:shadow-md"
                   >
                     {/* Status Badge */}
                     <div className="mb-3 flex items-center justify-between">
@@ -259,15 +253,11 @@ export default function DeliveredPage() {
                       </span>
                     </div>
 
-                    {/* Date & Time */}
+                    {/* Date */}
                     <div className="mb-4 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         <span>{event.date}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{event.time}</span>
                       </div>
                     </div>
 
@@ -279,7 +269,7 @@ export default function DeliveredPage() {
                     </div>
 
                     {/* Delivery ID */}
-                    <div className="rounded-lg bg-muted/50 dark:bg-muted/20 p-3">
+                    <div className="mt-auto -mx-5 -mb-5 rounded-b-xl border-t border-gray-100 dark:border-gray-700 bg-muted/30 dark:bg-muted/20 p-3">
                       <p className="text-xs text-muted-foreground">ID de livraison</p>
                       <p className="font-mono text-sm font-medium text-violet-600 dark:text-violet-400">
                         {event.id_livraison}

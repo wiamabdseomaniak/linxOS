@@ -28,10 +28,17 @@ export default function VerifyOtpForm() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
 
-  // Pré-remplit l'email si présent dans l'URL (?email=...).
+  // Pré-remplit l'email si présent dans l'URL (?email=...) et passe directement à la saisie du code si OTP déjà envoyé.
   useEffect(() => {
     const prefill = searchParams.get("email");
-    if (prefill) setEmail(prefill);
+    if (prefill) {
+      setEmail(prefill);
+      if (searchParams.get("sent") === "true") {
+        setStep("code");
+        setInfo("Un code à 6 chiffres a été envoyé à votre adresse.");
+        setResendCooldown(RESEND_COOLDOWN);
+      }
+    }
   }, [searchParams]);
 
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -47,12 +54,13 @@ export default function VerifyOtpForm() {
     }
   }, [step]);
 
-  // Redirige vers /dashboard si déjà connecté.
+  // Redirige vers /dashboard si déjà connecté (sauf si OTP vient d'être envoyé).
   useEffect(() => {
+    if (searchParams.get("sent") === "true") return;
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) router.replace("/dashboard");
     }).catch(() => {});
-  }, [router]);
+  }, [router, searchParams]);
 
   // Étape 1 : envoie le code OTP directement via Supabase.
   const handleSendCode = async (e: React.FormEvent) => {
@@ -74,14 +82,9 @@ export default function VerifyOtpForm() {
     try {
       const { error: otpErr } = await supabase.auth.signInWithOtp({
         email: trimmed.toLowerCase(),
-        options: { shouldCreateUser: true },
       });
       if (otpErr) {
-        if (/rate limit/i.test(otpErr.message)) {
-          setError("Trop de tentatives. Patientez quelques minutes avant de réessayer.");
-        } else {
-          setError("Impossible d'envoyer le code. Vérifiez l'email.");
-        }
+        setError("Impossible d'envoyer le code. Vérifiez l'email.");
         return;
       }
       setStep("code");
@@ -137,7 +140,6 @@ export default function VerifyOtpForm() {
     try {
       const { error: otpErr } = await supabase.auth.signInWithOtp({
         email: email.trim().toLowerCase(),
-        options: { shouldCreateUser: true },
       });
       if (otpErr) {
         setError("Impossible de renvoyer le code. Réessayez.");
