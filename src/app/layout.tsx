@@ -15,15 +15,16 @@ import { cn } from "@/lib/utils";
 // Police principale Inter (Google Fonts), exposée en variable CSS `--font-sans`.
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
-// Métadonnées globales (titre, description, favicon SVG inline).
+// Métadonnées globales (titre, description, favicon logo).
 export const metadata: Metadata = {
   title: "LINXOS - Plateforme de Logistique et Sponsoring",
   description: "Plateforme de gestion logistique et de livraison de niveau entreprise pour les entreprises modernes",
   icons: {
     icon: [
       {
-        url: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%237C3AED' rx='20' width='100' height='100'/><text x='50' y='65' font-size='40' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>LX</text></svg>",
-        type: "image/svg+xml",
+        url: "/icon.png",
+        sizes: "512x512",
+        type: "image/png",
       },
     ],
   },

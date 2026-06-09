@@ -13,7 +13,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowRight, Eye, EyeOff, KeyRound, X } from "lucide-react"
+import { ArrowRight, Eye, EyeOff, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -202,25 +202,13 @@ export default function LoginPage() {
                   {isLoading ? "Connexion..." : "Se connecter"}
                 </Button>
 
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center justify-center">
                   <button
                     type="button"
                     onClick={() => setShowForgotPassword(true)}
                     className="text-xs text-slate-500 hover:text-yellow-600 dark:text-slate-400 dark:hover:text-yellow-400 underline underline-offset-2 transition-colors"
                   >
                     Mot de passe oublié ?
-                  </button>
-                  <span className="text-xs text-slate-300 dark:text-slate-600">|</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const params = email ? `?email=${encodeURIComponent(email)}` : "";
-                      router.push(`/verify-otp${params}`);
-                    }}
-                    className="flex items-center gap-1 text-xs text-slate-500 hover:text-yellow-600 dark:text-slate-400 dark:hover:text-yellow-400 underline underline-offset-2 transition-colors"
-                  >
-                    <KeyRound className="h-3 w-3" />
-                    Connexion par code
                   </button>
                 </div>
               </form>

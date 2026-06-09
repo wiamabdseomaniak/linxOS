@@ -73,9 +73,11 @@ export interface NotificationRow {
   id_notification: string;
   titre: string;
   message: string;
+  type: string | null;
   date_notification: string | null;
   lue: boolean | null;
   id_utilisateur: string | null;
+  action_url: string | null;
 }
 
 export interface EmailVerificationRow {
@@ -172,17 +174,6 @@ export interface ProfileRow {
   success_rate: number | null;
   created_at: string | null;
   updated_at: string | null;
-}
-
-export interface NotificationRow {
-  id: string;
-  user_id: string | null;
-  title: string;
-  message: string;
-  type: NotificationTypeDb;
-  read: boolean | null;
-  action_url: string | null;
-  created_at: string | null;
 }
 
 export interface ActivityLogRow {

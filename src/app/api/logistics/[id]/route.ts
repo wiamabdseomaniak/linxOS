@@ -24,7 +24,6 @@ export async function PATCH(
 
   const supabase = createClient(url, anonKey);
 
-  // Patch partiel : on n'envoie à Supabase que les champs effectivement fournis.
   const updateData: Record<string, unknown> = {};
   if (statut_livraison) updateData.statut_livraison = statut_livraison;
   if (description_probleme !== undefined) updateData.description_probleme = description_probleme;

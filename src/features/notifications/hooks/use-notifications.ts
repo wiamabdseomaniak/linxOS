@@ -1,14 +1,9 @@
-/**
- * Hook Notifications.
- * Charge la liste, expose les actions (marquer lu, tout marquer, supprimer)
- * et s'abonne au canal temps réel Supabase pour rafraîchir automatiquement
- * la liste à chaque modification côté serveur.
- */
-
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { supabase, SUPABASE_TABLES, isSupabaseConfigured } from '@/lib/supabase';
+import { toast } from 'sonner';
+import { getSupabase, SUPABASE_TABLES, isSupabaseConfigured } from '@/lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   fetchNotifications,
   markNotificationAsRead,
@@ -17,7 +12,6 @@ import {
 } from '@/features/notifications/api/supabase-notifications';
 import type { Notification } from '@/types';
 
-// Forme publique du hook : données + compteurs + actions.
 interface UseNotificationsResult {
   notifications: Notification[];
   unreadCount: number;
@@ -29,14 +23,11 @@ interface UseNotificationsResult {
   remove: (id: string) => Promise<void>;
 }
 
-/**
- * Hook for fetching and managing user notifications from Supabase.
- * Subscribes to realtime changes on the notifications table.
- */
 export function useNotifications(): UseNotificationsResult {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const channelRef = useRef<ReturnType<SupabaseClient['channel']> | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -55,38 +46,40 @@ export function useNotifications(): UseNotificationsResult {
     refresh();
   }, [refresh]);
 
-  // Référence mutable vers le canal Supabase Realtime (permet le cleanup au démontage).
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-
+  // Souscription Realtime unique (créée une seule fois au montage)
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
 
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-    }
+    const client = getSupabase();
+    if (!client) return;
 
-    channelRef.current = supabase.channel('notifications-changes');
+    const channel = client.channel(`notifications-${Date.now()}`);
 
-    try {
-      channelRef.current
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: SUPABASE_TABLES.NOTIFICATION },
-          () => { refresh(); },
-        )
-        .subscribe();
-    } catch {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
+    channel
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: SUPABASE_TABLES.NOTIFICATION },
+        (payload) => {
+          console.log('[Notif] Realtime INSERT reçu:', payload.new);
+          const newRow = payload.new as Record<string, unknown>;
+          const title = (newRow.titre as string) ?? 'Nouvelle notification';
+          const message = (newRow.message as string) ?? '';
+          toast(title, { description: message, duration: 5000 });
+          refresh();
+        },
+      )
+      .subscribe((status) => {
+        console.log('[Notif] Souscription Realtime status:', status);
+      });
+
+    channelRef.current = channel;
 
     return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
+      console.log('[Notif] Nettoyage souscription Realtime');
+      client.removeChannel(channel);
+      channelRef.current = null;
     };
-  }, [refresh]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const markAsRead = useCallback(async (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id_notification === id ? { ...n, lue: true } : n)));

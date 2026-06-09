@@ -14,6 +14,25 @@ import {
 } from '@/features/logistics/api/supabase-logistics';
 import type { LogisticsEvent, StatutLivraison } from '@/types/supabase';
 import type { StatusCounts } from '@/features/logistics/constants';
+import { supabase } from '@/lib/supabase';
+
+const STATUS_NOTIF: Record<string, { titre: string; type: string; message: (nom: string) => string }> = {
+  en_cours: {
+    titre: 'Livraison assignée',
+    type: 'delivery',
+    message: (nom) => `La livraison "${nom}" a été assignée et est en cours d'acheminement.`,
+  },
+  livree: {
+    titre: 'Livraison validée',
+    type: 'success',
+    message: (nom) => `La livraison "${nom}" a été validée avec succès.`,
+  },
+  echouee: {
+    titre: 'Livraison rejetée',
+    type: 'error',
+    message: (nom) => `La livraison "${nom}" a été rejetée.`,
+  },
+};
 
 // État interne du hook.
 export interface LogisticsState {
@@ -28,7 +47,7 @@ export interface LogisticsState {
 // Actions exposées aux composants (chargement, mises à jour, WhatsApp).
 export interface LogisticsActions {
   loadEvents: () => Promise<void>;
-  handleUpdateStatus: (eventId: string, newStatus: StatutLivraison) => Promise<void>;
+  handleUpdateStatus: (eventId: string, newStatus: StatutLivraison, eventTitle: string) => Promise<void>;
   handleUpdateNote: (eventId: string, note: string, attachedFiles: File[]) => Promise<void>;
   openWhatsApp: (phone: string) => void;
 }
@@ -69,7 +88,7 @@ export function useLogistics(
    * Met à jour le statut d'une livraison : applique d'abord l'optimistic update,
    * puis rollback (recharge complète) en cas d'erreur.
    */
-  const handleUpdateStatus = useCallback(async (eventId: string, newStatus: StatutLivraison) => {
+  const handleUpdateStatus = useCallback(async (eventId: string, newStatus: StatutLivraison, eventTitle: string) => {
     try {
       const result = await updateEventStatus(eventId, newStatus);
       if (!result.success) throw new Error(result.error);
@@ -77,6 +96,29 @@ export function useLogistics(
         ...prev,
         events: prev.events.map(e => (e.id === eventId ? { ...e, status: newStatus } : e)),
       }));
+
+      // Crée une notification côté client
+      const config = newStatus ? STATUS_NOTIF[newStatus] : null;
+      if (config) {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser?.email) {
+          const { data: userRow } = await supabase
+            .from('utilisateur')
+            .select('id_utilisateur')
+            .eq('email', authUser.email)
+            .maybeSingle();
+          if (userRow) {
+            await supabase.from('notification').insert({
+              titre: config.titre,
+              message: config.message(eventTitle || 'Événement sans titre'),
+              type: config.type,
+              action_url: `/logistics?id=${eventId}`,
+              id_utilisateur: userRow.id_utilisateur,
+              lue: false,
+            });
+          }
+        }
+      }
     } catch (err) {
       console.error('Status update failed:', err);
       loadEvents();

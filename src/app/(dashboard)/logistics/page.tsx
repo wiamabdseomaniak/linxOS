@@ -344,7 +344,7 @@ export default function LogisticsPage() {
                           variant="outline"
                           size="sm"
                           className="flex-1 rounded-lg border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 hover:border-blue-200"
-                          onClick={() => handleUpdateStatus(event.id, 'en_cours')}
+                          onClick={() => handleUpdateStatus(event.id, 'en_cours', event.title)}
                         >
                           Démarrer la tournée
                         </Button>
@@ -357,7 +357,7 @@ export default function LogisticsPage() {
                             variant="outline"
                             size="sm"
                             className="flex-1 rounded-lg border-green-200 dark:border-green-800 text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 hover:text-green-600 hover:border-green-300"
-                            onClick={() => handleUpdateStatus(event.id, 'livree')}
+                            onClick={() => handleUpdateStatus(event.id, 'livree', event.title)}
                           >
                             Livrée
                           </Button>
@@ -365,7 +365,7 @@ export default function LogisticsPage() {
                             variant="outline"
                             size="sm"
                             className="rounded-lg border-red-200 dark:border-red-800 text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 hover:border-red-300"
-                            onClick={() => handleUpdateStatus(event.id, 'echouee')}
+                            onClick={() => handleUpdateStatus(event.id, 'echouee', event.title)}
                           >
                             Échouée
                           </Button>
