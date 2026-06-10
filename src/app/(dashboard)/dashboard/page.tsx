@@ -1,42 +1,20 @@
-﻿// Page Tableau de bord — vue d'ensemble des statistiques, graphiques et livraisons urgentes
-'use client';
+﻿'use client';
 
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
-import {
-  Package,
-  Clock,
-  CheckCircle2,
-  AlertTriangle,
-  ArrowUpRight,
-  ArrowDownRight,
-  TrendingUp,
-  Sparkles,
-  Calendar,
-  MapPin,
-  Truck,
-  Activity,
-} from 'lucide-react';
+import { Package, Clock, CheckCircle2, AlertTriangle, ArrowUpRight, ArrowDownRight, Calendar, MapPin, Truck, Activity } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Area,
-  AreaChart,
-  RadialBarChart,
-  RadialBar,
-  PolarAngleAxis,
-} from 'recharts';
 import { useDashboard } from '@/features/dashboard/hooks/use-dashboard';
 import { useCurrentUser } from '@/features/auth/hooks/use-current-user';
 import { PRIORITIES } from '@/lib/constants';
+
+const AreaChartCard = dynamic(() => import('@/components/dashboard/dashboard-charts').then(m => m.AreaChartCard), { ssr: false });
+const RadialChartCard = dynamic(() => import('@/components/dashboard/dashboard-charts').then(m => m.RadialChartCard), { ssr: false });
+const BarChartCard = dynamic(() => import('@/components/dashboard/dashboard-charts').then(m => m.BarChartCard), { ssr: false });
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -83,67 +61,55 @@ type ColorKey = keyof typeof statPalette;
 export default function DashboardPage() {
   const router = useRouter();
   const { stats, weekly, byCity, activity, problems, urgent, loading, error } = useDashboard();
-  const { user } = useCurrentUser();
+  const { user, loading: userLoading } = useCurrentUser();
 
-  const displayName = user?.name?.split(' ')[0] ?? 'Utilisateur';
+  const displayName = user?.name?.split(' ')[0];
 
-  const successRate = stats.totalDeliveries > 0
+  const successRate = useMemo(() => stats.totalDeliveries > 0
     ? Math.round((stats.completedDeliveries / stats.totalDeliveries) * 100)
-    : 0;
+    : 0, [stats.totalDeliveries, stats.completedDeliveries]);
 
-  const statCards: Array<{
-    title: string;
-    value: string;
-    change: string;
-    changeType: 'positive' | 'negative';
-    icon: typeof Package;
-    color: ColorKey;
-    ring: string;
-  }> = [
+  const statCards = useMemo(() => [
     {
       title: 'Total des livraisons',
       value: stats.totalDeliveries.toLocaleString(),
       change: '+12.5%',
-      changeType: 'positive',
+      changeType: 'positive' as const,
       icon: Package,
-      color: 'violet',
+      color: 'violet' as ColorKey,
       ring: 'before:bg-violet-500/40',
     },
     {
       title: 'En cours',
       value: stats.activeDeliveries.toString(),
       change: '+5.2%',
-      changeType: 'negative',
+      changeType: 'negative' as const,
       icon: Clock,
-      color: 'amber',
+      color: 'amber' as ColorKey,
       ring: 'before:bg-amber-500/40',
     },
     {
       title: 'Livrées',
       value: stats.completedDeliveries.toLocaleString(),
       change: '+8.1%',
-      changeType: 'positive',
+      changeType: 'positive' as const,
       icon: CheckCircle2,
-      color: 'emerald',
+      color: 'emerald' as ColorKey,
       ring: 'before:bg-emerald-500/40',
     },
     {
       title: 'Problèmes',
       value: stats.failedDeliveries.toString(),
       change: '-3.4%',
-      changeType: 'positive',
+      changeType: 'positive' as const,
       icon: AlertTriangle,
-      color: 'rose',
+      color: 'rose' as ColorKey,
       ring: 'before:bg-rose-500/40',
     },
-  ];
+  ], [stats.totalDeliveries, stats.activeDeliveries, stats.completedDeliveries, stats.failedDeliveries]);
 
-  const urgentDeliveries = urgent;
-  const recentActivity = activity.slice(0, 4);
-  const issuesThisWeek = problems;
-  const totalIssuesThisWeek = issuesThisWeek.reduce((sum, p) => sum + p.count, 0);
-
-  const radialData = [{ name: 'Succès', value: successRate, fill: '#10b981' }];
+  const recentActivity = useMemo(() => activity.slice(0, 4), [activity]);
+  const totalIssuesThisWeek = useMemo(() => problems.reduce((sum, p) => sum + p.count, 0), [problems]);
 
   return (
     <motion.div
@@ -162,7 +128,7 @@ export default function DashboardPage() {
             Vue d&apos;ensemble · 2026
           </div>
           <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            {'Bonjour'} <span className="text-gradient-brand">{displayName}</span>
+            {'Bonjour'}{displayName && !userLoading && <> <span className="text-gradient-brand">{displayName}</span></>}
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
             {"Aperçu de l'activité de vos livraisons aujourd'hui."}
@@ -233,133 +199,19 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <motion.div variants={itemVariants} className="lg:col-span-2">
-          <Card className="overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Suivi des performances</p>
-                <CardTitle className="text-lg font-semibold">
-                  {'Livraisons mensuelles'}
-                </CardTitle>
-              </div>
-              <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300">
-                2026
-              </Badge>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="h-[280px] w-full min-w-0">
-                <ResponsiveContainer width="100%" aspect={3.5} minWidth={0}>
-                  <AreaChart data={weekly} margin={{ left: -20, right: 8 }}>
-                    <defs>
-                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#F5C400" stopOpacity={0.45} />
-                        <stop offset="95%" stopColor="#F5C400" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="strokeValue" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="#F5C400" />
-                        <stop offset="100%" stopColor="#F5C400" />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} vertical={false} />
-                    <XAxis dataKey="day" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'var(--card)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '12px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                        color: 'var(--foreground)',
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="livrées"
-                      stroke="url(#strokeValue)"
-                      strokeWidth={2.5}
-                      fillOpacity={1}
-                      fill="url(#colorValue)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          <AreaChartCard weekly={weekly} />
         </motion.div>
 
         <motion.div variants={itemVariants}>
-          <Card className="h-full overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
-            <CardHeader className="border-b border-border/50 pb-4">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Indicateur</p>
-              <CardTitle className="text-lg font-semibold">Taux de réussite</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="flex h-[200px] items-center justify-center">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadialBarChart
-                    innerRadius="68%"
-                    outerRadius="100%"
-                    barSize={14}
-                    data={radialData}
-                    startAngle={90}
-                    endAngle={-270}
-                  >
-                    <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-                    <RadialBar background={{ fill: 'var(--muted)' }} dataKey="value" cornerRadius={10} fill="#10b981" />
-                  </RadialBarChart>
-                </ResponsiveContainer>
-                <div className="pointer-events-none absolute flex flex-col items-center">
-                  <span className="text-3xl font-semibold tracking-tight">{successRate}%</span>
-                  <span className="text-xs text-muted-foreground">livraisons réussies</span>
-                </div>
-              </div>
-              <div className="mt-2 grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-emerald-500/10 p-3">
-                  <p className="text-xs text-muted-foreground">Réussies</p>
-                  <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">{stats.completedDeliveries}</p>
-                </div>
-                <div className="rounded-xl bg-rose-500/10 p-3">
-                  <p className="text-xs text-muted-foreground">Échouées</p>
-                  <p className="text-lg font-semibold text-rose-600 dark:text-rose-400">{stats.failedDeliveries}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <RadialChartCard
+            successRate={successRate}
+            completedDeliveries={stats.completedDeliveries}
+            failedDeliveries={stats.failedDeliveries}
+          />
         </motion.div>
 
         <motion.div variants={itemVariants} className="lg:col-span-2">
-          <Card className="overflow-hidden rounded-2xl border-border/50 bg-card/70 backdrop-blur-sm">
-            <CardHeader className="border-b border-border/50 pb-4">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Répartition</p>
-              <CardTitle className="text-lg font-semibold">{'Livraisons par ville'}</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="h-[280px] w-full min-w-0">
-                <ResponsiveContainer width="100%" aspect={3.5} minWidth={0}>
-                  <BarChart data={byCity} margin={{ left: -20, right: 8 }}>
-                    <defs>
-                      <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#F5C400" />
-                        <stop offset="100%" stopColor="#F59E0B" />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} vertical={false} />
-                    <XAxis dataKey="city" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
-                    <Tooltip
-                      cursor={{ fill: 'var(--muted)', opacity: 0.4 }}
-                      contentStyle={{
-                        backgroundColor: 'var(--card)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '12px',
-                        color: 'var(--foreground)',
-                      }}
-                    />
-                    <Bar dataKey="livrées" fill="url(#barFill)" radius={[8, 8, 0, 0]} maxBarSize={60} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          <BarChartCard byCity={byCity} />
         </motion.div>
 
         <motion.div variants={itemVariants}>
@@ -409,11 +261,11 @@ export default function DashboardPage() {
               </Button>
             </CardHeader>
             <CardContent className="pt-4">
-              {urgentDeliveries.length === 0 ? (
+              {urgent.length === 0 ? (
                 <p className="text-sm text-muted-foreground">{'Aucune livraison urgente pour le moment.'}</p>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {urgentDeliveries.map((delivery) => (
+                  {urgent.map((delivery) => (
                     <div
                       key={delivery.id}
                       className="group relative overflow-hidden rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent p-4 transition-all hover:border-amber-500/40"
@@ -463,11 +315,11 @@ export default function DashboardPage() {
               </span>
             </CardHeader>
             <CardContent className="pt-4">
-              {issuesThisWeek.length === 0 ? (
+              {problems.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Aucun problème cette semaine.</p>
               ) : (
                 <ul className="space-y-2.5">
-                  {issuesThisWeek.slice(0, 5).map((item) => (
+                  {problems.slice(0, 5).map((item) => (
                     <li key={item.id} className="flex items-center justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">{item.event}</p>

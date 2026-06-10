@@ -1,25 +1,6 @@
-/**
- * Hook principal du tableau de bord.
- * Charge en parallèle toutes les sections (stats, weekly, byCity, byStatus,
- * activity, problems, urgent) et expose un état consolidé + un `refresh()`.
- */
-
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import {
-  fetchDashboardStats,
-  fetchWeeklyPerformance,
-  fetchMonthlyDeliveries,
-  fetchDeliveriesByCity,
-  fetchStatusDistribution,
-} from '@/features/dashboard/api/supabase-dashboard';
-import {
-  fetchActivityTimeline,
-  fetchProblemReports,
-  fetchUrgentDeliveries,
-  type UrgentDelivery,
-} from '@/features/dashboard/api/supabase-activity';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import type {
   DashboardStats,
   WeeklyPerformance,
@@ -29,17 +10,24 @@ import type {
   ProblemReport,
 } from '@/types/supabase';
 
-// Valeur initiale "neutre" pour éviter les `undefined` dans les vues avant chargement.
-const EMPTY_STATS: DashboardStats = {
-  totalDeliveries: 0,
-  activeDeliveries: 0,
-  completedDeliveries: 0,
-  failedDeliveries: 0,
-  totalRevenue: 0,
-  activeClients: 0,
-};
+interface DashboardApiResponse {
+  stats: DashboardStats;
+  weekly: WeeklyPerformance[];
+  byCity: CityData[];
+  activity: { id: string; action: string; driver: string | null; status: string }[];
+  problems: { id: string; event: string; problem: string; count: number; status: string; statusColor: string }[];
+  urgent: { id: string; trackingId: string; clientName: string; city: string; priority: string; scheduledDate: string }[];
+}
 
-// Forme de retour publique du hook.
+interface UrgentDelivery {
+  id: string;
+  trackingId: string;
+  clientName: string;
+  city: string;
+  priority: 'urgent';
+  scheduledDate: Date;
+}
+
 interface UseDashboardResult {
   stats: DashboardStats;
   weekly: WeeklyPerformance[];
@@ -53,18 +41,32 @@ interface UseDashboardResult {
   refresh: () => Promise<void>;
 }
 
-/**
- * Aggregated dashboard data hook.
- * Fetches all dashboard sections in parallel and exposes loading + error states.
- */
+const EMPTY_STATS: DashboardStats = {
+  totalDeliveries: 0,
+  activeDeliveries: 0,
+  completedDeliveries: 0,
+  failedDeliveries: 0,
+  totalRevenue: 0,
+  activeClients: 0,
+};
+
+function computeStatusDistribution(stats: DashboardStats): StatusDistribution[] {
+  const colorMap: Record<string, string> = {
+    livree: '#22c55e',
+    en_cours: '#ef4444',
+    planifie: '#3b82f6',
+    echouee: '#f97316',
+  };
+  return [
+    { name: 'planifie', value: stats.totalDeliveries - stats.activeDeliveries - stats.completedDeliveries - stats.failedDeliveries, color: colorMap.planifie },
+    { name: 'en_cours', value: stats.activeDeliveries, color: colorMap.en_cours },
+    { name: 'livree', value: stats.completedDeliveries, color: colorMap.livree },
+    { name: 'echouee', value: stats.failedDeliveries, color: colorMap.echouee },
+  ].filter(s => s.value > 0);
+}
+
 export function useDashboard(): UseDashboardResult {
-  const [stats, setStats] = useState<DashboardStats>(EMPTY_STATS);
-  const [weekly, setWeekly] = useState<WeeklyPerformance[]>([]);
-  const [byCity, setByCity] = useState<CityData[]>([]);
-  const [byStatus, setByStatus] = useState<StatusDistribution[]>([]);
-  const [activity, setActivity] = useState<ActivityItem[]>([]);
-  const [problems, setProblems] = useState<ProblemReport[]>([]);
-  const [urgent, setUrgent] = useState<UrgentDelivery[]>([]);
+  const [data, setData] = useState<DashboardApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,22 +74,12 @@ export function useDashboard(): UseDashboardResult {
     setLoading(true);
     setError(null);
     try {
-      const [s, w, c, st, a, p, u] = await Promise.all([
-        fetchDashboardStats(),
-        fetchMonthlyDeliveries(),
-        fetchDeliveriesByCity(),
-        fetchStatusDistribution(),
-        fetchActivityTimeline(8),
-        fetchProblemReports(),
-        fetchUrgentDeliveries(3),
-      ]);
-      setStats(s);
-      setWeekly(w);
-      setByCity(c);
-      setByStatus(st);
-      setActivity(a);
-      setProblems(p);
-      setUrgent(u);
+      const res = await fetch('/api/dashboard');
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({ error: 'Erreur inconnue' }));
+        throw new Error(body.error || `HTTP ${res.status}`);
+      }
+      setData(await res.json());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
@@ -98,6 +90,27 @@ export function useDashboard(): UseDashboardResult {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  const stats = data?.stats ?? EMPTY_STATS;
+  const weekly = data?.weekly ?? [];
+  const byCity = data?.byCity ?? [];
+  const byStatus = useMemo(() => computeStatusDistribution(stats), [stats]);
+  const activity: ActivityItem[] = useMemo(
+    () => (data?.activity ?? []).map(a => ({ id: a.id, action: a.action, driver: a.driver, status: a.status })),
+    [data?.activity],
+  );
+  const problems: ProblemReport[] = useMemo(() => (data?.problems ?? []) as ProblemReport[], [data?.problems]);
+  const urgent: UrgentDelivery[] = useMemo(
+    () => (data?.urgent ?? []).map(u => ({
+      id: u.id,
+      trackingId: u.trackingId,
+      clientName: u.clientName,
+      city: u.city,
+      priority: 'urgent' as const,
+      scheduledDate: new Date(u.scheduledDate),
+    })),
+    [data?.urgent],
+  );
 
   return { stats, weekly, byCity, byStatus, activity, problems, urgent, loading, error, refresh };
 }
