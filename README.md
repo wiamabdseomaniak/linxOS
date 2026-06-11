@@ -90,7 +90,7 @@ git clone <repo-url>
 cd linxos-platform
 
 # 2. Installer les dépendances
-npm install
+bun install
 
 # 3. Copier et configurer les variables d'environnement
 cp .env.example .env.local
@@ -99,7 +99,7 @@ cp .env.example .env.local
 # Exécuter le contenu de supabase/schema.sql dans le SQL Editor Supabase
 
 # 5. Lancer le serveur de développement
-npm run dev
+bun run dev
 ```
 
 Ouvrir [http://localhost:3000](http://localhost:3000).
@@ -120,10 +120,10 @@ Ouvrir [http://localhost:3000](http://localhost:3000).
 ## Commandes
 
 ```bash
-npm run dev      # Serveur de développement
-npm run build    # Build de production
-npm run start    # Lancement du serveur de production
-npm run lint     # Vérification ESLint
+bun run dev      # Serveur de développement
+bun run build    # Build de production
+bun run start    # Lancement du serveur de production
+bun run lint     # Vérification ESLint
 ```
 
 ## Licence

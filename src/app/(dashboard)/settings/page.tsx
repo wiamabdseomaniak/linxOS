@@ -45,7 +45,7 @@ import { cn } from '@/lib/utils';
 
 // Données mockées pour l'aperçu des sessions actives (à remplacer par un appel API).
 const sessions = [
-  { device: 'Chrome on MacOS', location: 'Casablanca, Maroc', lastActive: 'il y a 2 minutes', current: true },
+  { device: 'Chrome on Windows', location: 'Oujda, Maroc', lastActive: 'il y a 2 minutes', current: true },
   { device: 'Safari on iPhone', location: 'Rabat, Maroc', lastActive: 'il y a 1 heure', current: false },
   { device: 'Firefox on Windows', location: 'Marrakech, Maroc', lastActive: 'il y a 3 jours', current: false },
 ];
